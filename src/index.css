@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Golos+Text:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 47% 96%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 252 55% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 100% 64%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 40 30% 92%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 30 100% 64%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 40 20% 88%;
+    --input: 40 20% 88%;
+    --ring: 252 55% 53%;
+    --radius: 0.75rem;
+    --chart-1: 252 55% 53%;
+    --chart-2: 30 100% 64%;
+    --chart-3: 174 60% 51%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply text-sevq-text;
+    font-family: 'Golos Text', sans-serif;
+    background: radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%);
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Nunito', sans-serif;
+    color: #1A1A1A;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(101, 70, 199, 0.18);
+  border-radius: 50px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(101, 70, 199, 0.32);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Plastic card gloss overlay */
+.plastic-card {
+  position: relative;
+  overflow: hidden;
+}
+.plastic-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* 3D button press effect */
+.btn-3d {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.btn-3d:active {
+  transform: translateY(2px);
+}
