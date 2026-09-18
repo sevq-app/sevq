@@ -52,7 +52,7 @@
 }
 
 /* ========================================= */
-/* 🌙 ТЁМНАЯ ТЕМА — ПОЛНОЕ ПЕРЕКЛЮЧЕНИЕ     */
+/*  ТЁМНАЯ ТЕМА — ПОЛНОЕ ПЕРЕКЛЮЧЕНИЕ     */
 /* ========================================= */
 html.dark body {
   background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
@@ -82,17 +82,70 @@ html.dark .bg-\[#F3F4F6\] {
   background-color: #25252f !important;
 }
 
-/* Адаптация текста */
+/* ========================================= */
+/*  АДАПТАЦИЯ ВСЕХ ЦВЕТОВ ТЕКСТА           */
+/* ========================================= */
+
+/* Основной тёмный текст → белый */
 html.dark .text-\[#1A1A1A\],
 html.dark .text-sevchik-text {
   color: #e8e8f0 !important;
 }
+
+/* Вторичный серый текст → светло-серый */
 html.dark .text-\[#6B7280\],
 html.dark .text-sevchik-textSecondary {
   color: #a0a0b0 !important;
 }
+
+/* Placeholder и иконки → светло-серый */
+html.dark .text-\[#9CA3AF\] {
+  color: #8a8a9a !important;
+}
+
+/* Кнопки и второстепенный текст */
+html.dark .text-\[#4B5563\] {
+  color: #9a9aaa !important;
+}
+
+/* Ошибки (красный) — оставляем, но делаем чуть ярче */
+html.dark .text-red-600 {
+  color: #f87171 !important;
+}
+
+/* Успех (зелёный) — оставляем, но делаем чуть ярче */
+html.dark .text-green-600 {
+  color: #4ade80 !important;
+}
+
+/* Placeholder в input */
+html.dark input::placeholder {
+  color: #8a8a9a !important;
+}
+
+/* Inline-стили с жёстко заданными цветами */
+html.dark [style*="color: #1A1A1A"],
+html.dark [style*="color:#1A1A1A"] {
+  color: #e8e8f0 !important;
+}
+html.dark [style*="color: #6B7280"],
+html.dark [style*="color:#6B7280"] {
+  color: #a0a0b0 !important;
+}
+html.dark [style*="color: #9CA3AF"],
+html.dark [style*="color:#9CA3AF"] {
+  color: #8a8a9a !important;
+}
+
+/* Адаптация границ */
 html.dark .border-sevchik-purple\/8 {
   border-color: rgba(101, 70, 199, 0.2) !important;
+}
+html.dark .border-\[#F3F4F6\] {
+  border-color: #3a3a48 !important;
+}
+html.dark .border-\[#E5E7EB\] {
+  border-color: #3a3a48 !important;
 }
 
 /* Адаптация "пластикового" блика для тёмной темы */
