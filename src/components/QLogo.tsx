@@ -14,7 +14,6 @@ interface QLogoProps {
  */
 export function QLogo({ size = 64, animate = false, variant = 'solid' }: QLogoProps) {
   const uid = `qlogo-${variant}-${size}`;
-
   const containerStyle: React.CSSProperties = {
     width: size,
     height: size,
@@ -49,10 +48,8 @@ export function QLogo({ size = 64, animate = false, variant = 'solid' }: QLogoPr
 
   // Q ring path (outer)
   const ringPath = "M32 6C18.2 6 7 17.2 7 31C7 44.8 18.2 56 32 56C39 56 45.3 53.2 49.8 48.7L55 54L59 50L53.7 44.7C57.6 40.2 57 35.5 57 31C57 17.2 45.8 6 32 6Z";
-
   // Q inner cutout path
   const innerPath = "M32 15C23.7 15 17 21.7 17 30C17 38.3 23.7 45 32 45C36.2 45 39.9 43.3 42.7 40.5L37.5 35.3L41.5 31.3L46.7 36.5C48.9 34.2 47 33 47 30C47 21.7 40.3 15 32 15Z";
-
   // Tail (the Q tail)
   const tailPath = "M42 46L54 58";
 
@@ -61,7 +58,6 @@ export function QLogo({ size = 64, animate = false, variant = 'solid' }: QLogoPr
     gradient: `url(#${uid}-purpleGrad)`,
     ring: 'none',
   };
-
   const strokeMap: Record<string, string> = {
     solid: 'none',
     gradient: 'none',
@@ -84,7 +80,6 @@ export function QLogo({ size = 64, animate = false, variant = 'solid' }: QLogoPr
         </svg>
       );
     }
-
     const halfW = size / 2;
     return (
       <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{ overflow: 'visible' }}>
@@ -135,7 +130,6 @@ export function QLogoShowcase() {
     { variant: 'gradient', label: 'Диагональ', desc: 'Скошенный градиент' },
     { variant: 'ring', label: 'Контурный', desc: 'Только рамка' },
   ];
-
   return (
     <div className="flex gap-6 justify-center">
       {variants.map(({ variant, label, desc }) => (
@@ -143,8 +137,8 @@ export function QLogoShowcase() {
           <div className="w-24 h-24 rounded-card bg-white flex items-center justify-center" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.1)' }}>
             <QLogo size={56} variant={variant} />
           </div>
-          <span className="font-heading font-bold text-sm text-sevq-text">{label}</span>
-          <span className="text-xs text-sevq-textSecondary font-body">{desc}</span>
+          <span className="font-heading font-bold text-sm text-sevchik-text">{label}</span>
+          <span className="text-xs text-sevchik-textSecondary font-body">{desc}</span>
         </div>
       ))}
     </div>

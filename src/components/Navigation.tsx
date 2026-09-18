@@ -11,9 +11,9 @@ interface SidebarProps {
 
 const navItems: { key: Screen; label: string; icon: React.ElementType }[] = [
   { key: 'chats', label: 'Чаты', icon: MessageCircle },
-  { key: 'contacts', label: 'Контакты', icon: Users }, // <-- ИСПРАВЛЕНО: ключ теперь 'contacts'
+  { key: 'contacts', label: 'Контакты', icon: Users },
   { key: 'calls', label: 'Звонки', icon: Phone },
-  { key: 'profile', label: 'Мой SevQ', icon: User },
+  { key: 'profile', label: 'Мой Севчик', icon: User },
 ];
 
 export function Sidebar({ current, onNavigate }: SidebarProps) {
@@ -23,9 +23,8 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
     <div className="hidden md:flex flex-col w-20 lg:w-64 py-6 px-3 shrink-0 h-screen sticky top-0 z-30">
       <div className="mb-8 flex items-center gap-3 px-2">
         <QLogo size={44} />
-        <span className="hidden lg:block font-heading font-extrabold text-2xl text-sevq-text">SevQ</span>
+        <span className="hidden lg:block font-heading font-extrabold text-2xl text-sevchik-text">Севчик</span>
       </div>
-
       <nav className="flex flex-col gap-2.5 flex-1">
         {navItems.map(({ key, label, icon: Icon }) => {
           const active = current === key;
@@ -36,7 +35,7 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
               whileHover={{ y: -2 }}
               onClick={() => onNavigate(key)}
               className={`flex items-center gap-4 px-4 py-3 rounded-btn transition-all relative overflow-hidden ${
-                active ? 'text-white' : 'bg-white text-sevq-textSecondary'
+                active ? 'text-white' : 'bg-white text-sevchik-textSecondary'
               }`}
               style={
                 active
@@ -53,26 +52,24 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
           );
         })}
       </nav>
-
       <div className="flex flex-col gap-2.5 pt-4">
         <motion.button
           whileTap={{ scale: 0.97, y: 2 }}
           whileHover={{ y: -2 }}
           onClick={() => alert('🎨 Коллекция стикеров скоро будет доступна!')}
-          className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white text-sevq-textSecondary hover:text-sevq-purple transition-colors"
+          className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white text-sevchik-textSecondary hover:text-sevchik-purple transition-colors"
           style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
           title="Стикеры"
         >
           <Smile size={22} className="shrink-0" />
           <span className="hidden lg:block font-heading font-bold text-base">Стикеры</span>
         </motion.button>
-
         <div className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <Volume2 size={22} className={`shrink-0 ${soundOn ? 'text-sevq-purple' : 'text-sevq-textSecondary'}`} />
-          <span className="hidden lg:block font-heading font-bold text-base text-sevq-textSecondary flex-1">Звук</span>
+          <Volume2 size={22} className={`shrink-0 ${soundOn ? 'text-sevchik-purple' : 'text-sevchik-textSecondary'}`} />
+          <span className="hidden lg:block font-heading font-bold text-base text-sevchik-textSecondary flex-1">Звук</span>
           <button
             onClick={() => setSoundOn(!soundOn)}
-            className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${soundOn ? 'bg-sevq-mint' : 'bg-sevq-textSecondary/20'}`}
+            className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${soundOn ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/20'}`}
             style={soundOn ? { boxShadow: '0 2px 8px rgba(79,211,200,0.4)' } : undefined}
           >
             <motion.div
@@ -96,9 +93,9 @@ interface TabBarProps {
 export function TabBar({ current, onNavigate }: TabBarProps) {
   const items = [
     { key: 'chats' as Screen, label: 'Чаты', icon: MessageCircle },
-    { key: 'contacts' as Screen, label: 'Контакты', icon: Users }, // <-- ИСПРАВЛЕНО: ключ теперь 'contacts'
+    { key: 'contacts' as Screen, label: 'Контакты', icon: Users },
     { key: 'calls' as Screen, label: 'Звонки', icon: Phone },
-    { key: 'profile' as Screen, label: 'SevQ', icon: User },
+    { key: 'profile' as Screen, label: 'Севчик', icon: User },
   ];
 
   return (
@@ -114,7 +111,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               className="flex flex-col items-center gap-1 px-3 py-1.5"
             >
               <div
-                className={`p-2.5 rounded-2xl transition-all relative overflow-hidden ${active ? 'text-white' : 'text-sevq-textSecondary'}`}
+                className={`p-2.5 rounded-2xl transition-all relative overflow-hidden ${active ? 'text-white' : 'text-sevchik-textSecondary'}`}
                 style={
                   active
                     ? { background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 12px rgba(101,70,199,0.3)' }
@@ -123,7 +120,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               >
                 <Icon size={20} />
               </div>
-              <span className={`text-[10px] font-heading font-bold ${active ? 'text-sevq-purple' : 'text-sevq-textSecondary'}`}>
+              <span className={`text-[10px] font-heading font-bold ${active ? 'text-sevchik-purple' : 'text-sevchik-textSecondary'}`}>
                 {label}
               </span>
             </motion.button>

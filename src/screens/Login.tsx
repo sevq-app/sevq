@@ -23,12 +23,10 @@ export function Login({ onLogin, onRegister }: AuthProps) {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
     if (error) {
       setError(error.message === 'Invalid login credentials' 
         ? 'Неверный email или пароль' 
@@ -44,11 +42,9 @@ export function Login({ onLogin, onRegister }: AuthProps) {
     setLoading(true);
     setError('');
     setSuccessMessage('');
-
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
       redirectTo: window.location.origin,
     });
-
     if (error) {
       setError(error.message);
     } else {
@@ -58,7 +54,10 @@ export function Login({ onLogin, onRegister }: AuthProps) {
   };
 
   return (
-    <AuthLayout title={showForgotPassword ? 'Восстановление' : 'Добро пожаловать'} subtitle={showForgotPassword ? 'Введите email, привязанный к аккаунту' : 'Войдите в свой аккаунт SevQ'}>
+    <AuthLayout 
+      title={showForgotPassword ? 'Восстановление' : 'Добро пожаловать'} 
+      subtitle={showForgotPassword ? 'Введите email, привязанный к аккаунту' : 'Войдите в свой аккаунт Севчик'}
+    >
       <AnimatePresence mode="wait">
         {!showForgotPassword ? (
           <motion.form
@@ -75,7 +74,6 @@ export function Login({ onLogin, onRegister }: AuthProps) {
                 {error}
               </div>
             )}
-
             <InputField icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="your@email.com" />
             
             <div className="space-y-1.5">
@@ -95,13 +93,11 @@ export function Login({ onLogin, onRegister }: AuthProps) {
                 </button>
               </div>
             </div>
-
             <div className="flex justify-end pt-1">
               <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm font-semibold text-[#6546C7] hover:text-[#4a32a0] hover:underline transition-all cursor-pointer bg-transparent border-none p-0 flex items-center gap-1 group" style={{ zIndex: 20 }}>
                 Забыли пароль? <span className="group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
             </div>
-
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98, y: 2 }}
@@ -116,15 +112,14 @@ export function Login({ onLogin, onRegister }: AuthProps) {
               <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
               <span className="relative z-10 flex items-center justify-center gap-2">
                 {loading && <Loader2 className="animate-spin" size={20} />}
-                {loading ? 'Вход...' : 'Войти в SevQ'}
+                {loading ? 'Вход...' : 'Войти в Севчик'}
               </span>
             </motion.button>
-
             <div className="mt-6 pt-6 border-t border-[#E5E7EB]/50 text-center">
               <p className="text-sm text-[#6B7280] font-body">
                 Ещё нет аккаунта?{' '}
                 <button type="button" onClick={onRegister} className="font-bold text-[#6546C7] hover:text-[#4a32a0] hover:underline transition-all cursor-pointer bg-transparent border-none p-0">
-                  Создать SevQ
+                  Создать Севчик
                 </button>
               </p>
             </div>
@@ -149,7 +144,6 @@ export function Login({ onLogin, onRegister }: AuthProps) {
                 {successMessage}
               </div>
             )}
-
             <InputField icon={Mail} label="Email для восстановления" type="email" value={resetEmail} onChange={setResetEmail} placeholder="your@email.com" accentColor="#FF9848" />
             <div className="flex gap-3 pt-2">
               <SecondaryButton text="Назад" onClick={() => { setShowForgotPassword(false); setError(''); setSuccessMessage(''); }} />
@@ -189,7 +183,6 @@ export function Register({ onRegister, onLogin }: AuthProps) {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -199,7 +192,6 @@ export function Register({ onRegister, onLogin }: AuthProps) {
         },
       },
     });
-
     if (error) {
       setError(error.message === 'User already registered' 
         ? 'Пользователь с таким email уже существует' 
@@ -211,7 +203,7 @@ export function Register({ onRegister, onLogin }: AuthProps) {
   };
 
   return (
-    <AuthLayout title="Создать аккаунт" subtitle="Присоединяйтесь к уютному миру SevQ">
+    <AuthLayout title="Создать аккаунт" subtitle="Присоединяйтесь к уютному миру Севчик">
       <motion.form
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -224,11 +216,9 @@ export function Register({ onRegister, onLogin }: AuthProps) {
             {error}
           </div>
         )}
-
         <InputField icon={User} label="Имя" type="text" value={name} onChange={setName} placeholder="Как вас зовут?" />
         <InputField icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="your@email.com" />
         <InputField icon={Lock} label="Пароль" type="password" value={password} onChange={setPassword} placeholder="Минимум 6 символов" />
-
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98, y: 2 }}
@@ -246,7 +236,6 @@ export function Register({ onRegister, onLogin }: AuthProps) {
             {loading ? 'Создание...' : 'Зарегистрироваться'}
           </span>
         </motion.button>
-
         <div className="mt-6 pt-6 border-t border-[#E5E7EB]/50 text-center">
           <p className="text-sm text-[#6B7280] font-body">
             Уже есть аккаунт?{' '}
@@ -261,13 +250,11 @@ export function Register({ onRegister, onLogin }: AuthProps) {
 }
 
 // --- Вспомогательные компоненты ---
-
 function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle: string }) {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#6546C7]/10 rounded-full blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#FF9848]/10 rounded-full blur-3xl" />
-
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md relative z-10">
         <div className="bg-white rounded-[32px] p-8 relative overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(101, 70, 199, 0.12), 0 1px 3px rgba(0,0,0,0.05)', backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 40%)' }}>
           <div className="flex flex-col items-center mb-8">
