@@ -11,8 +11,8 @@ interface SidebarProps {
 
 const navItems: { key: Screen; label: string; icon: React.ElementType }[] = [
   { key: 'chats', label: 'Чаты', icon: MessageCircle },
-  { key: 'friends', label: 'Контакты', icon: Users }, // <-- Переименовано
-  { key: 'calls', label: 'Звонки', icon: Phone },     // <-- Переименовано и новая иконка
+  { key: 'contacts', label: 'Контакты', icon: Users }, // <-- ИСПРАВЛЕНО: ключ теперь 'contacts'
+  { key: 'calls', label: 'Звонки', icon: Phone },
   { key: 'profile', label: 'Мой SevQ', icon: User },
 ];
 
@@ -96,8 +96,8 @@ interface TabBarProps {
 export function TabBar({ current, onNavigate }: TabBarProps) {
   const items = [
     { key: 'chats' as Screen, label: 'Чаты', icon: MessageCircle },
-    { key: 'friends' as Screen, label: 'Контакты', icon: Users }, // <-- Переименовано
-    { key: 'calls' as Screen, label: 'Звонки', icon: Phone },     // <-- Переименовано
+    { key: 'contacts' as Screen, label: 'Контакты', icon: Users }, // <-- ИСПРАВЛЕНО: ключ теперь 'contacts'
+    { key: 'calls' as Screen, label: 'Звонки', icon: Phone },
     { key: 'profile' as Screen, label: 'SevQ', icon: User },
   ];
 
