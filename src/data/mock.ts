@@ -4,11 +4,12 @@ export type Screen =
   | 'chats'
   | 'conversation'
   | 'contacts'
-  | 'calls'       // <-- ДОБАВЛЕНО
-  | 'clubs'       // (можно оставить на всякий случай, или удалить)
+  | 'calls'
+  | 'clubs'
   | 'profile'
   | 'search'
-  | 'settings';
+  | 'settings'
+  | 'appearance'; // <-- ДОБАВЛЕНО
 
 export interface Message {
   id: string;
