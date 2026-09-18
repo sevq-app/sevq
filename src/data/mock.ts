@@ -6,7 +6,8 @@ export type Screen =
   | 'friends'
   | 'clubs'
   | 'profile'
-  | 'search';
+  | 'search'
+  | 'settings'; // <-- ДОБАВЛЕНО!
 
 export interface Message {
   id: string;
