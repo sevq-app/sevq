@@ -21,22 +21,43 @@ function App() {
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 🎨 Глобальные настройки оформления
+  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('sevq-fontSize')) || 16);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sevq-darkMode') === 'true');
+  const [selectedTheme, setSelectedTheme] = useState(() => localStorage.getItem('sevq-theme') || 'calm');
+
+  // Применяем настройки оформления ко всему документу и сохраняем в localStorage
+  useEffect(() => {
+    localStorage.setItem('sevq-fontSize', String(fontSize));
+    localStorage.setItem('sevq-darkMode', String(darkMode));
+    localStorage.setItem('sevq-theme', selectedTheme);
+
+    const html = document.documentElement;
+    
+    // Переключаем класс dark для глобальной темы
+    if (darkMode) {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+    
+    // Применяем базовый размер шрифта
+    html.style.fontSize = `${fontSize}px`;
+  }, [fontSize, darkMode, selectedTheme]);
+
   // Проверяем состояние аутентификации при загрузке
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (session) {
-        setScreen('chats'); // Пользователь авторизован
+        setScreen('chats'); 
       } else {
-        setScreen('login'); // Пользователь не авторизован
+        setScreen('login'); 
       }
       setIsLoading(false);
     };
-
     checkAuth();
 
-    // Подписываемся на изменения аутентификации
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         setScreen('chats');
@@ -44,7 +65,6 @@ function App() {
         setScreen('login');
       }
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -69,26 +89,23 @@ function App() {
     setScreen('conversation');
   };
 
-  // Функция выхода
   const handleLogout = () => {
     supabase.auth.signOut();
     setScreen('login');
     setActiveChat(null);
   };
 
-  // Показываем загрузку пока проверяем аутентификацию
   if (isLoading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
+      <div className={`h-screen w-full flex items-center justify-center transition-colors duration-500 ${darkMode ? 'bg-[#121218]' : 'bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]'}`}>
         <div className="flex flex-col items-center gap-4">
           <QLogo size={64} />
-          <p className="text-[#6B7280] font-body">Загрузка...</p>
+          <p className={`font-body ${darkMode ? 'text-gray-400' : 'text-[#6B7280]'}`}>Загрузка...</p>
         </div>
       </div>
     );
   }
 
-  // Auth screens
   if (screen === 'login') {
     return <Login onLogin={() => setScreen('chats')} onRegister={() => setScreen('register')} />;
   }
@@ -97,7 +114,7 @@ function App() {
   }
 
   const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'contacts' || screen === 'calls' || screen === 'clubs';
-
+  
   const pageVariants = {
     initial: { opacity: 0, x: 20 },
     animate: { opacity: 1, x: 0 },
@@ -105,9 +122,8 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className={`flex min-h-screen transition-colors duration-500 ${darkMode ? 'bg-[#121218]' : ''}`}>
       <Sidebar current={screen} onNavigate={setScreen} />
-
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
         <div className="flex-1 min-w-0 overflow-hidden">
           <AnimatePresence mode="wait">
@@ -124,7 +140,6 @@ function App() {
               {screen === 'conversation' && activeChat && (
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
               )}
-              
               {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
               {screen === 'calls' && <Calls onNavigate={setScreen} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
@@ -132,28 +147,33 @@ function App() {
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
-              
               {screen === 'settings' && (
                 <Settings 
                   onBack={() => setScreen('profile')} 
-                  onLogout={handleLogout}  // <-- Передаем нашу функцию выхода
+                  onLogout={handleLogout}  
                   onNavigate={setScreen} 
                 />
               )}
               
+              {/* Передаем глобальные настройки в экран Оформление */}
               {screen === 'appearance' && (
-                <Appearance onBack={() => setScreen('settings')} />
+                <Appearance 
+                  onBack={() => setScreen('settings')} 
+                  fontSize={fontSize}
+                  setFontSize={setFontSize}
+                  darkMode={darkMode}
+                  setDarkMode={setDarkMode}
+                  selectedTheme={selectedTheme}
+                  setSelectedTheme={setSelectedTheme}
+                />
               )}
-              
             </motion.div>
           </AnimatePresence>
         </div>
-
         <div className="hidden xl:block w-80 shrink-0 overflow-y-auto p-5 border-l border-sevq-purple/8">
           <ProfilePreview />
         </div>
       </div>
-
       {showTabBar && <TabBar current={screen} onNavigate={setScreen} />}
     </div>
   );
@@ -166,7 +186,6 @@ function ProfilePreview() {
         <QLogo size={36} />
         <span className="font-heading font-extrabold text-xl text-sevq-text">SevQ</span>
       </div>
-
       <div className="bg-white rounded-card p-5 flex flex-col items-center plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
         <div className="relative z-10">
           <div className="p-1 rounded-full" style={{ background: 'linear-gradient(135deg, #FFB87A, #FF9848)', boxShadow: '0 4px 14px rgba(255,152,72,0.3)' }}>
@@ -185,7 +204,6 @@ function ProfilePreview() {
           <span className="text-xs text-sevq-mint font-body">В сети</span>
         </div>
       </div>
-
       <div className="bg-white rounded-card p-4 flex items-center gap-3 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
         <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white relative overflow-hidden shrink-0" style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)' }}>
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
@@ -196,7 +214,6 @@ function ProfilePreview() {
           <p className="text-xs text-sevq-textSecondary font-body">1.2k участников</p>
         </div>
       </div>
-
       <div className="bg-white rounded-card p-4 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
         <h4 className="font-heading font-bold text-sm text-sevq-text mb-3 relative z-10">Персональная тема</h4>
         <div className="flex gap-3 relative z-10">
@@ -218,7 +235,6 @@ function ProfilePreview() {
           ))}
         </div>
       </div>
-
       <button
         onClick={() => window.dispatchEvent(new CustomEvent('sevq-navigate', { detail: 'search' }))}
         className="w-full flex items-center gap-3 px-4 py-3 rounded-card text-white font-heading font-bold btn-3d relative overflow-hidden"
