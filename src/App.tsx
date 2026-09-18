@@ -8,10 +8,10 @@ import { Chats } from '@/screens/Chats';
 import { Conversation } from '@/screens/Conversation';
 import { Profile } from '@/screens/Profile';
 import { Search } from '@/screens/Search';
-import { Contacts } from '@/screens/Contacts';
-import { Clubs } from '@/screens/Clubs'; 
+import { Friends } from '@/screens/Friends';
+import { Clubs } from '@/screens/Clubs';
 import { Settings } from '@/screens/Settings';
-import { Calls } from '@/screens/Calls'; // <-- 1. ДОБАВЛЕНО: Импорт экрана Звонки
+import { Calls } from '@/screens/Calls';
 import type { Screen, Chat } from '@/data/mock';
 
 function App() {
@@ -47,7 +47,7 @@ function App() {
     return <Register onRegister={() => setScreen('chats')} onLogin={() => setScreen('login')} />;
   }
 
-  // 2. ДОБАВЛЕНО: 'calls' в список экранов с нижней панелью
+  // ИСПРАВЛЕНО: 'friends' заменен на 'contacts'
   const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'contacts' || screen === 'calls' || screen === 'clubs';
 
   const pageVariants = {
@@ -60,9 +60,7 @@ function App() {
     <div className="flex min-h-screen">
       <Sidebar current={screen} onNavigate={setScreen} />
 
-      {/* Main content area */}
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
-        {/* Center column — chat list / friends / clubs */}
         <div className="flex-1 min-w-0 overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -78,12 +76,12 @@ function App() {
               {screen === 'conversation' && activeChat && (
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
               )}
+              
+              {/* ИСПРАВЛЕНО: 'friends' заменен на 'contacts' */}
               {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
-              {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
               
-              {/* 3. ДОБАВЛЕНО: Отображение экрана Звонки */}
               {screen === 'calls' && <Calls onNavigate={setScreen} />}
-              
+              {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
               {screen === 'profile' && <Profile onNavigate={setScreen} />}
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
@@ -95,7 +93,6 @@ function App() {
           </AnimatePresence>
         </div>
 
-        {/* Right column — profile preview on desktop (only for chat list views) */}
         <div className="hidden xl:block w-80 shrink-0 overflow-y-auto p-5 border-l border-sevq-purple/8">
           <ProfilePreview />
         </div>
@@ -106,17 +103,14 @@ function App() {
   );
 }
 
-/** Compact profile preview shown in the right column on wide desktop */
 function ProfilePreview() {
   return (
     <div className="space-y-4">
-      {/* Logo header */}
       <div className="flex items-center gap-3 mb-2">
         <QLogo size={36} />
         <span className="font-heading font-extrabold text-xl text-sevq-text">SevQ</span>
       </div>
 
-      {/* Mini profile card */}
       <div className="bg-white rounded-card p-5 flex flex-col items-center plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
         <div className="relative z-10">
           <div className="p-1 rounded-full" style={{ background: 'linear-gradient(135deg, #FFB87A, #FF9848)', boxShadow: '0 4px 14px rgba(255,152,72,0.3)' }}>
@@ -136,7 +130,6 @@ function ProfilePreview() {
         </div>
       </div>
 
-      {/* Favorite community mini */}
       <div className="bg-white rounded-card p-4 flex items-center gap-3 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
         <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white relative overflow-hidden shrink-0" style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)' }}>
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
@@ -148,7 +141,6 @@ function ProfilePreview() {
         </div>
       </div>
 
-      {/* Theme preview */}
       <div className="bg-white rounded-card p-4 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
         <h4 className="font-heading font-bold text-sm text-sevq-text mb-3 relative z-10">Персональная тема</h4>
         <div className="flex gap-3 relative z-10">
@@ -171,7 +163,6 @@ function ProfilePreview() {
         </div>
       </div>
 
-      {/* Search shortcut */}
       <button
         onClick={() => window.dispatchEvent(new CustomEvent('sevq-navigate', { detail: 'search' }))}
         className="w-full flex items-center gap-3 px-4 py-3 rounded-card text-white font-heading font-bold btn-3d relative overflow-hidden"
