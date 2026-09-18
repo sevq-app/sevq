@@ -5,7 +5,8 @@ import { Avatar } from '@/components/Avatar';
 import { userProfile, themeCircles, themeStickers } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
 
-export function Profile() {
+// 1. ДОБАВЛЕНО: Принимаем функцию onNavigate из App.tsx
+export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void }) {
   const [online, setOnline] = useState(userProfile.online);
   const [selectedTheme, setSelectedTheme] = useState(0);
   const [logoutLoading, setLogoutLoading] = useState(false);
@@ -14,7 +15,6 @@ export function Profile() {
     setLogoutLoading(true);
     try {
       await supabase.auth.signOut();
-      // Перенаправляем на страницу входа
       window.location.href = '/';
     } catch (error) {
       console.error('Ошибка при выходе:', error);
@@ -29,12 +29,16 @@ export function Profile() {
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center justify-between">
         <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Мой SevQ</h1>
-        <button
+        
+        {/* 2. ДОБАВЛЕНО: onClick и motion.button для кнопки настроек */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => onNavigate?.('settings')}
           className="w-11 h-11 rounded-card bg-white flex items-center justify-center text-sevq-textSecondary hover:text-sevq-purple transition-colors btn-3d"
           style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
         >
           <Settings size={20} />
-        </button>
+        </motion.button>
       </div>
 
       {/* Avatar + name */}
@@ -45,7 +49,6 @@ export function Profile() {
           transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="relative"
         >
-          {/* Orange frame with 3D volume */}
           <div
             className="p-1 rounded-full"
             style={{ background: 'linear-gradient(135deg, #FFB87A, #FF9848)', boxShadow: '0 8px 24px rgba(255,152,72,0.35)' }}
@@ -54,7 +57,6 @@ export function Profile() {
               <Avatar initials={userProfile.initials} color={userProfile.avatarColor} size="xxl" online={online} />
             </div>
           </div>
-          {/* Emoji sticker on avatar corner */}
           <motion.div
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -122,9 +124,9 @@ export function Profile() {
           <h3 className="font-heading font-bold text-sevq-text mb-3 relative z-10">Фотографии</h3>
           <div className="grid grid-cols-3 gap-3 relative z-10">
             {[
-              { color: '#6546C7', emoji: '️', rotate: -3 },
-              { color: '#FF9848', emoji: '', rotate: 2 },
-              { color: '#4FD3C8', emoji: '', rotate: -2 },
+              { color: '#6546C7', emoji: '🏔️', rotate: -3 },
+              { color: '#FF9848', emoji: '🌊', rotate: 2 },
+              { color: '#4FD3C8', emoji: '🌅', rotate: -2 },
             ].map((photo, i) => (
               <motion.div
                 key={i}
@@ -175,7 +177,6 @@ export function Profile() {
           style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
           <h3 className="font-heading font-bold text-sevq-text mb-4 relative z-10">Персональная тема</h3>
-          {/* 3 color circles */}
           <div className="flex gap-4 mb-4 relative z-10">
             {themeCircles.map((theme, i) => (
               <motion.button
@@ -196,7 +197,6 @@ export function Profile() {
               </motion.button>
             ))}
           </div>
-          {/* 5 emoji stickers */}
           <div className="flex gap-3 relative z-10">
             {themeStickers.map((sticker, i) => (
               <motion.button
@@ -216,7 +216,7 @@ export function Profile() {
           </div>
         </motion.div>
 
-        {/* 🔴 КНОПКА ВЫХОДА */}
+        {/* КНОПКА ВЫХОДА */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
