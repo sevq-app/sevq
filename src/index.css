@@ -42,24 +42,35 @@
     font-family: 'Golos Text', sans-serif;
     background: radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%);
     background-attachment: fixed;
-    transition: background 0.5s ease, color 0.5s ease;
+    transition: background 0.4s ease, color 0.4s ease;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Nunito', sans-serif;
     color: #1A1A1A;
-    transition: color 0.5s ease;
+    transition: color 0.4s ease;
   }
 }
 
 /* ========================================= */
-/* 🌙 ТЁМНАЯ ТЕМА — ТЁМНО-СЕРЫЕ ТОНА         */
+/* 🌙 ТЁМНАЯ ТЕМА — ПОЛНОЕ ПЕРЕКЛЮЧЕНИЕ     */
 /* ========================================= */
 html.dark body {
-  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%);
+  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
   color: #e8e8f0;
 }
 html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
-  color: #f0f0f8;
+  color: #f0f0f8 !important;
+}
+
+/* Принудительно затемняем центральную часть экранов */
+html.dark .bg-gradient-to-b {
+  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
+}
+html.dark [style*="FFF8ED"],
+html.dark [style*="FFF0DB"],
+html.dark [style*="FFF0DC"],
+html.dark [style*="FFE9CC"] {
+  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
 }
 
 /* Адаптация белых карточек в тёмной теме */
@@ -86,11 +97,11 @@ html.dark .border-sevchik-purple\/8 {
 
 /* Адаптация "пластикового" блика для тёмной темы */
 html.dark .plastic-card::before {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%) !important;
 }
 
 /* ========================================= */
-/*  ФОНОВЫЕ УЗОРЫ                           */
+/* 🎨 ФОНОВЫЕ УЗОРЫ                          */
 /* ========================================= */
 .pattern-bg-light {
   background-image: 
