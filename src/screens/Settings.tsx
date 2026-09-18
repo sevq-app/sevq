@@ -10,9 +10,11 @@ import { supabase } from '@/lib/supabase';
 interface SettingsProps {
   onBack: () => void;
   onLogout: () => void;
+  onNavigate?: (screen: string) => void; // <-- Добавлено
 }
 
-export function Settings({ onBack, onLogout }: SettingsProps) {
+// ВАЖНО: добавили onNavigate в параметры функции!
+export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [powerSaving, setPowerSaving] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
@@ -22,7 +24,6 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
     onLogout();
   };
 
-  // Группируем пункты меню для красоты и логики
   const sections = [
     {
       title: 'Основное',
@@ -35,7 +36,8 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
       title: 'Уведомления и вид',
       items: [
         { icon: Bell, label: 'Уведомления и звуки', color: '#FF9848', isToggle: true, value: notifications, action: () => setNotifications(!notifications) },
-        { icon: darkMode ? Moon : Sun, label: 'Оформление', color: '#6546C7', hasChevron: true, value: darkMode ? 'Тёмная' : 'Светлая', action: () => setDarkMode(!darkMode) },
+        // ИСПРАВЛЕНО: теперь эта кнопка открывает экран оформления
+        { icon: darkMode ? Moon : Sun, label: 'Оформление', color: '#6546C7', hasChevron: true, value: darkMode ? 'Тёмная' : 'Светлая', action: () => onNavigate?.('appearance') },
         { icon: Battery, label: 'Энергосбережение', color: '#4FD3C8', isToggle: true, value: powerSaving, action: () => setPowerSaving(!powerSaving) },
       ],
     },
@@ -59,7 +61,6 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
 
   return (
     <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
-      {/* Шапка с кнопкой назад */}
       <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center gap-3 sticky top-0 bg-gradient-to-b from-[#FFF8ED] to-transparent z-20 pb-4">
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -95,7 +96,6 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
                     itemIdx !== section.items.length - 1 ? 'border-b border-[#F3F4F6]' : ''
                   }`}
                 >
-                  {/* Иконка с "пластиковым" объемом */}
                   <div
                     className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
                     style={{
@@ -111,7 +111,6 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
                     {item.label}
                   </span>
 
-                  {/* Переключатель (Toggle) */}
                   {item.isToggle ? (
                     <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${item.value ? 'bg-[#4FD3C8]' : 'bg-[#E5E7EB]'}`}>
                       <motion.div
@@ -123,11 +122,9 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
                     </div>
                   ) : (
                     <>
-                      {/* Текст справа (например, "124 МБ" или "Русский") */}
                       {item.value && !item.isToggle && (
                         <span className="text-sm text-[#6B7280] font-body mr-1">{item.value}</span>
                       )}
-                      {/* Стрелочка вправо */}
                       {item.hasChevron && (
                         <ChevronRight size={18} className="text-[#9CA3AF]" />
                       )}
@@ -139,7 +136,6 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
           </motion.div>
         ))}
 
-        {/* Кнопка выхода и удаления аккаунта */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
