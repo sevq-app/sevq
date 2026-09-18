@@ -60,7 +60,6 @@ html.dark body {
 html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
   color: #f0f0f5;
 }
-/* Мягкое затемнение белых карточек */
 html.dark .bg-white {
   background-color: #2a2a3e !important;
 }
@@ -68,7 +67,6 @@ html.dark .bg-\[#F9FAFB\],
 html.dark .bg-\[#F3F4F6\] {
   background-color: #222236 !important;
 }
-/* Адаптация текста */
 html.dark .text-\[#1A1A1A\],
 html.dark .text-sevchik-text {
   color: #e0e0e8 !important;
@@ -80,14 +78,11 @@ html.dark .text-sevchik-textSecondary {
 html.dark .border-sevchik-purple\/8 {
   border-color: rgba(101, 70, 199, 0.2) !important;
 }
-/* Адаптация "пластикового" блика для тёмной темы */
 html.dark .plastic-card::before {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-/* ========================================= */
-/* 📜 Scrollbar & Utilities                  */
-/* ========================================= */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

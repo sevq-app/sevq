@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search as SearchIcon } from 'lucide-react';
 import { Sidebar, TabBar } from '@/components/Navigation';
@@ -20,6 +20,26 @@ function App() {
   const [screen, setScreen] = useState<Screen>('login');
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // 🎨 Глобальные настройки оформления
+  const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('sevchik-fontSize')) || 16);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sevchik-darkMode') === 'true');
+  const [selectedTheme, setSelectedTheme] = useState(() => localStorage.getItem('sevchik-theme') || 'calm');
+
+  // Применяем настройки оформления ко всему документу
+  useEffect(() => {
+    localStorage.setItem('sevchik-fontSize', String(fontSize));
+    localStorage.setItem('sevchik-darkMode', String(darkMode));
+    localStorage.setItem('sevchik-theme', selectedTheme);
+
+    const html = document.documentElement;
+    if (darkMode) {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+    html.style.fontSize = `${fontSize}px`;
+  }, [fontSize, darkMode, selectedTheme]);
 
   // Проверяем состояние аутентификации при загрузке
   useEffect(() => {
@@ -72,10 +92,10 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
+      <div className={`h-screen w-full flex items-center justify-center transition-colors duration-500 ${darkMode ? 'bg-[#121218]' : 'bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]'}`}>
         <div className="flex flex-col items-center gap-4">
           <QLogo size={64} />
-          <p className="text-[#6B7280] font-body">Загрузка...</p>
+          <p className={`font-body ${darkMode ? 'text-gray-400' : 'text-[#6B7280]'}`}>Загрузка...</p>
         </div>
       </div>
     );
@@ -97,7 +117,7 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className={`flex min-h-screen transition-colors duration-500 ${darkMode ? 'bg-[#121218]' : ''}`}>
       <Sidebar current={screen} onNavigate={setScreen} />
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
         <div className="flex-1 min-w-0 overflow-hidden">
@@ -123,14 +143,22 @@ function App() {
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
               {screen === 'settings' && (
-                <Settings
-                  onBack={() => setScreen('profile')}
+                <Settings 
+                  onBack={() => setScreen('profile')} 
                   onLogout={handleLogout}
-                  onNavigate={setScreen}
+                  onNavigate={setScreen} 
                 />
               )}
               {screen === 'appearance' && (
-                <Appearance onBack={() => setScreen('settings')} />
+                <Appearance 
+                  onBack={() => setScreen('settings')}
+                  fontSize={fontSize}
+                  setFontSize={setFontSize}
+                  darkMode={darkMode}
+                  setDarkMode={setDarkMode}
+                  selectedTheme={selectedTheme}
+                  setSelectedTheme={setSelectedTheme}
+                />
               )}
             </motion.div>
           </AnimatePresence>

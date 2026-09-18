@@ -267,7 +267,7 @@ export function Appearance({
           </div>
         </motion.div>
 
-        {/* Предпросмотр сообщений */}
+        {/* Предпросмотр сообщений со смайлами */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -287,7 +287,7 @@ export function Appearance({
                 }}
               >
                 <p className="font-body" style={{ color: textMain }}>
-                  Здесь ты можешь поменять цвет под своё настроение
+                  Здесь ты можешь поменять цвет под своё настроение 🎨
                 </p>
               </div>
             </div>
@@ -304,7 +304,7 @@ export function Appearance({
                 }}
               >
                 <p className="font-body">
-                  Выбери, что тебе ближе
+                  Выбери, что тебе ближе 💜
                 </p>
               </div>
             </div>
