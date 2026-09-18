@@ -8,7 +8,7 @@ import { Chats } from '@/screens/Chats';
 import { Conversation } from '@/screens/Conversation';
 import { Profile } from '@/screens/Profile';
 import { Search } from '@/screens/Search';
-import { Friends } from '@/screens/Friends';
+import { Contacts } from '@/screens/Contacts';
 import { Clubs } from '@/screens/Clubs'; 
 import { Settings } from '@/screens/Settings';
 import { Calls } from '@/screens/Calls'; // <-- 1. ДОБАВЛЕНО: Импорт экрана Звонки
@@ -48,7 +48,7 @@ function App() {
   }
 
   // 2. ДОБАВЛЕНО: 'calls' в список экранов с нижней панелью
-  const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'friends' || screen === 'calls' || screen === 'clubs';
+  const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'contacts' || screen === 'calls' || screen === 'clubs';
 
   const pageVariants = {
     initial: { opacity: 0, x: 20 },
@@ -78,7 +78,7 @@ function App() {
               {screen === 'conversation' && activeChat && (
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
               )}
-              {screen === 'friends' && <Friends onWriteMessage={handleSearchWrite} />}
+              {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
               
               {/* 3. ДОБАВЛЕНО: Отображение экрана Звонки */}
