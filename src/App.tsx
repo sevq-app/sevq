@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from 'react'; 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search as SearchIcon } from 'lucide-react';
 import { Sidebar, TabBar } from '@/components/Navigation';
@@ -9,8 +9,9 @@ import { Conversation } from '@/screens/Conversation';
 import { Profile } from '@/screens/Profile';
 import { Search } from '@/screens/Search';
 import { Friends } from '@/screens/Friends';
-import { Clubs } from '@/screens/Clubs';
-import { Settings } from '@/screens/Settings'; // <-- ДОБАВЛЕНО
+import { Clubs } from '@/screens/Clubs'; 
+import { Settings } from '@/screens/Settings';
+import { Calls } from '@/screens/Calls'; // <-- 1. ДОБАВЛЕНО: Импорт экрана Звонки
 import type { Screen, Chat } from '@/data/mock';
 
 function App() {
@@ -46,7 +47,8 @@ function App() {
     return <Register onRegister={() => setScreen('chats')} onLogin={() => setScreen('login')} />;
   }
 
-  const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'friends' || screen === 'clubs';
+  // 2. ДОБАВЛЕНО: 'calls' в список экранов с нижней панелью
+  const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'friends' || screen === 'calls' || screen === 'clubs';
 
   const pageVariants = {
     initial: { opacity: 0, x: 20 },
@@ -78,11 +80,15 @@ function App() {
               )}
               {screen === 'friends' && <Friends onWriteMessage={handleSearchWrite} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
-              {screen === 'profile' && <Profile onNavigate={setScreen} />} {/* <-- ОБНОВЛЕНО */}
+              
+              {/* 3. ДОБАВЛЕНО: Отображение экрана Звонки */}
+              {screen === 'calls' && <Calls onNavigate={setScreen} />}
+              
+              {screen === 'profile' && <Profile onNavigate={setScreen} />}
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
-              {screen === 'settings' && ( /* <-- ДОБАВЛЕНО */
+              {screen === 'settings' && (
                 <Settings onBack={() => setScreen('profile')} onLogout={() => setScreen('login')} />
               )}
             </motion.div>
