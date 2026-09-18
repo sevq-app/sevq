@@ -1,33 +1,60 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, User } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, User, Loader2 } from 'lucide-react';
 import { QLogo } from '@/components/QLogo';
+import { supabase } from '@/lib/supabase';
 
-// --- ПРОПСЫ ---
 interface AuthProps {
   onLogin: () => void;
   onRegister: () => void;
 }
 
-// ==========================================
-// ЭКРАН ВХОДА (LOGIN)
-// ==========================================
 export function Login({ onLogin, onRegister }: AuthProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin();
+    setLoading(true);
+    setError('');
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message === 'Invalid login credentials' 
+        ? 'Неверный email или пароль' 
+        : error.message);
+      setLoading(false);
+    } else {
+      onLogin();
+    }
   };
 
-  const handleResetPassword = (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Ссылка для сброса пароля отправлена на ${resetEmail}`);
-    setShowForgotPassword(false);
+    setLoading(true);
+    setError('');
+    setSuccessMessage('');
+
+    const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+      redirectTo: window.location.origin,
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setSuccessMessage('Ссылка для сброса пароля отправлена на ваш email!');
+    }
+    setLoading(false);
   };
 
   return (
@@ -43,6 +70,12 @@ export function Login({ onLogin, onRegister }: AuthProps) {
             onSubmit={handleLogin}
             className="space-y-5"
           >
+            {error && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-body">
+                {error}
+              </div>
+            )}
+
             <InputField icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="your@email.com" />
             
             <div className="space-y-1.5">
@@ -69,7 +102,23 @@ export function Login({ onLogin, onRegister }: AuthProps) {
               </button>
             </div>
 
-            <PrimaryButton text="Войти в SevQ" />
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98, y: 2 }}
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
+              style={{ 
+                background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+                boxShadow: '0 4px 14px rgba(101, 70, 199, 0.25)'
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+              <span className="relative z-10 flex items-center justify-center gap-2">
+                {loading && <Loader2 className="animate-spin" size={20} />}
+                {loading ? 'Вход...' : 'Войти в SevQ'}
+              </span>
+            </motion.button>
 
             <div className="mt-6 pt-6 border-t border-[#E5E7EB]/50 text-center">
               <p className="text-sm text-[#6B7280] font-body">
@@ -90,10 +139,37 @@ export function Login({ onLogin, onRegister }: AuthProps) {
             onSubmit={handleResetPassword}
             className="space-y-5"
           >
+            {error && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-body">
+                {error}
+              </div>
+            )}
+            {successMessage && (
+              <div className="p-3 rounded-xl bg-green-50 border border-green-200 text-green-600 text-sm font-body">
+                {successMessage}
+              </div>
+            )}
+
             <InputField icon={Mail} label="Email для восстановления" type="email" value={resetEmail} onChange={setResetEmail} placeholder="your@email.com" accentColor="#FF9848" />
             <div className="flex gap-3 pt-2">
-              <SecondaryButton text="Назад" onClick={() => setShowForgotPassword(false)} />
-              <PrimaryButton text="Отправить" color="orange" onClick={() => {}} type="submit" />
+              <SecondaryButton text="Назад" onClick={() => { setShowForgotPassword(false); setError(''); setSuccessMessage(''); }} />
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98, y: 2 }}
+                type="submit"
+                disabled={loading}
+                className="flex-1 py-3.5 rounded-2xl text-white font-heading font-bold relative overflow-hidden disabled:opacity-70"
+                style={{ 
+                  background: 'linear-gradient(135deg, #FFB87A 0%, #FF9848 100%)',
+                  boxShadow: '0 4px 14px rgba(255, 152, 72, 0.25)'
+                }}
+              >
+                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {loading && <Loader2 className="animate-spin" size={18} />}
+                  {loading ? 'Отправка...' : 'Отправить'}
+                </span>
+              </motion.button>
             </div>
           </motion.form>
         )}
@@ -102,17 +178,36 @@ export function Login({ onLogin, onRegister }: AuthProps) {
   );
 }
 
-// ==========================================
-// ЭКРАН РЕГИСТРАЦИИ (REGISTER)
-// ==========================================
 export function Register({ onRegister, onLogin }: AuthProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    onRegister();
+    setLoading(true);
+    setError('');
+
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: name,
+        },
+      },
+    });
+
+    if (error) {
+      setError(error.message === 'User already registered' 
+        ? 'Пользователь с таким email уже существует' 
+        : error.message);
+      setLoading(false);
+    } else {
+      onRegister();
+    }
   };
 
   return (
@@ -124,11 +219,33 @@ export function Register({ onRegister, onLogin }: AuthProps) {
         onSubmit={handleRegister}
         className="space-y-5"
       >
+        {error && (
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-body">
+            {error}
+          </div>
+        )}
+
         <InputField icon={User} label="Имя" type="text" value={name} onChange={setName} placeholder="Как вас зовут?" />
         <InputField icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="your@email.com" />
-        <InputField icon={Lock} label="Пароль" type="password" value={password} onChange={setPassword} placeholder="Придумайте пароль" />
+        <InputField icon={Lock} label="Пароль" type="password" value={password} onChange={setPassword} placeholder="Минимум 6 символов" />
 
-        <PrimaryButton text="Зарегистрироваться" />
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98, y: 2 }}
+          type="submit"
+          disabled={loading}
+          className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6 disabled:opacity-70"
+          style={{ 
+            background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+            boxShadow: '0 4px 14px rgba(101, 70, 199, 0.25)'
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+          <span className="relative z-10 flex items-center justify-center gap-2">
+            {loading && <Loader2 className="animate-spin" size={20} />}
+            {loading ? 'Создание...' : 'Зарегистрироваться'}
+          </span>
+        </motion.button>
 
         <div className="mt-6 pt-6 border-t border-[#E5E7EB]/50 text-center">
           <p className="text-sm text-[#6B7280] font-body">
@@ -143,9 +260,7 @@ export function Register({ onRegister, onLogin }: AuthProps) {
   );
 }
 
-// ==========================================
-// ВСПОМОГАТЕЛЬНЫЕ КОМПОНЕНТЫ (для красоты и чистоты кода)
-// ==========================================
+// --- Вспомогательные компоненты ---
 
 function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle: string }) {
   return (
@@ -172,7 +287,7 @@ function InputField({ icon: Icon, label, type, value, onChange, placeholder, acc
     <div className="space-y-1.5">
       <label className="text-xs font-bold text-[#6B7280] uppercase tracking-wider ml-1">{label}</label>
       <div className="relative group">
-        <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[${accentColor}] transition-colors`} size={20} />
+        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[#6546C7] transition-colors" size={20} />
         <input
           type={type}
           value={value}
@@ -183,27 +298,6 @@ function InputField({ icon: Icon, label, type, value, onChange, placeholder, acc
         />
       </div>
     </div>
-  );
-}
-
-function PrimaryButton({ text, color = 'purple', onClick, type = 'button' }: any) {
-  const isOrange = color === 'orange';
-  const bg = isOrange ? 'linear-gradient(135deg, #FFB87A 0%, #FF9848 100%)' : 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)';
-  const shadow = isOrange ? '0 4px 14px rgba(255, 152, 72, 0.25)' : '0 4px 14px rgba(101, 70, 199, 0.25)';
-  const hoverShadow = isOrange ? '0 8px 20px rgba(255, 152, 72, 0.3)' : '0 8px 20px rgba(101, 70, 199, 0.3)';
-
-  return (
-    <motion.button
-      whileHover={{ scale: 1.02, boxShadow: hoverShadow }}
-      whileTap={{ scale: 0.98, y: 2 }}
-      type={type}
-      onClick={onClick}
-      className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6"
-      style={{ background: bg, boxShadow: shadow }}
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
-      <span className="relative z-10">{text}</span>
-    </motion.button>
   );
 }
 
