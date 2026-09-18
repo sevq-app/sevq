@@ -12,7 +12,6 @@ interface ChatsProps {
 export function Chats({ onOpenChat }: ChatsProps) {
   const [query, setQuery] = useState('');
   const [chats] = useState(initialChats);
-
   const filtered = chats.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase())
   );
@@ -23,12 +22,11 @@ export function Chats({ onOpenChat }: ChatsProps) {
       <div className="sticky top-0 z-10 pt-6 pb-4 px-4 sm:px-6" style={{ background: 'linear-gradient(180deg, rgba(255,248,237,0.98) 80%, transparent)' }}>
         <div className="flex items-center justify-between mb-4">
           <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Чаты</h1>
-          <div className="w-10 h-10 rounded-full bg-sevq-orange flex items-center justify-center font-heading font-extrabold text-white text-sm relative overflow-hidden" style={{ boxShadow: '0 4px 12px rgba(255,152,72,0.3)' }}>
+          <div className="w-10 h-10 rounded-full bg-sevchik-orange flex items-center justify-center font-heading font-extrabold text-white text-sm relative overflow-hidden" style={{ boxShadow: '0 4px 12px rgba(255,152,72,0.3)' }}>
             <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)' }} />
             <span className="relative z-10">АВ</span>
           </div>
         </div>
-
         {/* Orange search bar */}
         <div className="relative">
           <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80" />
@@ -76,7 +74,7 @@ export function Chats({ onOpenChat }: ChatsProps) {
                   />
                 )}
               </div>
-              <span className="text-xs font-body text-sevq-textSecondary max-w-[60px] truncate">
+              <span className="text-xs font-body text-sevchik-textSecondary max-w-[60px] truncate">
                 {story.name}
               </span>
             </motion.button>
@@ -108,11 +106,11 @@ export function Chats({ onOpenChat }: ChatsProps) {
               />
               <div className="flex-1 min-w-0 relative z-10">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-heading font-bold text-sevq-text truncate">{chat.name}</h3>
-                  <span className="text-xs text-sevq-textSecondary font-body shrink-0">{chat.time}</span>
+                  <h3 className="font-heading font-bold text-sevchik-text truncate">{chat.name}</h3>
+                  <span className="text-xs text-sevchik-textSecondary font-body shrink-0">{chat.time}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2 mt-1">
-                  <p className="text-sm text-sevq-textSecondary font-body truncate">{chat.lastMessage}</p>
+                  <p className="text-sm text-sevchik-textSecondary font-body truncate">{chat.lastMessage}</p>
                   {chat.unread > 0 && (
                     <span
                       className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[22px] h-[22px] px-1.5 flex items-center justify-center"
@@ -134,7 +132,7 @@ export function Chats({ onOpenChat }: ChatsProps) {
             </motion.button>
           ))}
           {filtered.length === 0 && (
-            <div className="text-center py-12 text-sevq-textSecondary font-body">Ничего не найдено</div>
+            <div className="text-center py-12 text-sevchik-textSecondary font-body">Ничего не найдено</div>
           )}
         </div>
       </div>

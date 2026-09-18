@@ -28,7 +28,6 @@ export function Conversation({ chat, onBack }: ConversationProps) {
     };
     setMessages((prev) => [...prev, msg]);
     setInput('');
-
     setTimeout(() => {
       const reply: Message = {
         id: `m-${Date.now()}-r`,
@@ -50,20 +49,20 @@ export function Conversation({ chat, onBack }: ConversationProps) {
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
           onClick={onBack}
-          className="p-2 rounded-full bg-sevq-cream text-sevq-text btn-3d"
+          className="p-2 rounded-full bg-sevchik-cream text-sevchik-text btn-3d"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
         >
           <ArrowLeft size={20} />
         </motion.button>
         <Avatar initials={chat.initials} color={chat.avatarColor} size="sm" online={chat.online} />
         <div className="flex-1 min-w-0">
-          <h2 className="font-heading font-bold text-sevq-text truncate">{chat.name}</h2>
-          <p className={`text-xs font-body flex items-center gap-1 ${chat.online ? 'text-sevq-mint' : 'text-sevq-textSecondary'}`}>
-            {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevq-mint" />}
+          <h2 className="font-heading font-bold text-sevchik-text truncate">{chat.name}</h2>
+          <p className={`text-xs font-body flex items-center gap-1 ${chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
+            {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
             {chat.online ? 'в сети' : 'не в сети'}
           </p>
         </div>
-        <button className="p-2 rounded-full bg-sevq-cream text-sevq-textSecondary btn-3d" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+        <button className="p-2 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
           <MoreVertical size={20} />
         </button>
       </div>
@@ -84,7 +83,7 @@ export function Conversation({ chat, onBack }: ConversationProps) {
                 className={`max-w-[75%] px-4 py-2.5 font-body text-sm relative overflow-hidden ${
                   isMe
                     ? 'text-white rounded-card rounded-br-md'
-                    : 'bg-white text-sevq-text rounded-card rounded-bl-md'
+                    : 'bg-white text-sevchik-text rounded-card rounded-bl-md'
                 }`}
                 style={
                   isMe
@@ -99,7 +98,7 @@ export function Conversation({ chat, onBack }: ConversationProps) {
                   <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 40%)' }} />
                 )}
                 <p className="relative z-10">{msg.text}</p>
-                <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevq-textSecondary'}`}>{msg.time}</p>
+                <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>{msg.time}</p>
               </div>
             </motion.div>
           );
@@ -112,7 +111,7 @@ export function Conversation({ chat, onBack }: ConversationProps) {
         <div className="flex items-center gap-2">
           <motion.button
             whileTap={{ scale: 0.9, y: 2 }}
-            className="shrink-0 w-11 h-11 rounded-full bg-sevq-cream flex items-center justify-center text-sevq-purple btn-3d"
+            className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           >
             <Plus size={22} />
@@ -123,7 +122,7 @@ export function Conversation({ chat, onBack }: ConversationProps) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Написать сообщение..."
-            className="flex-1 bg-sevq-cream/60 rounded-btn py-3 px-4 text-sevq-text placeholder:text-sevq-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevq-purple/30 font-body text-sm"
+            className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
           />
           <motion.button
             whileTap={{ scale: 0.88, y: 2 }}
