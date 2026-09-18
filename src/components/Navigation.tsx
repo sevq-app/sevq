@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Users, Compass, User, Search, Smile, Volume2 } from 'lucide-react';
+import { MessageCircle, Users, Phone, User, Smile, Volume2 } from 'lucide-react';
 import { QLogo } from './QLogo';
 import type { Screen } from '@/data/mock';
 
@@ -11,8 +11,8 @@ interface SidebarProps {
 
 const navItems: { key: Screen; label: string; icon: React.ElementType }[] = [
   { key: 'chats', label: 'Чаты', icon: MessageCircle },
-  { key: 'friends', label: 'Друзья', icon: Users },
-  { key: 'clubs', label: 'Клубы', icon: Compass },
+  { key: 'friends', label: 'Контакты', icon: Users }, // <-- Переименовано
+  { key: 'calls', label: 'Звонки', icon: Phone },     // <-- Переименовано и новая иконка
   { key: 'profile', label: 'Мой SevQ', icon: User },
 ];
 
@@ -21,13 +21,11 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
 
   return (
     <div className="hidden md:flex flex-col w-20 lg:w-64 py-6 px-3 shrink-0 h-screen sticky top-0 z-30">
-      {/* Logo */}
       <div className="mb-8 flex items-center gap-3 px-2">
         <QLogo size={44} />
         <span className="hidden lg:block font-heading font-extrabold text-2xl text-sevq-text">SevQ</span>
       </div>
 
-      {/* Nav buttons */}
       <nav className="flex flex-col gap-2.5 flex-1">
         {navItems.map(({ key, label, icon: Icon }) => {
           const active = current === key;
@@ -38,9 +36,7 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
               whileHover={{ y: -2 }}
               onClick={() => onNavigate(key)}
               className={`flex items-center gap-4 px-4 py-3 rounded-btn transition-all relative overflow-hidden ${
-                active
-                  ? 'text-white'
-                  : 'bg-white text-sevq-textSecondary'
+                active ? 'text-white' : 'bg-white text-sevq-textSecondary'
               }`}
               style={
                 active
@@ -48,7 +44,6 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
                   : { boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }
               }
             >
-              {/* Gloss for active */}
               {active && (
                 <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
               )}
@@ -59,9 +54,7 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
         })}
       </nav>
 
-      {/* Bottom: Stickers + Sound toggle */}
       <div className="flex flex-col gap-2.5 pt-4">
-        {/* Кнопка СТИКЕРЫ (вместо Настроек) */}
         <motion.button
           whileTap={{ scale: 0.97, y: 2 }}
           whileHover={{ y: -2 }}
@@ -74,7 +67,6 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
           <span className="hidden lg:block font-heading font-bold text-base">Стикеры</span>
         </motion.button>
 
-        {/* Кнопка ЗВУК */}
         <div className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
           <Volume2 size={22} className={`shrink-0 ${soundOn ? 'text-sevq-purple' : 'text-sevq-textSecondary'}`} />
           <span className="hidden lg:block font-heading font-bold text-base text-sevq-textSecondary flex-1">Звук</span>
@@ -104,8 +96,8 @@ interface TabBarProps {
 export function TabBar({ current, onNavigate }: TabBarProps) {
   const items = [
     { key: 'chats' as Screen, label: 'Чаты', icon: MessageCircle },
-    { key: 'friends' as Screen, label: 'Друзья', icon: Users },
-    { key: 'clubs' as Screen, label: 'Клубы', icon: Compass },
+    { key: 'friends' as Screen, label: 'Контакты', icon: Users }, // <-- Переименовано
+    { key: 'calls' as Screen, label: 'Звонки', icon: Phone },     // <-- Переименовано
     { key: 'profile' as Screen, label: 'SevQ', icon: User },
   ];
 
@@ -131,9 +123,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               >
                 <Icon size={20} />
               </div>
-              <span
-                className={`text-[10px] font-heading font-bold ${active ? 'text-sevq-purple' : 'text-sevq-textSecondary'}`}
-              >
+              <span className={`text-[10px] font-heading font-bold ${active ? 'text-sevq-purple' : 'text-sevq-textSecondary'}`}>
                 {label}
               </span>
             </motion.button>
