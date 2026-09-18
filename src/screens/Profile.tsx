@@ -1,12 +1,28 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, Users } from 'lucide-react';
+import { Settings, Users, LogOut } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { userProfile, themeCircles, themeStickers } from '@/data/mock';
+import { supabase } from '@/lib/supabase';
 
 export function Profile() {
   const [online, setOnline] = useState(userProfile.online);
   const [selectedTheme, setSelectedTheme] = useState(0);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      await supabase.auth.signOut();
+      // Перенаправляем на страницу входа
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Ошибка при выходе:', error);
+      alert('Не удалось выйти из аккаунта');
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
 
   return (
     <div className="h-full overflow-y-auto pb-24 md:pb-6">
@@ -106,9 +122,9 @@ export function Profile() {
           <h3 className="font-heading font-bold text-sevq-text mb-3 relative z-10">Фотографии</h3>
           <div className="grid grid-cols-3 gap-3 relative z-10">
             {[
-              { color: '#6546C7', emoji: '🏔️', rotate: -3 },
-              { color: '#FF9848', emoji: '🌊', rotate: 2 },
-              { color: '#4FD3C8', emoji: '🌅', rotate: -2 },
+              { color: '#6546C7', emoji: '️', rotate: -3 },
+              { color: '#FF9848', emoji: '', rotate: 2 },
+              { color: '#4FD3C8', emoji: '', rotate: -2 },
             ].map((photo, i) => (
               <motion.div
                 key={i}
@@ -198,6 +214,32 @@ export function Profile() {
               </motion.button>
             ))}
           </div>
+        </motion.div>
+
+        {/* 🔴 КНОПКА ВЫХОДА */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="pt-2 pb-6"
+        >
+          <motion.button
+            whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)' }}
+            whileTap={{ scale: 0.98, y: 2 }}
+            onClick={handleLogout}
+            disabled={logoutLoading}
+            className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            style={{
+              background: 'linear-gradient(135deg, #FF6B6B 0%, #EF4444 100%)',
+              boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)',
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
+            <LogOut size={22} className="relative z-10" />
+            <span className="relative z-10">
+              {logoutLoading ? 'Выход...' : 'Выйти из аккаунта'}
+            </span>
+          </motion.button>
         </motion.div>
       </div>
     </div>
