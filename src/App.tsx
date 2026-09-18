@@ -12,6 +12,7 @@ import { Friends } from '@/screens/Friends';
 import { Clubs } from '@/screens/Clubs';
 import { Settings } from '@/screens/Settings';
 import { Calls } from '@/screens/Calls';
+import { Appearance } from '@/screens/Appearance'; // <-- Импорт есть
 import type { Screen, Chat } from '@/data/mock';
 
 function App() {
@@ -39,15 +40,6 @@ function App() {
     setScreen('conversation');
   };
 
-  // Auth screens
-  if (screen === 'login') {
-    return <Login onLogin={() => setScreen('chats')} onRegister={() => setScreen('register')} />;
-  }
-  if (screen === 'register') {
-    return <Register onRegister={() => setScreen('chats')} onLogin={() => setScreen('login')} />;
-  }
-
-  // ИСПРАВЛЕНО: 'friends' заменен на 'contacts'
   const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'contacts' || screen === 'calls' || screen === 'clubs';
 
   const pageVariants = {
@@ -77,18 +69,24 @@ function App() {
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
               )}
               
-              {/* ИСПРАВЛЕНО: 'friends' заменен на 'contacts' */}
               {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
-              
               {screen === 'calls' && <Calls onNavigate={setScreen} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
               {screen === 'profile' && <Profile onNavigate={setScreen} />}
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
+              
+              {/* 1. ИСПРАВЛЕНО: добавлен onNavigate={setScreen} */}
               {screen === 'settings' && (
-                <Settings onBack={() => setScreen('profile')} onLogout={() => setScreen('login')} />
+                <Settings onBack={() => setScreen('profile')} onLogout={() => setScreen('login')} onNavigate={setScreen} />
               )}
+              
+              {/* 2. ИСПРАВЛЕНО: добавлен рендер экрана Appearance */}
+              {screen === 'appearance' && (
+                <Appearance onBack={() => setScreen('settings')} />
+              )}
+              
             </motion.div>
           </AnimatePresence>
         </div>
