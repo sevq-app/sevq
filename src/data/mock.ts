@@ -3,13 +3,13 @@ export type Screen =
   | 'register'
   | 'chats'
   | 'conversation'
-  | 'friends'
-  | 'calls'       // <-- ДОБАВЛЕНО
-  | 'clubs'       // (можно оставить на всякий случай, или удалить)
+  | 'contacts'      // <-- БЫЛО 'friends', СТАЛО 'contacts'
+  | 'calls'
+  | 'clubs'
   | 'profile'
   | 'search'
   | 'settings';
-
+  
 export interface Message {
   id: string;
   senderId: string;
