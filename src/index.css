@@ -42,6 +42,7 @@
     font-family: 'Golos Text', sans-serif;
     background: radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%);
     background-attachment: fixed;
+    transition: background 0.5s ease, color 0.5s ease;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Nunito', sans-serif;
@@ -49,7 +50,44 @@
   }
 }
 
-/* Scrollbar */
+/* ========================================= */
+/* 🌙 ОРГАНИЧНАЯ ТЁМНАЯ ТЕМА                 */
+/* ========================================= */
+html.dark body {
+  background: radial-gradient(ellipse at top left, #1e1e2e 0%, #16162a 60%, #0f0f1e 100%);
+  color: #e0e0e8;
+}
+html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
+  color: #f0f0f5;
+}
+/* Мягкое затемнение белых карточек */
+html.dark .bg-white {
+  background-color: #2a2a3e !important;
+}
+html.dark .bg-\[#F9FAFB\],
+html.dark .bg-\[#F3F4F6\] {
+  background-color: #222236 !important;
+}
+/* Адаптация текста */
+html.dark .text-\[#1A1A1A\],
+html.dark .text-sevchik-text {
+  color: #e0e0e8 !important;
+}
+html.dark .text-\[#6B7280\],
+html.dark .text-sevchik-textSecondary {
+  color: #a0a0b8 !important;
+}
+html.dark .border-sevchik-purple\/8 {
+  border-color: rgba(101, 70, 199, 0.2) !important;
+}
+/* Адаптация "пластикового" блика для тёмной темы */
+html.dark .plastic-card::before {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+/* ========================================= */
+/* 📜 Scrollbar & Utilities                  */
+/* ========================================= */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

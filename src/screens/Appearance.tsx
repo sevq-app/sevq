@@ -12,11 +12,48 @@ interface AppearanceProps {
 }
 
 const themes = [
-  { id: 'joy', name: 'Радость', gradient: 'linear-gradient(135deg, #FFD93D 0%, #FF9848 100%)', bg: '#FFF8ED', messageColor: '#FF9848' },
-  { id: 'sadness', name: 'Печаль', gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', bg: '#F0F4FF', messageColor: '#667eea' },
-  { id: 'happiness', name: 'Счастье', gradient: 'linear-gradient(135deg, #4FD3C8 0%, #48BB78 100%)', bg: '#F0FFF4', messageColor: '#4FD3C8' },
-  { id: 'calm', name: 'Спокойствие', gradient: 'linear-gradient(135deg, #A78BFA 0%, #6546C7 100%)', bg: '#FAF5FF', messageColor: '#A78BFA' },
-  { id: 'surprise', name: 'Удивление', gradient: 'linear-gradient(135deg, #F093FB 0%, #F5576C 100%)', bg: '#FFF0F5', messageColor: '#F093FB' },
+  { 
+    id: 'spring', 
+    name: 'Весна', 
+    gradient: 'linear-gradient(135deg, #A8E6CF 0%, #FFD3B6 50%, #FFAAA5 100%)',
+    messageGradient: 'linear-gradient(135deg, #A8E6CF 0%, #FFAAA5 100%)',
+    bg: '#F0FFF4'
+  },
+  { 
+    id: 'summer', 
+    name: 'Лето', 
+    gradient: 'linear-gradient(135deg, #FFE259 0%, #FFA751 50%, #FF6B6B 100%)',
+    messageGradient: 'linear-gradient(135deg, #FFE259 0%, #FF6B6B 100%)',
+    bg: '#FFF9E6'
+  },
+  { 
+    id: 'autumn', 
+    name: 'Осень', 
+    gradient: 'linear-gradient(135deg, #F09819 0%, #ED4264 50%, #C94B4B 100%)',
+    messageGradient: 'linear-gradient(135deg, #F09819 0%, #C94B4B 100%)',
+    bg: '#FFF5E6'
+  },
+  { 
+    id: 'winter', 
+    name: 'Зима', 
+    gradient: 'linear-gradient(135deg, #E0EAFC 0%, #CFDEF3 50%, #A8C0FF 100%)',
+    messageGradient: 'linear-gradient(135deg, #E0EAFC 0%, #A8C0FF 100%)',
+    bg: '#F0F4FF'
+  },
+  { 
+    id: 'aurora', 
+    name: 'Северное сияние', 
+    gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #4FD3C8 50%, #48BB78 75%, #667eea 100%)',
+    messageGradient: 'linear-gradient(135deg, #667eea 0%, #4FD3C8 50%, #48BB78 100%)',
+    bg: '#F0F0FF'
+  },
+  { 
+    id: 'sea', 
+    name: 'Море', 
+    gradient: 'linear-gradient(135deg, #4FD3C8 0%, #3B82F6 50%, #1E3A8A 100%)',
+    messageGradient: 'linear-gradient(135deg, #4FD3C8 0%, #1E3A8A 100%)',
+    bg: '#E6F7FF'
+  },
 ];
 
 export function Appearance({ 
@@ -37,12 +74,12 @@ export function Appearance({
 
   const currentTheme = themes.find(t => t.id === selectedTheme);
 
-  // Базовые цвета для адаптации под темную тему
-  const cardBg = darkMode ? '#23232B' : '#FFFFFF';
-  const previewBg = darkMode ? '#1A1A22' : '#F9FAFB';
-  const textMain = darkMode ? '#F3F4F6' : '#1A1A1A';
-  const textSecondary = darkMode ? '#9CA3AF' : '#6B7280';
-  const containerBg = darkMode ? '#121218' : (currentTheme?.bg || '#FFF8ED');
+  // Базовые цвета для адаптации под тёмную тему
+  const cardBg = darkMode ? '#2a2a3e' : '#FFFFFF';
+  const previewBg = darkMode ? '#222236' : '#F9FAFB';
+  const textMain = darkMode ? '#e0e0e8' : '#1A1A1A';
+  const textSecondary = darkMode ? '#a0a0b8' : '#6B7280';
+  const containerBg = darkMode ? '#1e1e2e' : (currentTheme?.bg || '#FFF8ED');
 
   return (
     <div
@@ -54,7 +91,7 @@ export function Appearance({
         className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20"
         style={{
           background: darkMode
-            ? 'linear-gradient(180deg, #121218 80%, transparent 100%)'
+            ? 'linear-gradient(180deg, #1e1e2e 80%, transparent 100%)'
             : `linear-gradient(180deg, ${containerBg} 80%, transparent 100%)`,
         }}
       >
@@ -129,7 +166,7 @@ export function Appearance({
           </div>
         </motion.div>
 
-        {/* Тема (светлая/темная) */}
+        {/* Тема (светлая/тёмная) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -159,11 +196,9 @@ export function Appearance({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setDarkMode(false)}
-              className={`flex-1 py-3 rounded-2xl font-heading font-bold transition-all ${
-                !darkMode ? 'bg-[#6546C7] text-white' : 'text-[#6B7280]'
-              }`}
+              className="flex-1 py-3 rounded-2xl font-heading font-bold transition-all"
               style={{ 
-                backgroundColor: !darkMode ? '#6546C7' : (darkMode ? '#2A2A32' : '#F3F4F6'),
+                backgroundColor: !darkMode ? '#6546C7' : (darkMode ? '#2a2a3e' : '#F3F4F6'),
                 boxShadow: !darkMode ? '0 4px 12px rgba(101,70,199,0.3)' : 'none',
                 color: !darkMode ? '#FFFFFF' : textSecondary
               }}
@@ -173,11 +208,9 @@ export function Appearance({
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setDarkMode(true)}
-              className={`flex-1 py-3 rounded-2xl font-heading font-bold transition-all ${
-                darkMode ? 'bg-[#6546C7] text-white' : 'text-[#6B7280]'
-              }`}
+              className="flex-1 py-3 rounded-2xl font-heading font-bold transition-all"
               style={{ 
-                backgroundColor: darkMode ? '#6546C7' : (darkMode ? '#2A2A32' : '#F3F4F6'),
+                backgroundColor: darkMode ? '#6546C7' : (darkMode ? '#2a2a3e' : '#F3F4F6'),
                 boxShadow: darkMode ? '0 4px 12px rgba(101,70,199,0.3)' : 'none',
                 color: darkMode ? '#FFFFFF' : textSecondary
               }}
@@ -187,7 +220,7 @@ export function Appearance({
           </div>
         </motion.div>
 
-        {/* Макеты тем */}
+        {/* Цветовые темы */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -208,38 +241,33 @@ export function Appearance({
             <h3 className="font-heading font-bold" style={{ color: textMain }}>Цветовая тема</h3>
           </div>
           
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {themes.map((theme) => (
               <motion.button
                 key={theme.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedTheme(theme.id)}
-                className={`relative p-4 rounded-2xl text-left transition-all ${
-                  selectedTheme === theme.id ? 'ring-4 ring-[#6546C7]' : ''
+                className={`relative h-16 rounded-xl transition-all ${
+                  selectedTheme === theme.id ? 'ring-2 ring-[#6546C7] ring-offset-2' : ''
                 }`}
                 style={{
                   background: theme.gradient,
                   boxShadow: selectedTheme === theme.id
-                    ? `0 8px 24px ${theme.messageColor}60`
-                    : '0 4px 12px rgba(0,0,0,0.1)',
+                    ? `0 4px 12px rgba(101,70,199,0.4)`
+                    : '0 2px 8px rgba(0,0,0,0.1)',
                 }}
               >
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-                <div className="relative z-10">
-                  <h4 className="font-heading font-bold text-white text-sm mb-1">{theme.name}</h4>
-                  <div className="flex gap-1">
-                    <div className="w-6 h-6 rounded-full bg-white/30" />
-                    <div className="w-6 h-6 rounded-full bg-white/20" />
-                    <div className="w-6 h-6 rounded-full bg-white/10" />
-                  </div>
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
+                <div className="relative z-10 flex items-center justify-center h-full">
+                  <span className="font-heading font-bold text-white text-xs drop-shadow-md">{theme.name}</span>
                 </div>
               </motion.button>
             ))}
           </div>
         </motion.div>
 
-        {/* Предпросмотр сообщения */}
+        {/* Предпросмотр сообщений */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -249,24 +277,36 @@ export function Appearance({
         >
           <h3 className="font-heading font-bold mb-4" style={{ color: textMain }}>Предпросмотр</h3>
           <div className="space-y-3">
-            <div
-              className="p-3 rounded-2xl rounded-tl-none max-w-[80%]"
-              style={{
-                background: currentTheme?.gradient || 'linear-gradient(135deg, #6546C7, #8366D9)',
-                color: 'white',
-                fontSize: `${fontSize}px`
-              }}
-            >
-              <p className="font-body">Привет! Как дела?</p>
+            {/* Входящее сообщение (нейтральное) */}
+            <div className="flex justify-start">
+              <div
+                className="p-3 rounded-2xl rounded-tl-none max-w-[80%]"
+                style={{
+                  backgroundColor: darkMode ? '#3a3a4e' : '#F3F4F6',
+                  fontSize: `${fontSize}px`
+                }}
+              >
+                <p className="font-body" style={{ color: textMain }}>
+                  Здесь ты можешь поменять цвет под своё настроение
+                </p>
+              </div>
             </div>
-            <div 
-              className="p-3 rounded-2xl rounded-tr-none max-w-[80%] ml-auto" 
-              style={{ 
-                backgroundColor: darkMode ? '#2A2A32' : '#F3F4F6',
-                fontSize: `${fontSize}px`
-              }}
-            >
-              <p className="font-body" style={{ color: textMain }}>Отлично! А у тебя?</p>
+            
+            {/* Исходящее сообщение (цвет темы) */}
+            <div className="flex justify-end">
+              <div
+                className="p-3 rounded-2xl rounded-tr-none max-w-[80%]"
+                style={{
+                  background: currentTheme?.messageGradient || 'linear-gradient(135deg, #6546C7, #8366D9)',
+                  color: 'white',
+                  fontSize: `${fontSize}px`,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                }}
+              >
+                <p className="font-body">
+                  Выбери, что тебе ближе
+                </p>
+              </div>
             </div>
           </div>
         </motion.div>
