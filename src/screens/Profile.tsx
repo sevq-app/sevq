@@ -5,7 +5,6 @@ import { Avatar } from '@/components/Avatar';
 import { userProfile, themeCircles, themeStickers } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
 
-// 1. ДОБАВЛЕНО: Принимаем функцию onNavigate из App.tsx
 export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void }) {
   const [online, setOnline] = useState(userProfile.online);
   const [selectedTheme, setSelectedTheme] = useState(0);
@@ -28,13 +27,11 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
     <div className="h-full overflow-y-auto pb-24 md:pb-6">
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center justify-between">
-        <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Мой SevQ</h1>
-        
-        {/* 2. ДОБАВЛЕНО: onClick и motion.button для кнопки настроек */}
+        <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Мой Севчик</h1>
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => onNavigate?.('settings')}
-          className="w-11 h-11 rounded-card bg-white flex items-center justify-center text-sevq-textSecondary hover:text-sevq-purple transition-colors btn-3d"
+          className="w-11 h-11 rounded-card bg-white flex items-center justify-center text-sevchik-textSecondary hover:text-sevchik-purple transition-colors btn-3d"
           style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
         >
           <Settings size={20} />
@@ -68,7 +65,7 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
           </motion.div>
         </motion.div>
         <h2 className="font-heading font-extrabold text-xl mt-4">{userProfile.name}</h2>
-        <p className="text-sevq-textSecondary text-sm font-body mt-0.5">{userProfile.bio}</p>
+        <p className="text-sevchik-textSecondary text-sm font-body mt-0.5">{userProfile.bio}</p>
       </div>
 
       <div className="px-4 sm:px-6 space-y-4 max-w-2xl mx-auto">
@@ -81,15 +78,15 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
           style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
           <div className="relative z-10">
-            <h3 className="font-heading font-bold text-sevq-text">Статус</h3>
-            <p className="text-sm text-sevq-textSecondary font-body mt-0.5 flex items-center gap-1.5">
-              {online && <span className="w-2 h-2 rounded-full bg-sevq-mint" />}
+            <h3 className="font-heading font-bold text-sevchik-text">Статус</h3>
+            <p className="text-sm text-sevchik-textSecondary font-body mt-0.5 flex items-center gap-1.5">
+              {online && <span className="w-2 h-2 rounded-full bg-sevchik-mint" />}
               {online ? 'В сети' : 'Не в сети'}
             </p>
           </div>
           <button
             onClick={() => setOnline(!online)}
-            className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${online ? 'bg-sevq-mint' : 'bg-sevq-textSecondary/20'}`}
+            className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/20'}`}
             style={online ? { boxShadow: '0 3px 12px rgba(79,211,200,0.4)' } : undefined}
           >
             <motion.div
@@ -109,8 +106,8 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
           className="bg-white rounded-card p-5 plastic-card"
           style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
-          <h3 className="font-heading font-bold text-sevq-text mb-2 relative z-10">Обо мне</h3>
-          <p className="text-sm text-sevq-textSecondary font-body leading-relaxed relative z-10">{userProfile.about}</p>
+          <h3 className="font-heading font-bold text-sevchik-text mb-2 relative z-10">Обо мне</h3>
+          <p className="text-sm text-sevchik-textSecondary font-body leading-relaxed relative z-10">{userProfile.about}</p>
         </motion.div>
 
         {/* Photos — Polaroid effect */}
@@ -121,7 +118,7 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
           className="bg-white rounded-card p-5 plastic-card"
           style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
-          <h3 className="font-heading font-bold text-sevq-text mb-3 relative z-10">Фотографии</h3>
+          <h3 className="font-heading font-bold text-sevchik-text mb-3 relative z-10">Фотографии</h3>
           <div className="grid grid-cols-3 gap-3 relative z-10">
             {[
               { color: '#6546C7', emoji: '🏔️', rotate: -3 },
@@ -162,9 +159,9 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
             <Users size={26} className="relative z-10" />
           </div>
           <div className="flex-1 min-w-0 relative z-10">
-            <h3 className="font-heading font-bold text-sevq-text">Любимое сообщество</h3>
-            <p className="text-sm text-sevq-text font-body mt-0.5 truncate">{userProfile.favoriteCommunity}</p>
-            <p className="text-xs text-sevq-textSecondary font-body">{userProfile.communityMembers}</p>
+            <h3 className="font-heading font-bold text-sevchik-text">Любимое сообщество</h3>
+            <p className="text-sm text-sevchik-text font-body mt-0.5 truncate">{userProfile.favoriteCommunity}</p>
+            <p className="text-xs text-sevchik-textSecondary font-body">{userProfile.communityMembers}</p>
           </div>
         </motion.div>
 
@@ -176,7 +173,7 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
           className="bg-white rounded-card p-5 plastic-card"
           style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
-          <h3 className="font-heading font-bold text-sevq-text mb-4 relative z-10">Персональная тема</h3>
+          <h3 className="font-heading font-bold text-sevchik-text mb-4 relative z-10">Персональная тема</h3>
           <div className="flex gap-4 mb-4 relative z-10">
             {themeCircles.map((theme, i) => (
               <motion.button
@@ -206,7 +203,7 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 + i * 0.06, type: 'spring', stiffness: 300 }}
-                className="w-11 h-11 rounded-2xl bg-sevq-cream flex items-center justify-center text-xl"
+                className="w-11 h-11 rounded-2xl bg-sevchik-cream flex items-center justify-center text-xl"
                 style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
                 title={sticker.label}
               >
@@ -216,7 +213,7 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void 
           </div>
         </motion.div>
 
-        {/* КНОПКА ВЫХОДА */}
+        {/* Кнопка выхода */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

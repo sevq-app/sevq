@@ -7,7 +7,6 @@ interface FriendsProps {
   onWriteMessage: (name: string) => void;
 }
 
-// Типы экранов внутри компонента
 type FriendsView = 'main' | 'selectMembers' | 'createGroup';
 
 export function Friends({ onWriteMessage }: FriendsProps) {
@@ -81,7 +80,6 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               >
                 <Plus size={22} />
               </motion.button>
-
               {/* Выпадающее меню */}
               <AnimatePresence>
                 {showDropdown && (
@@ -124,7 +122,6 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                         </div>
                         <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Создать группу</span>
                       </motion.button>
-
                       {/* Пункт 2: Пригласить по ссылке */}
                       <motion.button
                         whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -146,7 +143,6 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                         </div>
                         <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Пригласить по ссылке</span>
                       </motion.button>
-
                       {/* Пункт 3: Найти по номеру */}
                       <motion.button
                         whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -174,7 +170,6 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               </AnimatePresence>
             </div>
           </div>
-
           {/* Строка поиска */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]" size={20} />
@@ -252,8 +247,8 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   </div>
                   {friend.online && (
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-sevq-mint" />
-                      <span className="text-xs text-sevq-mint font-body">В сети</span>
+                      <span className="w-2 h-2 rounded-full bg-sevchik-mint" />
+                      <span className="text-xs text-sevchik-mint font-body">В сети</span>
                     </div>
                   )}
                 </motion.div>
@@ -296,7 +291,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   </div>
                   <h3 className="font-heading font-extrabold text-xl text-[#1A1A1A] mb-2">Доступ к контактам</h3>
                   <p className="text-sm text-[#6B7280] font-body leading-relaxed">
-                    Разрешите доступ к вашей телефонной книге. Это поможет найти здесь ваших друзей и знакомых, которые уже пользуются SevQ.
+                    Разрешите доступ к вашей телефонной книге. Это поможет найти здесь ваших друзей и знакомых, которые уже пользуются Севчик.
                   </p>
                 </div>
                 <div className="flex gap-3 mt-6">
@@ -347,7 +342,6 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             </motion.button>
             <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A]">Выбери участников</h1>
           </div>
-
           {/* Поиск */}
           <div className="relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]" size={20} />
@@ -360,7 +354,6 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
           </div>
-
           {/* Счетчик выбранных */}
           {selectedMembers.length > 0 && (
             <motion.div
