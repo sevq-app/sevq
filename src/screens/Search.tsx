@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Search as SearchIcon, MessageSquare } from 'lucide-react';
-import { Avatar } from '@/components/Avatar';
-import { searchResults } from '@/data/mock';
+import { ArrowLeft, Search as SearchIcon, Clock, TrendingUp } from 'lucide-react';
 
 interface SearchProps {
   onBack: () => void;
@@ -11,97 +9,83 @@ interface SearchProps {
 
 export function Search({ onBack, onWriteMessage }: SearchProps) {
   const [query, setQuery] = useState('');
-
-  const filtered = query.trim()
-    ? searchResults.filter(
-        (r) =>
-          r.name.toLowerCase().includes(query.toLowerCase()) ||
-          r.handle.toLowerCase().includes(query.toLowerCase())
-      )
-    : searchResults;
+  const recentSearches = ['Анна', 'Клуб путешественников', 'Дизайн'];
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3" style={{ background: 'rgba(255,248,237,0.95)', backdropFilter: 'blur(12px)' }}>
-        <motion.button
-          whileTap={{ scale: 0.9, y: 2 }}
-          onClick={onBack}
-          className="p-2 rounded-full bg-white text-sevq-text btn-3d"
-          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
-        >
-          <ArrowLeft size={20} />
+      <div className="px-4 sm:px-6 pt-6 pb-4 flex items-center gap-3 sticky top-0 z-20" style={{ background: 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={onBack} className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-sevchik-purple" style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}>
+          <ArrowLeft size={22} />
         </motion.button>
-        <h1 className="font-heading font-extrabold text-xl flex-1">Поиск</h1>
+        <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A]">Поиск</h1>
       </div>
 
-      {/* Big orange search */}
-      <div className="px-4 sm:px-6 py-4">
+      {/* Search Input */}
+      <div className="px-4 sm:px-6 mb-6">
         <div className="relative">
-          <SearchIcon size={22} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80" />
+          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9CA3AF]" size={20} />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Поиск людей..."
-            className="w-full text-white placeholder:text-white/80 rounded-card py-4 pl-12 pr-4 focus:outline-none font-body text-base"
-            style={{
-              background: 'linear-gradient(135deg, #FFB87A, #FF9848)',
-              boxShadow: '0 6px 20px rgba(255,152,72,0.3)',
-            }}
+            placeholder="Поиск людей, групп и сообщений..."
+            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border-2 border-transparent focus:border-sevchik-purple/30 outline-none transition-all font-body text-[#1A1A1A] placeholder:text-[#9CA3AF]"
+            style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
           />
         </div>
       </div>
 
-      {/* Results */}
+      {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-6">
-        {filtered.length > 0 ? (
-          <div className="space-y-2.5">
-            {filtered.map((person, i) => (
-              <motion.div
-                key={person.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05 }}
-                whileHover={{ y: -4 }}
-                className="bg-white rounded-card p-3.5 flex items-center gap-3 plastic-card"
-                style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
-              >
-                <Avatar
-                  initials={person.initials}
-                  color={person.avatarColor}
-                  size="md"
-                  online={person.online}
-                  ringColor={person.online ? '#4FD3C8' : undefined}
-                />
-                <div className="flex-1 min-w-0 relative z-10">
-                  <h3 className="font-heading font-bold text-sevq-text truncate">{person.name}</h3>
-                  <p className="text-sm text-sevq-purple font-body truncate">{person.handle}</p>
-                  <p className={`text-xs font-body mt-0.5 flex items-center gap-1 ${person.online ? 'text-sevq-mint' : 'text-sevq-textSecondary'}`}>
-                    {person.online && <span className="w-1.5 h-1.5 rounded-full bg-sevq-mint" />}
-                    {person.status}
-                  </p>
-                </div>
-                <motion.button
-                  whileTap={{ scale: 0.9, y: 2 }}
-                  onClick={() => onWriteMessage(person.name)}
-                  className="shrink-0 text-white rounded-btn px-4 py-2.5 font-heading font-bold text-sm btn-3d relative overflow-hidden flex items-center gap-1.5"
-                  style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 14px rgba(101,70,199,0.25)' }}
-                >
-                  <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%)' }} />
-                  <MessageSquare size={16} className="relative z-10" />
-                  <span className="relative z-10">Написать</span>
-                </motion.button>
-              </motion.div>
-            ))}
+        {query ? (
+          <div className="text-center py-12">
+            <p className="text-sevchik-textSecondary font-body">Ничего не найдено по запросу "{query}"</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-4" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
-              <SearchIcon size={36} className="text-sevq-purple/40" />
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1 flex items-center gap-2">
+                <Clock size={14} /> Недавние
+              </h2>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+                {recentSearches.map((item, i) => (
+                  <motion.button
+                    key={i}
+                    whileHover={{ backgroundColor: '#FAFAFA' }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => onWriteMessage(item)}
+                    className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${i !== recentSearches.length - 1 ? 'border-b border-[#F3F4F6]' : ''}`}
+                  >
+                    <div className="w-10 h-10 rounded-2xl bg-sevchik-cream flex items-center justify-center text-sevchik-purple shrink-0">
+                      <SearchIcon size={18} />
+                    </div>
+                    <span className="font-heading font-semibold text-sm text-[#1A1A1A]">{item}</span>
+                  </motion.button>
+                ))}
+              </div>
             </div>
-            <p className="text-sevq-text font-heading font-bold text-lg">Никого не нашли</p>
-            <p className="text-sevq-textSecondary font-body text-sm mt-1">Попробуйте изменить запрос</p>
+
+            <div>
+              <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1 flex items-center gap-2">
+                <TrendingUp size={14} /> Популярное в Севчик
+              </h2>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+                {['Новости дизайна', 'IT сообщество', 'Музыка 24/7'].map((item, i) => (
+                  <motion.button
+                    key={i}
+                    whileHover={{ backgroundColor: '#FAFAFA' }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${i !== 2 ? 'border-b border-[#F3F4F6]' : ''}`}
+                  >
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shrink-0" style={{ background: 'linear-gradient(135deg, #FF9848, #FFB87A)' }}>
+                      <TrendingUp size={18} />
+                    </div>
+                    <span className="font-heading font-semibold text-sm text-[#1A1A1A]">{item}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </div>
