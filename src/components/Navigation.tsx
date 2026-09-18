@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Users, Compass, User, Search, Settings, Volume2 } from 'lucide-react';
+import { MessageCircle, Users, Compass, User, Search, Smile, Volume2 } from 'lucide-react';
 import { QLogo } from './QLogo';
 import type { Screen } from '@/data/mock';
 
@@ -59,20 +59,24 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
         })}
       </nav>
 
-      {/* Bottom: Settings + Sound toggle */}
+      {/* Bottom: Stickers + Sound toggle */}
       <div className="flex flex-col gap-2.5 pt-4">
+        {/* Кнопка СТИКЕРЫ (вместо Настроек) */}
         <motion.button
           whileTap={{ scale: 0.97, y: 2 }}
           whileHover={{ y: -2 }}
-          className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white text-sevq-textSecondary"
+          onClick={() => alert('🎨 Коллекция стикеров скоро будет доступна!')}
+          className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white text-sevq-textSecondary hover:text-sevq-purple transition-colors"
           style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+          title="Стикеры"
         >
-          <Settings size={22} className="shrink-0" />
-          <span className="hidden lg:block font-heading font-bold text-base">Настройки</span>
+          <Smile size={22} className="shrink-0" />
+          <span className="hidden lg:block font-heading font-bold text-base">Стикеры</span>
         </motion.button>
 
+        {/* Кнопка ЗВУК */}
         <div className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <Volume2 size={22} className="shrink-0 text-sevq-textSecondary" />
+          <Volume2 size={22} className={`shrink-0 ${soundOn ? 'text-sevq-purple' : 'text-sevq-textSecondary'}`} />
           <span className="hidden lg:block font-heading font-bold text-base text-sevq-textSecondary flex-1">Звук</span>
           <button
             onClick={() => setSoundOn(!soundOn)}
