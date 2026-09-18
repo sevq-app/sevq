@@ -62,7 +62,8 @@ export default {
           4: 'hsl(var(--chart-4))',
           5: 'hsl(var(--chart-5))',
         },
-        sevq: {
+        // 🎨 Переименовано с sevq на sevchik
+        sevchik: {
           purple: '#6546C7',
           purpleDark: '#4E35A5',
           purpleLight: '#8366D9',

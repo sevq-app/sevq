@@ -38,11 +38,10 @@
     @apply border-border;
   }
   body {
-    @apply text-sevq-text;
+    @apply text-sevchik-text;
     font-family: 'Golos Text', sans-serif;
     background: radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%);
     background-attachment: fixed;
-    transition: background 0.5s ease, color 0.5s ease;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Nunito', sans-serif;
@@ -50,43 +49,7 @@
   }
 }
 
-/* ========================================= */
-/* 🌙 ГЛОБАЛЬНАЯ ТЕМНАЯ ТЕМА (Dark Mode)     */
-/* ========================================= */
-html.dark body {
-  background: radial-gradient(ellipse at top left, #1A1A24 0%, #121218 60%, #0A0A0F 100%);
-  color: #E5E7EB;
-}
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
-  color: #F3F4F6;
-}
-/* Переопределяем жесткие цвета Tailwind для темной темы */
-html.dark .bg-white {
-  background-color: #23232B !important;
-}
-html.dark .bg-\[#F9FAFB\],
-html.dark .bg-\[#F3F4F6\] {
-  background-color: #1A1A22 !important;
-}
-html.dark .text-\[#1A1A1A\],
-html.dark .text-sevq-text {
-  color: #F3F4F6 !important;
-}
-html.dark .text-\[#6B7280\],
-html.dark .text-sevq-textSecondary {
-  color: #9CA3AF !important;
-}
-html.dark .border-sevq-purple\/8 {
-  border-color: rgba(101, 70, 199, 0.2) !important;
-}
-/* Адаптация "пластикового" блика для темной темы */
-html.dark .plastic-card::before {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
-}
-
-/* ========================================= */
-/* 📜 Scrollbar & Utilities                  */
-/* ========================================= */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
