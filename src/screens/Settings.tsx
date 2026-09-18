@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  User, Bell, Lock, Palette, Globe, HardDrive, Info,
-  LogOut, ChevronRight, Moon, Sun, Volume2, VolumeX,
-  Shield, MessageCircle, Trash2
+  Star, Smartphone, Bell, Shield, HardDrive, Battery,
+  UserPlus, Palette, Languages, HelpCircle, Info,
+  LogOut, ChevronRight, Moon, Sun
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
@@ -13,9 +13,8 @@ interface SettingsProps {
 }
 
 export function Settings({ onBack, onLogout }: SettingsProps) {
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [showOnline, setShowOnline] = useState(true);
+  const [notifications, setNotifications] = useState(true);
+  const [powerSaving, setPowerSaving] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
   const handleLogout = async () => {
@@ -23,60 +22,57 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
     onLogout();
   };
 
+  // Группируем пункты меню для красоты и логики
   const sections = [
     {
-      title: 'Аккаунт',
+      title: 'Основное',
       items: [
-        { icon: User, label: 'Редактировать профиль', color: '#6546C7', action: () => {} },
+        { icon: Star, label: 'Избранное', color: '#FF9848', hasChevron: true },
+        { icon: Smartphone, label: 'Устройства', color: '#6546C7', hasChevron: true, value: '1 активно' },
       ],
     },
     {
-      title: 'Уведомления',
+      title: 'Уведомления и вид',
       items: [
-        { icon: soundEnabled ? Volume2 : VolumeX, label: 'Звук сообщений', color: '#FF9848', action: () => setSoundEnabled(!soundEnabled), isToggle: true, value: soundEnabled },
-        { icon: Bell, label: 'Push-уведомления', color: '#FF9848', action: () => setPushEnabled(!pushEnabled), isToggle: true, value: pushEnabled },
+        { icon: Bell, label: 'Уведомления и звуки', color: '#FF9848', isToggle: true, value: notifications, action: () => setNotifications(!notifications) },
+        { icon: darkMode ? Moon : Sun, label: 'Оформление', color: '#6546C7', hasChevron: true, value: darkMode ? 'Тёмная' : 'Светлая', action: () => setDarkMode(!darkMode) },
+        { icon: Battery, label: 'Энергосбережение', color: '#4FD3C8', isToggle: true, value: powerSaving, action: () => setPowerSaving(!powerSaving) },
       ],
     },
     {
-      title: 'Конфиденциальность',
+      title: 'Конфиденциальность и данные',
       items: [
-        { icon: Shield, label: 'Показывать статус "В сети"', color: '#4FD3C8', action: () => setShowOnline(!showOnline), isToggle: true, value: showOnline },
-        { icon: MessageCircle, label: 'Кто может писать мне', color: '#4FD3C8', action: () => {}, hasChevron: true },
+        { icon: Shield, label: 'Безопасность', color: '#4FD3C8', hasChevron: true },
+        { icon: HardDrive, label: 'Данные и память', color: '#6B7280', hasChevron: true, value: '124 МБ' },
       ],
     },
     {
-      title: 'Оформление',
+      title: 'Поддержка',
       items: [
-        { icon: darkMode ? Moon : Sun, label: 'Тёмная тема', color: '#6546C7', action: () => setDarkMode(!darkMode), isToggle: true, value: darkMode },
-        { icon: Palette, label: 'Цвет акцента', color: '#6546C7', action: () => {}, hasChevron: true },
-      ],
-    },
-    {
-      title: 'Общие',
-      items: [
-        { icon: Globe, label: 'Язык', color: '#6B7280', action: () => {}, hasChevron: true, value: 'Русский' },
-        { icon: HardDrive, label: 'Данные и память', color: '#6B7280', action: () => {}, hasChevron: true },
-        { icon: Info, label: 'О приложении SevQ', color: '#6B7280', action: () => {}, hasChevron: true, value: 'v1.0.0' },
+        { icon: UserPlus, label: 'Пригласить друзей', color: '#6546C7', hasChevron: true },
+        { icon: Languages, label: 'Язык приложения', color: '#6B7280', hasChevron: true, value: 'Русский' },
+        { icon: HelpCircle, label: 'Помощь', color: '#6B7280', hasChevron: true },
+        { icon: Info, label: 'О приложении', color: '#6B7280', hasChevron: true, value: 'v1.0.0' },
       ],
     },
   ];
 
   return (
     <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
-      {/* Header */}
-      <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center gap-3">
+      {/* Шапка с кнопкой назад */}
+      <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center gap-3 sticky top-0 bg-gradient-to-b from-[#FFF8ED] to-transparent z-20 pb-4">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onBack}
           className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7] transition-colors"
           style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}
         >
-          <ChevronRight size={20} className="rotate-180" />
+          <ChevronRight size={22} className="rotate-180" />
         </motion.button>
         <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#1A1A1A]">Настройки</h1>
       </div>
 
-      <div className="px-4 sm:px-6 space-y-6 max-w-2xl mx-auto pt-4">
+      <div className="px-4 sm:px-6 space-y-6 max-w-2xl mx-auto pt-2">
         {sections.map((section, sectionIdx) => (
           <motion.div
             key={section.title}
@@ -87,6 +83,7 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
             <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1">
               {section.title}
             </h2>
+            
             <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
               {section.items.map((item, itemIdx) => (
                 <motion.button
@@ -98,6 +95,7 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
                     itemIdx !== section.items.length - 1 ? 'border-b border-[#F3F4F6]' : ''
                   }`}
                 >
+                  {/* Иконка с "пластиковым" объемом */}
                   <div
                     className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
                     style={{
@@ -108,9 +106,12 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
                     <item.icon size={20} className="text-white relative z-10" />
                   </div>
+                  
                   <span className="flex-1 font-heading font-semibold text-[#1A1A1A] text-sm">
                     {item.label}
                   </span>
+
+                  {/* Переключатель (Toggle) */}
                   {item.isToggle ? (
                     <div className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${item.value ? 'bg-[#4FD3C8]' : 'bg-[#E5E7EB]'}`}>
                       <motion.div
@@ -120,11 +121,17 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
                         style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
                       />
                     </div>
-                  ) : item.value ? (
-                    <span className="text-sm text-[#6B7280] font-body mr-1">{item.value}</span>
-                  ) : null}
-                  {item.hasChevron && !item.isToggle && (
-                    <ChevronRight size={18} className="text-[#9CA3AF]" />
+                  ) : (
+                    <>
+                      {/* Текст справа (например, "124 МБ" или "Русский") */}
+                      {item.value && !item.isToggle && (
+                        <span className="text-sm text-[#6B7280] font-body mr-1">{item.value}</span>
+                      )}
+                      {/* Стрелочка вправо */}
+                      {item.hasChevron && (
+                        <ChevronRight size={18} className="text-[#9CA3AF]" />
+                      )}
+                    </>
                   )}
                 </motion.button>
               ))}
@@ -132,12 +139,12 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
           </motion.div>
         ))}
 
-        {/* Кнопка выхода */}
+        {/* Кнопка выхода и удаления аккаунта */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="pt-2 pb-6"
+          className="pt-4 pb-8"
         >
           <motion.button
             whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)' }}
@@ -152,16 +159,6 @@ export function Settings({ onBack, onLogout }: SettingsProps) {
             <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
             <LogOut size={20} className="relative z-10" />
             <span className="relative z-10">Выйти из аккаунта</span>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full mt-3 py-3 rounded-2xl text-[#EF4444] font-heading font-semibold text-sm bg-white flex items-center justify-center gap-2"
-            style={{ boxShadow: '0 4px 12px rgba(239, 68, 68, 0.1)' }}
-          >
-            <Trash2 size={16} />
-            Удалить аккаунт
           </motion.button>
         </motion.div>
       </div>
