@@ -10,6 +10,7 @@ import { Profile } from '@/screens/Profile';
 import { Search } from '@/screens/Search';
 import { Friends } from '@/screens/Friends';
 import { Clubs } from '@/screens/Clubs';
+import { Settings } from '@/screens/Settings'; // <-- ДОБАВЛЕНО
 import type { Screen, Chat } from '@/data/mock';
 
 function App() {
@@ -77,9 +78,12 @@ function App() {
               )}
               {screen === 'friends' && <Friends onWriteMessage={handleSearchWrite} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
-              {screen === 'profile' && <Profile />}
+              {screen === 'profile' && <Profile onNavigate={setScreen} />} {/* <-- ОБНОВЛЕНО */}
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
+              )}
+              {screen === 'settings' && ( /* <-- ДОБАВЛЕНО */
+                <Settings onBack={() => setScreen('profile')} onLogout={() => setScreen('login')} />
               )}
             </motion.div>
           </AnimatePresence>
