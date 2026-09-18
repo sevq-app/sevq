@@ -1,4 +1,4 @@
-import { useState } from 'react'; 
+import { useState, useEffect } from 'react'; 
 import { AnimatePresence, motion } from 'framer-motion';
 import { Search as SearchIcon } from 'lucide-react';
 import { Sidebar, TabBar } from '@/components/Navigation';
@@ -12,12 +12,41 @@ import { Friends } from '@/screens/Friends';
 import { Clubs } from '@/screens/Clubs';
 import { Settings } from '@/screens/Settings';
 import { Calls } from '@/screens/Calls';
-import { Appearance } from '@/screens/Appearance'; // <-- Импорт есть
+import { Appearance } from '@/screens/Appearance';
+import { supabase } from '@/lib/supabase';
 import type { Screen, Chat } from '@/data/mock';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login');
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Проверяем состояние аутентификации при загрузке
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        setScreen('chats'); // Пользователь авторизован
+      } else {
+        setScreen('login'); // Пользователь не авторизован
+      }
+      setIsLoading(false);
+    };
+
+    checkAuth();
+
+    // Подписываемся на изменения аутентификации
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        setScreen('chats');
+      } else {
+        setScreen('login');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleOpenChat = (chat: Chat) => {
     setActiveChat(chat);
@@ -39,6 +68,33 @@ function App() {
     setActiveChat(chat);
     setScreen('conversation');
   };
+
+  // Функция выхода
+  const handleLogout = () => {
+    supabase.auth.signOut();
+    setScreen('login');
+    setActiveChat(null);
+  };
+
+  // Показываем загрузку пока проверяем аутентификацию
+  if (isLoading) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
+        <div className="flex flex-col items-center gap-4">
+          <QLogo size={64} />
+          <p className="text-[#6B7280] font-body">Загрузка...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Auth screens
+  if (screen === 'login') {
+    return <Login onLogin={() => setScreen('chats')} onRegister={() => setScreen('register')} />;
+  }
+  if (screen === 'register') {
+    return <Register onRegister={() => setScreen('chats')} onLogin={() => setScreen('login')} />;
+  }
 
   const showTabBar = screen === 'chats' || screen === 'profile' || screen === 'search' || screen === 'contacts' || screen === 'calls' || screen === 'clubs';
 
@@ -77,12 +133,14 @@ function App() {
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
               
-              {/* 1. ИСПРАВЛЕНО: добавлен onNavigate={setScreen} */}
               {screen === 'settings' && (
-                <Settings onBack={() => setScreen('profile')} onLogout={() => setScreen('login')} onNavigate={setScreen} />
+                <Settings 
+                  onBack={() => setScreen('profile')} 
+                  onLogout={handleLogout}  // <-- Передаем нашу функцию выхода
+                  onNavigate={setScreen} 
+                />
               )}
               
-              {/* 2. ИСПРАВЛЕНО: добавлен рендер экрана Appearance */}
               {screen === 'appearance' && (
                 <Appearance onBack={() => setScreen('settings')} />
               )}
