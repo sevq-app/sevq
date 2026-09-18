@@ -3,7 +3,7 @@ export type Screen =
   | 'register'
   | 'chats'
   | 'conversation'
-  | 'friends'
+  | 'contacts'
   | 'calls'       // <-- ДОБАВЛЕНО
   | 'clubs'       // (можно оставить на всякий случай, или удалить)
   | 'profile'
