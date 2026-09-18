@@ -92,7 +92,7 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className={`h-screen w-full flex items-center justify-center transition-colors duration-500 ${darkMode ? 'bg-[#121218]' : 'bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]'}`}>
+      <div className={`h-screen w-full flex items-center justify-center transition-colors duration-500 ${darkMode ? 'bg-[#1f1f28]' : 'bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]'}`}>
         <div className="flex flex-col items-center gap-4">
           <QLogo size={64} />
           <p className={`font-body ${darkMode ? 'text-gray-400' : 'text-[#6B7280]'}`}>Загрузка...</p>
@@ -117,7 +117,7 @@ function App() {
   };
 
   return (
-    <div className={`flex min-h-screen transition-colors duration-500 ${darkMode ? 'bg-[#121218]' : ''}`}>
+    <div className={`flex min-h-screen transition-colors duration-500 ${darkMode ? 'bg-[#1f1f28]' : ''}`}>
       <Sidebar current={screen} onNavigate={setScreen} />
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
         <div className="flex-1 min-w-0 overflow-hidden">

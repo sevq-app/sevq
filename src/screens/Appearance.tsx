@@ -75,15 +75,15 @@ export function Appearance({
   const currentTheme = themes.find(t => t.id === selectedTheme);
 
   // Базовые цвета для адаптации под тёмную тему
-  const cardBg = darkMode ? '#2a2a3e' : '#FFFFFF';
-  const previewBg = darkMode ? '#222236' : '#F9FAFB';
-  const textMain = darkMode ? '#e0e0e8' : '#1A1A1A';
-  const textSecondary = darkMode ? '#a0a0b8' : '#6B7280';
-  const containerBg = darkMode ? '#1e1e2e' : (currentTheme?.bg || '#FFF8ED');
+  const cardBg = darkMode ? '#2d2d3a' : '#FFFFFF';
+  const previewBg = darkMode ? '#25252f' : '#F9FAFB';
+  const textMain = darkMode ? '#e8e8f0' : '#1A1A1A';
+  const textSecondary = darkMode ? '#a0a0b0' : '#6B7280';
+  const containerBg = darkMode ? '#1f1f28' : (currentTheme?.bg || '#FFF8ED');
 
   return (
     <div
-      className="h-full overflow-y-auto pb-24 md:pb-6 transition-colors duration-500"
+      className={`h-full overflow-y-auto pb-24 md:pb-6 transition-colors duration-500 ${darkMode ? 'pattern-bg-dark' : 'pattern-bg-light'}`}
       style={{ background: containerBg }}
     >
       {/* Шапка */}
@@ -91,7 +91,7 @@ export function Appearance({
         className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20"
         style={{
           background: darkMode
-            ? 'linear-gradient(180deg, #1e1e2e 80%, transparent 100%)'
+            ? 'linear-gradient(180deg, #1f1f28 80%, transparent 100%)'
             : `linear-gradient(180deg, ${containerBg} 80%, transparent 100%)`,
         }}
       >
@@ -198,7 +198,7 @@ export function Appearance({
               onClick={() => setDarkMode(false)}
               className="flex-1 py-3 rounded-2xl font-heading font-bold transition-all"
               style={{ 
-                backgroundColor: !darkMode ? '#6546C7' : (darkMode ? '#2a2a3e' : '#F3F4F6'),
+                backgroundColor: !darkMode ? '#6546C7' : (darkMode ? '#2d2d3a' : '#F3F4F6'),
                 boxShadow: !darkMode ? '0 4px 12px rgba(101,70,199,0.3)' : 'none',
                 color: !darkMode ? '#FFFFFF' : textSecondary
               }}
@@ -210,7 +210,7 @@ export function Appearance({
               onClick={() => setDarkMode(true)}
               className="flex-1 py-3 rounded-2xl font-heading font-bold transition-all"
               style={{ 
-                backgroundColor: darkMode ? '#6546C7' : (darkMode ? '#2a2a3e' : '#F3F4F6'),
+                backgroundColor: darkMode ? '#6546C7' : (darkMode ? '#2d2d3a' : '#F3F4F6'),
                 boxShadow: darkMode ? '0 4px 12px rgba(101,70,199,0.3)' : 'none',
                 color: darkMode ? '#FFFFFF' : textSecondary
               }}
@@ -267,12 +267,12 @@ export function Appearance({
           </div>
         </motion.div>
 
-        {/* Предпросмотр сообщений со смайлами */}
+        {/* Предпросмотр сообщений с узорами */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-3xl p-5"
+          className={`rounded-3xl p-5 ${darkMode ? 'pattern-bg-dark' : 'pattern-bg-light'}`}
           style={{ backgroundColor: cardBg, boxShadow: darkMode ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(101,70,199,0.08)' }}
         >
           <h3 className="font-heading font-bold mb-4" style={{ color: textMain }}>Предпросмотр</h3>
@@ -282,7 +282,7 @@ export function Appearance({
               <div
                 className="p-3 rounded-2xl rounded-tl-none max-w-[80%]"
                 style={{
-                  backgroundColor: darkMode ? '#3a3a4e' : '#F3F4F6',
+                  backgroundColor: darkMode ? '#3a3a48' : '#F3F4F6',
                   fontSize: `${fontSize}px`
                 }}
               >
