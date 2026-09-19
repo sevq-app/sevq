@@ -153,3 +153,36 @@
 .btn-3d:active {
   transform: translateY(2px);
 }
+/* ========================================= */
+/* 🌙 ДОПОЛНИТЕЛЬНЫЕ ПРАВИЛА ДЛЯ ТЁМНОЙ ТЕМЫ */
+/* ========================================= */
+
+/* Принудительно затемняем фоны с inline-стилями */
+.dark [style*="FFF8ED"],
+.dark [style*="FFF0DB"],
+.dark [style*="FFF0DC"],
+.dark [style*="FFE9CC"],
+.dark [style*="radial-gradient"] {
+  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
+}
+
+/* Заголовки в тёмной теме */
+.dark h1,
+.dark h2,
+.dark h3 {
+  color: #f0f0f8 !important;
+}
+
+/* Подзаголовки и вторичный текст */
+.dark .text-\[#6B7280\] {
+  color: #a0a0b0 !important;
+}
+
+/* Поля ввода в тёмной теме */
+.dark input {
+  background-color: #2d2d3a !important;
+  color: #e8e8f0 !important;
+}
+.dark input::placeholder {
+  color: #8a8a9a !important;
+}
