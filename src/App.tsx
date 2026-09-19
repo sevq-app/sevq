@@ -135,10 +135,10 @@ function App() {
               {screen === 'conversation' && activeChat && (
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
               )}
-              {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
-              {screen === 'calls' && <Calls onNavigate={setScreen} />}
+              {screen === 'contacts' && <Friends />}
+              {screen === 'calls' && <Calls />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
-              {screen === 'profile' && <Profile onNavigate={setScreen} />}
+              {screen === 'profile' && <Profile onNavigate={(s: Screen) => setScreen(s)} />}
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
@@ -146,7 +146,7 @@ function App() {
                 <Settings 
                   onBack={() => setScreen('profile')} 
                   onLogout={handleLogout}
-                  onNavigate={setScreen} 
+                  onNavigate={(s: string) => setScreen(s as Screen)} 
                 />
               )}
               {screen === 'appearance' && (

@@ -1,11 +1,7 @@
 import { motion } from 'framer-motion';
 import { Phone, PhoneIncoming, PhoneOutgoing, Video } from 'lucide-react';
 
-interface CallsProps {
-  onNavigate: (screen: string) => void;
-}
-
-export function Calls({ onNavigate }: CallsProps) {
+export function Calls() {
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
       <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20" style={{ background: 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>

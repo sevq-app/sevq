@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Users, Link, Phone, Camera, ChevronLeft, X } from 'lucide-react';
+import { Search, Plus, Users, Link, Phone, Camera, ChevronLeft } from 'lucide-react';
 import { friendsData } from '@/data/mock';
-
-interface FriendsProps {
-  onWriteMessage: (name: string) => void;
-}
 
 type FriendsView = 'main' | 'selectMembers' | 'createGroup';
 
-export function Friends({ onWriteMessage }: FriendsProps) {
+export function Friends() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showConnectPrompt, setShowConnectPrompt] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Phone, User } from 'lucide-react';
 import { QLogo } from './QLogo';
