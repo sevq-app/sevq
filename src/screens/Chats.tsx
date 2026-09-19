@@ -7,9 +7,10 @@ import type { Chat } from '@/data/mock';
 
 interface ChatsProps {
   onOpenChat: (chat: Chat) => void;
+  darkMode?: boolean;
 }
 
-export function Chats({ onOpenChat }: ChatsProps) {
+export function Chats({ onOpenChat, darkMode = false }: ChatsProps) {
   const [query, setQuery] = useState('');
   const [chats] = useState(initialChats);
   const filtered = chats.filter((c) =>
@@ -19,9 +20,9 @@ export function Chats({ onOpenChat }: ChatsProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 pt-6 pb-4 px-4 sm:px-6" style={{ background: 'linear-gradient(180deg, rgba(255,248,237,0.98) 80%, transparent)' }}>
+      <div className="sticky top-0 z-10 pt-6 pb-4 px-4 sm:px-6" style={{ background: darkMode ? 'linear-gradient(180deg, #1f1f28 80%, transparent)' : 'linear-gradient(180deg, rgba(255,248,237,0.98) 80%, transparent)' }}>
         <div className="flex items-center justify-between mb-4">
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Чаты</h1>
+          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl" style={{ color: darkMode ? '#e8e8f0' : '#1A1A1A' }}>Чаты</h1>
           <div className="w-10 h-10 rounded-full bg-sevchik-orange flex items-center justify-center font-heading font-extrabold text-white text-sm relative overflow-hidden" style={{ boxShadow: '0 4px 12px rgba(255,152,72,0.3)' }}>
             <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)' }} />
             <span className="relative z-10">АВ</span>

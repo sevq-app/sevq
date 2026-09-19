@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import type { ReactElement } from 'react';
 import {
   Star, Smartphone, Bell, Shield, HardDrive, Battery,
   UserPlus, Languages, HelpCircle, Info,
@@ -13,6 +14,16 @@ interface SettingsProps {
   onNavigate?: (screen: string) => void;
 }
 
+type SettingsItem = 
+  | { icon: React.ElementType; label: string; color: string; hasChevron?: boolean; value?: never; isToggle?: never; action?: never }
+  | { icon: React.ElementType; label: string; color: string; isToggle: true; value: boolean; action: () => void }
+  | { icon: React.ElementType; label: string; color: string; hasChevron: true; value: string; action?: () => void };
+
+interface SettingsSection {
+  title: string;
+  items: SettingsItem[];
+}
+
 export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [powerSaving, setPowerSaving] = useState(false);
@@ -22,7 +33,7 @@ export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
     onLogout();
   };
 
-  const sections = [
+  const sections: { title: string; items: SettingsItem[] }[] = [
     {
       title: 'Основное',
       items: [

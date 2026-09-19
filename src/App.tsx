@@ -131,14 +131,14 @@ function App() {
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="h-full"
             >
-              {screen === 'chats' && <Chats onOpenChat={handleOpenChat} />}
+              {screen === 'chats' && <Chats onOpenChat={handleOpenChat} darkMode={darkMode} />}
               {screen === 'conversation' && activeChat && (
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
               )}
-              {screen === 'contacts' && <Friends />}
-              {screen === 'calls' && <Calls />}
+              {screen === 'contacts' && <Friends darkMode={darkMode} />}
+              {screen === 'calls' && <Calls darkMode={darkMode} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
-              {screen === 'profile' && <Profile onNavigate={(s: Screen) => setScreen(s)} />}
+              {screen === 'profile' && <Profile onNavigate={(s) => setScreen(s as Screen)} />}
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
