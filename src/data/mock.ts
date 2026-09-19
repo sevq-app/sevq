@@ -9,7 +9,11 @@ export type Screen =
   | 'profile'
   | 'search'
   | 'settings'
-  | 'appearance'; // <-- должен быть!
+  | 'appearance'
+  | 'about-edit'
+  | 'photos'
+  | 'my-groups'
+  | 'group';
   
 export interface Message {
   id: string;

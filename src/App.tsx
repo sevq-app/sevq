@@ -6,19 +6,26 @@ import { QLogo } from '@/components/QLogo';
 import { Login, Register } from '@/screens/Login';
 import { Chats } from '@/screens/Chats';
 import { Conversation } from '@/screens/Conversation';
-import { Profile } from '@/screens/Profile';
+import { getProfileGroups, Profile } from '@/screens/Profile';
 import { Search } from '@/screens/Search';
 import { Friends } from '@/screens/Friends';
 import { Clubs } from '@/screens/Clubs';
 import { Settings } from '@/screens/Settings';
 import { Calls } from '@/screens/Calls';
 import { Appearance } from '@/screens/Appearance';
+import { AboutEdit } from '@/screens/AboutEdit';
+import { Photos } from '@/screens/Photos';
+import { MyGroups } from '@/screens/MyGroups';
+import { Group } from '@/screens/Group';
 import { supabase } from '@/lib/supabase';
+import type { User } from '@supabase/supabase-js';
 import type { Screen, Chat } from '@/data/mock';
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login');
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // 🎨 Глобальные настройки оформления
@@ -50,8 +57,10 @@ function App() {
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
+        setCurrentUser(session.user);
         setScreen('chats');
       } else {
+        setCurrentUser(null);
         setScreen('login');
       }
       setIsLoading(false);
@@ -59,8 +68,10 @@ function App() {
     checkAuth();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
+        setCurrentUser(session.user);
         setScreen('chats');
       } else {
+        setCurrentUser(null);
         setScreen('login');
       }
     });
@@ -86,6 +97,11 @@ function App() {
     } as Chat;
     setActiveChat(chat);
     setScreen('conversation');
+  };
+
+  const handleOpenGroup = (groupName: string) => {
+    setActiveGroup(groupName);
+    setScreen('group');
   };
 
   const handleLogout = () => {
@@ -144,7 +160,11 @@ function App() {
               {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
               {screen === 'calls' && <Calls onNavigate={setScreen} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
-              {screen === 'profile' && <Profile onNavigate={setScreen} />}
+              {screen === 'profile' && <Profile user={currentUser} onNavigate={setScreen} />}
+              {screen === 'about-edit' && <AboutEdit onBack={() => setScreen('profile')} />}
+              {screen === 'photos' && <Photos onBack={() => setScreen('profile')} />}
+              {screen === 'my-groups' && <MyGroups groups={getProfileGroups(currentUser)} onBack={() => setScreen('profile')} onOpenGroup={handleOpenGroup} />}
+              {screen === 'group' && activeGroup && <Group name={activeGroup} onBack={() => setScreen('my-groups')} />}
               {screen === 'search' && (
                 <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
               )}
@@ -171,7 +191,7 @@ function App() {
           </AnimatePresence>
         </div>
         <div className="hidden xl:block w-80 shrink-0 overflow-y-auto p-5 border-l border-sevchik-purple/8">
-          <ProfilePreview />
+          <ProfilePreview user={currentUser} />
         </div>
       </div>
       {showTabBar && <TabBar current={screen} onNavigate={setScreen} />}
@@ -179,7 +199,11 @@ function App() {
   );
 }
 
-function ProfilePreview() {
+function ProfilePreview({ user }: { user: User | null }) {
+  const metadata = user?.user_metadata as Record<string, unknown> | undefined;
+  const name = typeof metadata?.name === 'string' ? metadata.name : typeof metadata?.full_name === 'string' ? metadata.full_name : '';
+  const username = typeof metadata?.username === 'string' ? metadata.username : '';
+  const avatarUrl = typeof metadata?.avatarUrl === 'string' ? metadata.avatarUrl : typeof metadata?.avatar_url === 'string' ? metadata.avatar_url : '';
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-2">
@@ -190,28 +214,18 @@ function ProfilePreview() {
         <div className="relative z-10">
           <div className="p-1 rounded-full" style={{ background: 'linear-gradient(135deg, #FFB87A, #FF9848)', boxShadow: '0 4px 14px rgba(255,152,72,0.3)' }}>
             <div className="p-[2px] rounded-full bg-white">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center font-heading font-extrabold text-white text-lg relative overflow-hidden" style={{ background: '#6546C7' }}>
+              {avatarUrl ? <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full object-cover" /> : <div className="w-16 h-16 rounded-full flex items-center justify-center font-heading font-extrabold text-white text-lg relative overflow-hidden" style={{ background: '#6546C7' }}>
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)' }} />
-                <span className="relative z-10">АВ</span>
-              </div>
+                <span className="relative z-10">+</span>
+              </div>}
             </div>
           </div>
         </div>
-        <h3 className="font-heading font-extrabold text-base mt-3 relative z-10" style={{ color: 'var(--text-main, #1A1A1A)' }}>Александр В.</h3>
-        <p className="text-xs font-body mt-0.5 relative z-10" style={{ color: 'var(--text-secondary, #6B7280)' }}>Твой маленький большой мир</p>
+        <h3 className="font-heading font-extrabold text-base mt-3 relative z-10" style={{ color: 'var(--text-main, #1A1A1A)' }}>{name || 'Загрузка...'}</h3>
+        <p className="text-xs font-body mt-0.5 relative z-10" style={{ color: 'var(--text-secondary, #6B7280)' }}>{username ? `@${username.replace(/^@/, '')}` : ''}</p>
         <div className="flex items-center gap-1.5 mt-2 relative z-10">
           <span className="w-2 h-2 rounded-full bg-sevchik-mint" />
           <span className="text-xs text-sevchik-mint font-body">В сети</span>
-        </div>
-      </div>
-      <div className="bg-white rounded-card p-4 flex items-center gap-3 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white relative overflow-hidden shrink-0" style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)' }}>
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-          <span className="relative z-10 text-sm font-heading font-bold">КП</span>
-        </div>
-        <div className="flex-1 min-w-0 relative z-10">
-          <p className="text-sm font-heading font-bold truncate" style={{ color: 'var(--text-main, #1A1A1A)' }}>Клуб путешественников</p>
-          <p className="text-xs font-body" style={{ color: 'var(--text-secondary, #6B7280)' }}>1.2k участников</p>
         </div>
       </div>
       <div className="bg-white rounded-card p-4 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
