@@ -43,7 +43,8 @@ function App() {
 
     const html = document.documentElement;
     html.classList.toggle('gray-theme', grayMode);
-    html.style.fontSize = `${fontSize}px`;
+    html.style.fontSize = '16px';
+    html.style.setProperty('--font-scale', String(fontSize / 16));
   }, [fontSize, selectedTheme, grayMode]);
 
   // Проверяем состояние аутентификации при загрузке

@@ -43,8 +43,7 @@ export function Conversation({ chat, onBack }: ConversationProps) {
     <div className="flex flex-col h-full">
       {/* Header */}
       <div
-        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-white"
-        style={{ boxShadow: '0 4px 16px rgba(101,70,199,0.06)' }}
+        className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent"
       >
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
@@ -82,21 +81,11 @@ export function Conversation({ chat, onBack }: ConversationProps) {
               <div
                 className={`max-w-[75%] px-4 py-2.5 font-body text-sm relative overflow-hidden ${
                   isMe
-                    ? 'text-white rounded-card rounded-br-md'
-                    : 'bg-white text-sevchik-text rounded-card rounded-bl-md'
+                    ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
+                    : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
                 }`}
-                style={
-                  isMe
-                    ? { background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 16px rgba(101,70,199,0.2)' }
-                    : { boxShadow: '0 4px 16px rgba(101,70,199,0.06)' }
-                }
+                style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
               >
-                {isMe && (
-                  <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%)' }} />
-                )}
-                {!isMe && (
-                  <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, transparent 40%)' }} />
-                )}
                 <p className="relative z-10">{msg.text}</p>
                 <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>{msg.time}</p>
               </div>

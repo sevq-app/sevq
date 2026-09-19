@@ -39,8 +39,58 @@
     --text-secondary: #6B7280;
     --text-placeholder: #9CA3AF;
     --border-color: rgba(101, 70, 199, 0.08);
+    --theme-primary: #6546C7;
+    --theme-message-gradient: linear-gradient(135deg, #6546C7, #8366D9);
   }
 
+}
+
+html {
+  font-size: 16px;
+}
+
+html[style*="--font-scale"] {
+  font-size: 16px !important;
+}
+
+html[style*="--font-scale"] body,
+html[style*="--font-scale"] p,
+html[style*="--font-scale"] span,
+html[style*="--font-scale"] h1,
+html[style*="--font-scale"] h2,
+html[style*="--font-scale"] h3,
+html[style*="--font-scale"] h4,
+html[style*="--font-scale"] h5,
+html[style*="--font-scale"] h6 {
+  font-size: calc(1rem * var(--font-scale));
+}
+
+html[style*="--font-scale"] .text-xs {
+  font-size: calc(0.75rem * var(--font-scale));
+}
+
+html[style*="--font-scale"] .text-sm {
+  font-size: calc(0.875rem * var(--font-scale));
+}
+
+html[style*="--font-scale"] .text-base {
+  font-size: calc(1rem * var(--font-scale));
+}
+
+html[style*="--font-scale"] .text-lg {
+  font-size: calc(1.125rem * var(--font-scale));
+}
+
+html[style*="--font-scale"] .text-xl {
+  font-size: calc(1.25rem * var(--font-scale));
+}
+
+html[style*="--font-scale"] .text-2xl {
+  font-size: calc(1.5rem * var(--font-scale));
+}
+
+html[style*="--font-scale"] .text-3xl {
+  font-size: calc(1.875rem * var(--font-scale));
 }
 
 @layer base {
@@ -108,6 +158,18 @@
   transform: translateY(2px);
 }
 
+.message-incoming-pattern {
+  background: var(--bg-input);
+  color: var(--text-main);
+}
+
+.message-outgoing-pattern {
+  background-color: var(--theme-primary);
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 20%),
+    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
+}
+
 /* Глобальная серая тема */
 html.gray-theme {
   --bg-main: radial-gradient(ellipse at top left, #34383f 0%, #24272b 60%, #1b1e22 100%);
@@ -117,6 +179,8 @@ html.gray-theme {
   --text-secondary: #d6d9de;
   --text-placeholder: #aeb4bc;
   --border-color: rgba(255, 255, 255, 0.14);
+  --theme-primary: #5967A8;
+  --theme-message-gradient: linear-gradient(135deg, #5967A8, #3F4D88);
   color-scheme: dark;
 }
 

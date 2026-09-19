@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Type, Palette, Moon } from 'lucide-react';
+import { ChevronLeft, Type, Palette, Moon, Flower, Sun, Leaf, Snowflake, Sparkles, Waves } from 'lucide-react';
 
 interface AppearanceProps {
   onBack: () => void;
@@ -12,60 +13,72 @@ interface AppearanceProps {
 }
 
 const themes = [
-  { 
-    id: 'spring', 
-    name: 'Весна', 
+  {
+    id: 'spring',
+    name: 'Весна',
+    icon: Flower,
     gradient: 'linear-gradient(135deg, #A8E6CF 0%, #FFD3B6 50%, #FFAAA5 100%)',
     messageGradient: 'linear-gradient(135deg, #A8E6CF 0%, #FFAAA5 100%)',
+    primary: '#63B99D',
     bg: '#F0FFF4'
   },
-  { 
-    id: 'summer', 
-    name: 'Лето', 
+  {
+    id: 'summer',
+    name: 'Лето',
+    icon: Sun,
     gradient: 'linear-gradient(135deg, #FFE259 0%, #FFA751 50%, #FF6B6B 100%)',
     messageGradient: 'linear-gradient(135deg, #FFE259 0%, #FF6B6B 100%)',
+    primary: '#E58A4A',
     bg: '#FFF9E6'
   },
-  { 
-    id: 'autumn', 
-    name: 'Осень', 
+  {
+    id: 'autumn',
+    name: 'Осень',
+    icon: Leaf,
     gradient: 'linear-gradient(135deg, #F09819 0%, #ED4264 50%, #C94B4B 100%)',
     messageGradient: 'linear-gradient(135deg, #F09819 0%, #C94B4B 100%)',
+    primary: '#C96B4B',
     bg: '#FFF5E6'
   },
-  { 
-    id: 'winter', 
-    name: 'Зима', 
+  {
+    id: 'winter',
+    name: 'Зима',
+    icon: Snowflake,
     gradient: 'linear-gradient(135deg, #E0EAFC 0%, #CFDEF3 50%, #A8C0FF 100%)',
     messageGradient: 'linear-gradient(135deg, #E0EAFC 0%, #A8C0FF 100%)',
+    primary: '#6E91C9',
     bg: '#F0F4FF'
   },
-  { 
-    id: 'aurora', 
-    name: 'Северное сияние', 
+  {
+    id: 'aurora',
+    name: 'Северное сияние',
+    icon: Sparkles,
     gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 25%, #4FD3C8 50%, #48BB78 75%, #667eea 100%)',
     messageGradient: 'linear-gradient(135deg, #667eea 0%, #4FD3C8 50%, #48BB78 100%)',
+    primary: '#4D9D99',
     bg: '#F0F0FF'
   },
-  { 
-    id: 'sea', 
-    name: 'Море', 
+  {
+    id: 'sea',
+    name: 'Море',
+    icon: Waves,
     gradient: 'linear-gradient(135deg, #4FD3C8 0%, #3B82F6 50%, #1E3A8A 100%)',
     messageGradient: 'linear-gradient(135deg, #4FD3C8 0%, #1E3A8A 100%)',
+    primary: '#277FC0',
     bg: '#E6F7FF'
   },
 ];
 
-export function Appearance({ 
-  onBack, 
-  fontSize, 
-  setFontSize, 
-  selectedTheme, 
+export function Appearance({
+  onBack,
+  fontSize,
+  setFontSize,
+  selectedTheme,
   setSelectedTheme,
   grayMode,
   setGrayMode,
 }: AppearanceProps) {
-  
+
   const getFontSizeLabel = () => {
     if (fontSize < 14) return 'Мелко';
     if (fontSize > 18) return 'Крупно';
@@ -73,6 +86,24 @@ export function Appearance({
   };
 
   const currentTheme = themes.find(t => t.id === selectedTheme);
+
+  const applyTheme = (themeId: string) => {
+    const theme = themes.find((item) => item.id === themeId);
+    if (!theme) return;
+
+    setSelectedTheme(themeId);
+    document.documentElement.setAttribute('data-theme', themeId);
+    document.documentElement.style.setProperty('--theme-primary', theme.primary);
+    document.documentElement.style.setProperty('--theme-message-gradient', theme.messageGradient);
+  };
+
+  useEffect(() => {
+    if (currentTheme) {
+      document.documentElement.setAttribute('data-theme', currentTheme.id);
+      document.documentElement.style.setProperty('--theme-primary', currentTheme.primary);
+      document.documentElement.style.setProperty('--theme-message-gradient', currentTheme.messageGradient);
+    }
+  }, [currentTheme]);
 
   const cardBg = grayMode ? '#35383D' : '#FFFFFF';
   const previewBg = grayMode ? '#2B2E33' : '#F9FAFB';
@@ -99,21 +130,21 @@ export function Appearance({
             whileTap={{ scale: 0.9 }}
             onClick={onBack}
             className="w-11 h-11 rounded-2xl flex items-center justify-center text-[#6546C7]"
-            style={{ 
+            style={{
               backgroundColor: cardBg,
               boxShadow: '0 4px 12px rgba(101,70,199,0.15)'
             }}
           >
             <ChevronLeft size={22} />
           </motion.button>
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl" style={{ color: textMain }}>
+          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl" style={{ color: textMain, fontSize: `${fontSize}px` }}>
             Оформление
           </h1>
         </div>
       </div>
 
       <div className="px-4 sm:px-6 space-y-6 max-w-2xl mx-auto pt-2">
-        
+
         {/* Размер текста */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -131,14 +162,14 @@ export function Appearance({
             >
               <Type size={20} className="text-white" />
             </div>
-            <h3 className="font-heading font-bold" style={{ color: textMain }}>Размер текста</h3>
+            <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Размер текста</h3>
           </div>
-          
+
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-body" style={{ color: textSecondary }}>Текущий размер:</span>
-            <span className="font-heading font-bold text-[#6546C7]">{getFontSizeLabel()}</span>
+            <span className="font-heading font-bold text-[#6546C7]" style={{ fontSize: `${fontSize}px` }}>{getFontSizeLabel()}</span>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <span className="text-xs font-body" style={{ color: textSecondary }}>A</span>
             <input
@@ -154,7 +185,7 @@ export function Appearance({
             />
             <span className="text-lg font-body font-bold" style={{ color: textSecondary }}>A</span>
           </div>
-          
+
           <div className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: previewBg }}>
             <p
               className="font-body transition-all duration-300"
@@ -181,8 +212,8 @@ export function Appearance({
               <Moon size={20} className="text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-heading font-bold" style={{ color: textMain }}>Серая тема</h3>
-              <p className="text-xs font-body mt-0.5" style={{ color: textSecondary }}>
+              <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Серая тема</h3>
+              <p className="text-xs font-body mt-0.5" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>
                 Нейтральный фон и белый текст для лучшего контраста
               </p>
             </div>
@@ -220,30 +251,31 @@ export function Appearance({
             </div>
             <h3 className="font-heading font-bold" style={{ color: textMain }}>Цветовая тема</h3>
           </div>
-          
+
           <div className="grid grid-cols-3 gap-2">
-            {themes.map((theme) => (
+            {themes.map((theme) => {
+              const ThemeIcon = theme.icon;
+              return (
               <motion.button
                 key={theme.id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => setSelectedTheme(theme.id)}
-                className={`relative h-16 rounded-xl transition-all ${
-                  selectedTheme === theme.id ? 'ring-2 ring-[#6546C7] ring-offset-2' : ''
+                onClick={() => applyTheme(theme.id)}
+                className={`group relative h-20 rounded-2xl bg-gradient-to-br transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl ${
+                  selectedTheme === theme.id ? 'ring-2 ring-white/50 ring-offset-2 ring-offset-[var(--bg-main)]' : ''
                 }`}
                 style={{
                   background: theme.gradient,
-                  boxShadow: selectedTheme === theme.id
-                    ? `0 4px 12px rgba(101,70,199,0.4)`
-                    : '0 2px 8px rgba(0,0,0,0.1)',
+                  boxShadow: selectedTheme === theme.id ? `0 12px 28px ${theme.primary}66` : `0 6px 16px ${theme.primary}33`,
                 }}
               >
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
-                <div className="relative z-10 flex items-center justify-center h-full">
-                  <span className="font-heading font-bold text-white text-xs drop-shadow-md">{theme.name}</span>
+                <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1 text-white drop-shadow-sm">
+                  <ThemeIcon className="h-6 w-6" />
+                  <span className="font-heading font-bold text-xs">{theme.name}</span>
                 </div>
               </motion.button>
-            ))}
+              );
+            })}
           </div>
         </motion.div>
 
@@ -260,30 +292,27 @@ export function Appearance({
             {/* Входящее сообщение (нейтральное) */}
             <div className="flex justify-start">
               <div
-                className="p-3 rounded-2xl rounded-tl-none max-w-[80%]"
+                className="message-incoming-pattern p-3 rounded-2xl rounded-bl-sm max-w-[80%]"
                 style={{
-                  backgroundColor: grayMode ? '#2B2E33' : '#252936',
                   fontSize: `${fontSize}px`
                 }}
               >
-                <p className="font-body" style={{ color: '#FFFFFF' }}>
+                <p className="font-body" style={{ color: textMain, fontSize: `${fontSize}px` }}>
                   Здесь ты можешь поменять цвет под своё настроение 🎨
                 </p>
               </div>
             </div>
-            
+
             {/* Исходящее сообщение (цвет темы) */}
             <div className="flex justify-end">
               <div
-                className="p-3 rounded-2xl rounded-tr-none max-w-[80%]"
+                className="message-outgoing-pattern p-3 rounded-2xl rounded-br-sm max-w-[80%]"
                 style={{
-                  background: currentTheme?.messageGradient || 'linear-gradient(135deg, #6546C7, #8366D9)',
-                  color: 'white',
                   fontSize: `${fontSize}px`,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }}
               >
-                <p className="font-body">
+                <p className="font-body" style={{ fontSize: `${fontSize}px` }}>
                   Выбери, что тебе ближе 💜
                 </p>
               </div>
