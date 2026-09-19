@@ -144,7 +144,7 @@ export function Login({ onLogin, onRegister }: AuthProps) {
                 {successMessage}
               </div>
             )}
-            <InputField icon={Mail} label="Email для восстановления" type="email" value={resetEmail} onChange={setResetEmail} placeholder="your@email.com" accentColor="#FF9848" />
+            <InputField icon={Mail} label="Email для восстановления" type="email" value={resetEmail} onChange={setResetEmail} placeholder="your@email.com" />
             <div className="flex gap-3 pt-2">
               <SecondaryButton text="Назад" onClick={() => { setShowForgotPassword(false); setError(''); setSuccessMessage(''); }} />
               <motion.button
@@ -269,7 +269,16 @@ function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; 
   );
 }
 
-function InputField({ icon: Icon, label, type, value, onChange, placeholder, accentColor = '#6546C7' }: any) {
+interface InputFieldProps {
+  icon: React.ElementType;
+  label: string;
+  type: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}
+
+function InputField({ icon: Icon, label, type, value, onChange, placeholder }: InputFieldProps) {
   return (
     <div className="space-y-1.5">
       <label className="text-xs font-bold text-[#6B7280] uppercase tracking-wider ml-1">{label}</label>
@@ -288,7 +297,12 @@ function InputField({ icon: Icon, label, type, value, onChange, placeholder, acc
   );
 }
 
-function SecondaryButton({ text, onClick }: any) {
+interface SecondaryButtonProps {
+  text: string;
+  onClick: () => void;
+}
+
+function SecondaryButton({ text, onClick }: SecondaryButtonProps) {
   return (
     <motion.button
       whileHover={{ scale: 1.02 }}

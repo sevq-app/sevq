@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   Star, Smartphone, Bell, Shield, HardDrive, Battery,
-  UserPlus, Palette, Languages, HelpCircle, Info,
+  UserPlus, Languages, HelpCircle, Info,
   LogOut, ChevronRight, Moon, Sun
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -10,14 +10,12 @@ import { supabase } from '@/lib/supabase';
 interface SettingsProps {
   onBack: () => void;
   onLogout: () => void;
-  onNavigate?: (screen: string) => void; // <-- Добавлено
+  onNavigate?: (screen: string) => void;
 }
 
-// ВАЖНО: добавили onNavigate в параметры функции!
 export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [powerSaving, setPowerSaving] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -36,8 +34,7 @@ export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
       title: 'Уведомления и вид',
       items: [
         { icon: Bell, label: 'Уведомления и звуки', color: '#FF9848', isToggle: true, value: notifications, action: () => setNotifications(!notifications) },
-        // ИСПРАВЛЕНО: теперь эта кнопка открывает экран оформления
-        { icon: darkMode ? Moon : Sun, label: 'Оформление', color: '#6546C7', hasChevron: true, value: darkMode ? 'Тёмная' : 'Светлая', action: () => onNavigate?.('appearance') },
+        { icon: Sun, label: 'Оформление', color: '#6546C7', hasChevron: true, value: 'Светлая', action: () => onNavigate?.('appearance') },
         { icon: Battery, label: 'Энергосбережение', color: '#4FD3C8', isToggle: true, value: powerSaving, action: () => setPowerSaving(!powerSaving) },
       ],
     },
