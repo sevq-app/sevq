@@ -8,9 +8,10 @@ import type { Chat } from '@/data/mock';
 interface ChatsProps {
   onOpenChat: (chat: Chat) => void;
   grayMode: boolean;
+  fontSize: number;
 }
 
-export function Chats({ onOpenChat, grayMode }: ChatsProps) {
+export function Chats({ onOpenChat, grayMode, fontSize }: ChatsProps) {
   const [query, setQuery] = useState('');
   const [chats] = useState(initialChats);
   const filtered = chats.filter((c) =>
@@ -109,17 +110,17 @@ export function Chats({ onOpenChat, grayMode }: ChatsProps) {
               />
               <div className="flex-1 min-w-0 relative z-10">
                 <div className="flex items-center justify-between gap-2">
-                  <h3 className="font-heading font-bold text-sevchik-text truncate">{chat.name}</h3>
-                  <span className="text-xs text-sevchik-textSecondary font-body shrink-0">{chat.time}</span>
+                          <h3 className="font-heading font-bold text-sevchik-text truncate" style={{ fontSize: `${fontSize}px` }}>{chat.name}</h3>
+                          <span className="text-xs text-sevchik-textSecondary font-body shrink-0" style={{ fontSize: `${fontSize}px` }}>{chat.time}</span>
                 </div>
                 <div className="flex items-center justify-between gap-2 mt-1">
-                  <p className="text-sm text-sevchik-textSecondary font-body truncate">{chat.lastMessage}</p>
+                          <p className="text-sm text-sevchik-textSecondary font-body truncate" style={{ fontSize: `${fontSize}px` }}>{chat.lastMessage}</p>
                   {chat.unread > 0 && (
                     <span
                       className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[22px] h-[22px] px-1.5 flex items-center justify-center"
                       style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 3px 10px rgba(101,70,199,0.3)' }}
                     >
-                      {chat.unread}
+                      <span style={{ fontSize: `${fontSize}px` }}>{chat.unread}</span>
                     </span>
                   )}
                   {chat.isNew && chat.unread === 0 && (
@@ -127,7 +128,7 @@ export function Chats({ onOpenChat, grayMode }: ChatsProps) {
                       className="shrink-0 text-white text-[10px] font-heading font-bold rounded-pill px-2 h-[20px] flex items-center justify-center"
                       style={{ background: 'linear-gradient(135deg, #6BE3D9, #4FD3C8)', boxShadow: '0 3px 10px rgba(79,211,200,0.3)' }}
                     >
-                      Новое
+                      <span style={{ fontSize: `${fontSize}px` }}>Новое</span>
                     </span>
                   )}
                 </div>

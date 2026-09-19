@@ -134,7 +134,7 @@ export function Appearance({
           >
             <ChevronLeft size={22} />
           </motion.button>
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl" style={{ color: textMain, fontSize: `${fontSize}px` }}>
+          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl" style={{ color: textMain }}>
             Оформление
           </h1>
         </div>
@@ -159,16 +159,16 @@ export function Appearance({
             >
               <Type size={20} className="text-white" />
             </div>
-            <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Размер текста</h3>
+            <h3 className="font-heading font-bold" style={{ color: textMain }}>Размер текста</h3>
           </div>
 
           <div className="flex items-center justify-between mb-[12px]">
-            <span className="text-sm font-body" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>Текущий размер:</span>
-            <span className="font-heading font-bold text-[#6546C7]" style={{ fontSize: `${fontSize}px` }}>{getFontSizeLabel()}</span>
+            <span className="text-sm font-body" style={{ color: textSecondary }}>Текущий размер:</span>
+            <span className="font-heading font-bold text-[#6546C7]">{getFontSizeLabel()}</span>
           </div>
 
           <div className="flex items-center gap-[16px]">
-            <span className="text-xs font-body" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>A</span>
+            <span className="text-xs font-body" style={{ color: textSecondary }}>A</span>
             <input
               type="range"
               min="12"
@@ -180,7 +180,7 @@ export function Appearance({
                 background: `linear-gradient(to right, #6546C7 ${((fontSize - 12) / 12) * 100}%, #E5E7EB ${((fontSize - 12) / 12) * 100}%)`,
               }}
             />
-            <span className="text-lg font-body font-bold" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>A</span>
+            <span className="text-lg font-body font-bold" style={{ color: textSecondary }}>A</span>
           </div>
 
           <div className="mt-[16px] p-[16px] rounded-2xl" style={{ backgroundColor: previewBg }}>
@@ -209,8 +209,8 @@ export function Appearance({
               <Moon size={20} className="text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Серая тема</h3>
-              <p className="text-xs font-body mt-[2px]" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>
+              <h3 className="font-heading font-bold" style={{ color: textMain }}>Серая тема</h3>
+              <p className="text-xs font-body mt-[2px]" style={{ color: textSecondary }}>
                 Нейтральный фон и белый текст для лучшего контраста
               </p>
             </div>
@@ -224,9 +224,7 @@ export function Appearance({
               color: grayMode ? '#24272B' : '#1A1A1A',
             }}
           >
-            <span style={{ fontSize: `${fontSize}px` }}>
-              {grayMode ? 'Серая тема включена' : 'Включить серую тему'}
-            </span>
+            {grayMode ? 'Серая тема включена' : 'Включить серую тему'}
           </button>
         </motion.div>
 
@@ -248,7 +246,7 @@ export function Appearance({
             >
               <Palette size={20} className="text-white" />
             </div>
-            <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Цветовая тема</h3>
+            <h3 className="font-heading font-bold" style={{ color: textMain }}>Цветовая тема</h3>
           </div>
 
           <div className="grid grid-cols-3 gap-[8px]">
@@ -270,7 +268,7 @@ export function Appearance({
               >
                 <div className="relative z-10 flex h-full flex-col items-center justify-center gap-[4px] text-white drop-shadow-sm">
                   <ThemeIcon className="h-[24px] w-[24px]" />
-                  <span className="font-heading font-bold text-xs" style={{ fontSize: `${fontSize}px` }}>{theme.name}</span>
+                  <span className="font-heading font-bold text-xs">{theme.name}</span>
                 </div>
               </motion.button>
               );
@@ -286,7 +284,7 @@ export function Appearance({
           className="rounded-3xl p-[20px] pattern-bg-light"
           style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
-          <h3 className="font-heading font-bold mb-[16px]" style={{ color: textMain, fontSize: `${fontSize}px` }}>Предпросмотр</h3>
+          <h3 className="font-heading font-bold mb-[16px]" style={{ color: textMain }}>Предпросмотр</h3>
           <div className="space-y-[12px]">
             {/* Входящее сообщение (нейтральное) */}
             <div className="flex justify-start">

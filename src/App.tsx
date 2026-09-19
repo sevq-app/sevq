@@ -136,10 +136,10 @@ function App() {
               className="h-full"
             >
               {screen === 'chats' && (
-                <Chats onOpenChat={handleOpenChat} grayMode={grayMode} />
+                <Chats onOpenChat={handleOpenChat} grayMode={grayMode} fontSize={fontSize} />
               )}
               {screen === 'conversation' && activeChat && (
-                <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
+                <Conversation chat={activeChat} onBack={() => setScreen('chats')} fontSize={fontSize} />
               )}
               {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
               {screen === 'calls' && <Calls onNavigate={setScreen} />}

@@ -7,9 +7,10 @@ import type { Chat, Message } from '@/data/mock';
 interface ConversationProps {
   chat: Chat;
   onBack: () => void;
+  fontSize: number;
 }
 
-export function Conversation({ chat, onBack }: ConversationProps) {
+export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [messages, setMessages] = useState<Message[]>(chat.messages);
   const [input, setInput] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
@@ -86,8 +87,8 @@ export function Conversation({ chat, onBack }: ConversationProps) {
                 }`}
                 style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
               >
-                <p className="relative z-10">{msg.text}</p>
-                <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>{msg.time}</p>
+                <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
+                <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`} style={{ fontSize: `${fontSize}px` }}>{msg.time}</p>
               </div>
             </motion.div>
           );
