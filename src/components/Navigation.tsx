@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, Users, Phone, User, Smile, Volume2 } from 'lucide-react';
+import { MessageCircle, Users, Phone, User } from 'lucide-react';
 import { QLogo } from './QLogo';
 import type { Screen } from '@/data/mock';
 
@@ -9,16 +9,15 @@ interface SidebarProps {
   onNavigate: (s: Screen) => void;
 }
 
+// НОВЫЙ ПОРЯДОК: Контакты → Звонки → Чаты → Мой Севчик
 const navItems: { key: Screen; label: string; icon: React.ElementType }[] = [
-  { key: 'chats', label: 'Чаты', icon: MessageCircle },
   { key: 'contacts', label: 'Контакты', icon: Users },
   { key: 'calls', label: 'Звонки', icon: Phone },
+  { key: 'chats', label: 'Чаты', icon: MessageCircle },
   { key: 'profile', label: 'Мой Севчик', icon: User },
 ];
 
 export function Sidebar({ current, onNavigate }: SidebarProps) {
-  const [soundOn, setSoundOn] = useState(true);
-
   return (
     <div className="hidden md:flex flex-col w-20 lg:w-64 py-6 px-3 shrink-0 h-screen sticky top-0 z-30">
       <div className="mb-8 flex items-center gap-3 px-2">
@@ -52,35 +51,6 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
           );
         })}
       </nav>
-      <div className="flex flex-col gap-2.5 pt-4">
-        <motion.button
-          whileTap={{ scale: 0.97, y: 2 }}
-          whileHover={{ y: -2 }}
-          onClick={() => alert('🎨 Коллекция стикеров скоро будет доступна!')}
-          className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white text-sevchik-textSecondary hover:text-sevchik-purple transition-colors"
-          style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
-          title="Стикеры"
-        >
-          <Smile size={22} className="shrink-0" />
-          <span className="hidden lg:block font-heading font-bold text-base">Стикеры</span>
-        </motion.button>
-        <div className="flex items-center gap-4 px-4 py-3 rounded-btn bg-white" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-          <Volume2 size={22} className={`shrink-0 ${soundOn ? 'text-sevchik-purple' : 'text-sevchik-textSecondary'}`} />
-          <span className="hidden lg:block font-heading font-bold text-base text-sevchik-textSecondary flex-1">Звук</span>
-          <button
-            onClick={() => setSoundOn(!soundOn)}
-            className={`relative w-12 h-7 rounded-full transition-colors duration-300 ${soundOn ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/20'}`}
-            style={soundOn ? { boxShadow: '0 2px 8px rgba(79,211,200,0.4)' } : undefined}
-          >
-            <motion.div
-              layout
-              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-              className={`absolute top-1 w-5 h-5 rounded-full bg-white ${soundOn ? 'left-6' : 'left-1'}`}
-              style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.15)' }}
-            />
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
@@ -91,10 +61,11 @@ interface TabBarProps {
 }
 
 export function TabBar({ current, onNavigate }: TabBarProps) {
+  // НОВЫЙ ПОРЯДОК для мобильной версии
   const items = [
-    { key: 'chats' as Screen, label: 'Чаты', icon: MessageCircle },
     { key: 'contacts' as Screen, label: 'Контакты', icon: Users },
     { key: 'calls' as Screen, label: 'Звонки', icon: Phone },
+    { key: 'chats' as Screen, label: 'Чаты', icon: MessageCircle },
     { key: 'profile' as Screen, label: 'Севчик', icon: User },
   ];
 
