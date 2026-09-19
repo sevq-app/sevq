@@ -61,7 +61,7 @@ export function Avatar({
       {online && (
         <div
           className={cn(
-            'absolute bottom-0 right-0 rounded-full bg-sevq-mint border-white z-20',
+            'absolute bottom-0 right-0 rounded-full bg-sevchik-mint border-white z-20',
             dotSizeMap[size]
           )}
           style={{ boxShadow: '0 0 0 1px #4FD3C8' }}
