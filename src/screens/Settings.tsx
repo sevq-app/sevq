@@ -12,6 +12,7 @@ interface SettingsProps {
   onBack: () => void;
   onLogout: () => void;
   onNavigate?: (screen: Screen) => void;
+  grayMode: boolean;
 }
 
 type SettingsItem = {
@@ -24,7 +25,7 @@ type SettingsItem = {
   action?: () => void;
 };
 
-export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
+export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [powerSaving, setPowerSaving] = useState(false);
 
@@ -98,7 +99,7 @@ export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
               {section.items.map((item, itemIdx) => (
                 <motion.button
                   key={item.label}
-                  whileHover={{ backgroundColor: '#FAFAFA' }}
+                  whileHover={{ backgroundColor: grayMode ? '#2d2d3a' : '#FAFAFA' }}
                   whileTap={{ scale: 0.98 }}
                   onClick={item.action}
                   className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${
