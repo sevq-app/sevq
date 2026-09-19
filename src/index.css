@@ -233,8 +233,9 @@
   background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
 }
 
-/* Перебиваем градиенты header */
-.dark [style*="linear-gradient(180deg, rgba(255,248,237"] {
+/* Перебиваем градиенты header — более агрессивный селектор */
+.dark [style*="linear-gradient(180deg, rgba(255,248,237"],
+.dark [style*="linear-gradient(180deg, #FFF8ED"] {
   background: linear-gradient(180deg, #1f1f28 80%, transparent 100%) !important;
 }
 
@@ -255,4 +256,75 @@
 .dark [style*="color: #6B7280"],
 .dark [style*="color:#6B7280"] {
   color: #a0a0b0 !important;
+}
+
+/* 🔥 НОВОЕ: Принудительное переопределение для sticky header */
+.dark .sticky[style*="background"] {
+  background: linear-gradient(180deg, #1f1f28 80%, transparent 100%) !important;
+}
+
+/* 🔥 НОВОЕ: Для всех div с кремовым фоном внутри экранов */
+.dark div[style*="background:"] {
+  background: var(--bg-card) !important;
+}
+
+/* 🔥 АГРЕССИВНОЕ ПЕРЕОПРЕДЕЛЕНИЕ ДЛЯ ВСЕХ КРЕМОВЫХ INLINE-СТИЛЕЙ */
+/* Перебиваем ЛЮБОЙ inline-style с кремовыми оттенками */
+.dark [style*="FFF8ED"],
+.dark [style*="FFF0DB"],
+.dark [style*="FFF0DC"],
+.dark [style*="FFE9CC"],
+.dark [style*="rgba(255,248,237"],
+.dark [style*="rgba(255,240,219"],
+.dark [style*="radial-gradient(circle at 50% 50%, #FFF8ED"],
+.dark [style*="radial-gradient(ellipse at top left, #FFF8ED"] {
+  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
+}
+
+/* Перебиваем ЛЮБОЙ linear-gradient с кремовыми цветами в header */
+.dark [style*="linear-gradient(180deg, rgba(255,248,237"],
+.dark [style*="linear-gradient(180deg, #FFF8ED"],
+.dark [style*="linear-gradient(180deg,#FFF8ED"] {
+  background: linear-gradient(180deg, #1f1f28 80%, transparent 100%) !important;
+}
+
+/* Для bg-gradient-to-b с кремовыми цветами */
+.dark .bg-gradient-to-b {
+  background: linear-gradient(to bottom, #2a2a35 0%, #1f1f28 100%) !important;
+}
+
+/* 🔥 МАКСИМАЛЬНО АГРЕССИВНОЕ ПЕРЕОПРЕДЕЛЕНИЕ — перебивает ЛЮБЫЕ inline-стили */
+/* Специфичность выше за счёт комбинации классов и атрибутов */
+.dark div[style*="background"],
+.dark section[style*="background"],
+.dark header[style*="background"],
+.dark main[style*="background"] {
+  background: var(--bg-card) !important;
+}
+
+/* Перебиваем sticky элементы с кремовым фоном */
+.dark .sticky[style*="linear-gradient(180deg, rgba(255,248,237"],
+.dark .sticky[style*="linear-gradient(180deg, #FFF8ED"],
+.dark .sticky[style*="radial-gradient"] {
+  background: linear-gradient(180deg, #1f1f28 80%, transparent 100%) !important;
+}
+
+/* Перебиваем ВСЕ возможные варианты кремовых градиентов */
+.dark [style*="background: 'radial-gradient(circle at 50% 50%, #FFF8ED"],
+.dark [style*='background: "radial-gradient(circle at 50% 50%, #FFF8ED'],
+.dark [style*="background: radial-gradient(circle at 50% 50%, #FFF8ED"],
+.dark [style*="background:'radial-gradient(circle at 50% 50%, #FFF8ED"],
+.dark [style*="background:'linear-gradient(180deg, #FFF8ED"],
+.dark [style*='background:"linear-gradient(180deg, #FFF8ED'],
+.dark [style*="background: linear-gradient(180deg, #FFF8ED"],
+.dark [style*="background:linear-gradient(180deg,#FFF8ED"],
+.dark [style*="background:linear-gradient(180deg, #FFF8ED"] {
+  background: var(--bg-main) !important;
+}
+
+/* Для всех элементов внутри screens с кремовым фоном */
+.dark .flex[style*="background"],
+.dark .relative[style*="background"],
+.dark .h-full[style*="background"] {
+  background: var(--bg-card) !important;
 }
