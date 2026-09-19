@@ -120,10 +120,7 @@ export function Appearance({
     >
       {/* Шапка */}
       <div
-        className="px-[16px] sm:px-[24px] pt-[24px] pb-[16px] sticky top-0 z-20"
-        style={{
-          background: `linear-gradient(180deg, ${containerBg} 80%, transparent 100%)`,
-        }}
+        className="px-[16px] sm:px-[24px] pt-[24px] pb-[16px] sticky top-0 z-20 bg-[var(--bg-main)]"
       >
         <div className="flex items-center gap-[12px]">
           <motion.button
