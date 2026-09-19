@@ -23,23 +23,16 @@ function App() {
 
   // 🎨 Глобальные настройки оформления
   const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('sevchik-fontSize')) || 16);
-  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('sevchik-darkMode') === 'true');
   const [selectedTheme, setSelectedTheme] = useState(() => localStorage.getItem('sevchik-theme') || 'calm');
 
   // Применяем настройки оформления ко всему документу
   useEffect(() => {
     localStorage.setItem('sevchik-fontSize', String(fontSize));
-    localStorage.setItem('sevchik-darkMode', String(darkMode));
     localStorage.setItem('sevchik-theme', selectedTheme);
 
     const html = document.documentElement;
-    if (darkMode) {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
     html.style.fontSize = `${fontSize}px`;
-  }, [fontSize, darkMode, selectedTheme]);
+  }, [fontSize, selectedTheme]);
 
   // Проверяем состояние аутентификации при загрузке
   useEffect(() => {
@@ -92,7 +85,7 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className={`h-screen w-full flex items-center justify-center ${darkMode ? 'dark' : ''}`} style={{ background: 'var(--bg-main, radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%))' }}>
+      <div className="h-screen w-full flex items-center justify-center" style={{ background: 'var(--bg-main, radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%))' }}>
         <div className="flex flex-col items-center gap-4">
           <QLogo size={64} />
           <p className="font-body" style={{ color: 'var(--text-secondary, #6B7280)' }}>Загрузка...</p>
@@ -117,7 +110,7 @@ function App() {
   };
 
   return (
-    <div className={`flex min-h-screen ${darkMode ? 'dark' : ''}`}>
+    <div className="flex min-h-screen">
       <Sidebar current={screen} onNavigate={setScreen} />
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
         <div className="flex-1 min-w-0 overflow-hidden">
@@ -154,8 +147,6 @@ function App() {
                   onBack={() => setScreen('settings')}
                   fontSize={fontSize}
                   setFontSize={setFontSize}
-                  darkMode={darkMode}
-                  setDarkMode={setDarkMode}
                   selectedTheme={selectedTheme}
                   setSelectedTheme={setSelectedTheme}
                 />

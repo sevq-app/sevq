@@ -41,16 +41,6 @@
     --border-color: rgba(101, 70, 199, 0.08);
   }
 
-  /* ТЁМНАЯ ТЕМА — мгновенное переключение */
-  .dark {
-    --bg-main: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%);
-    --bg-card: #2d2d3a;
-    --bg-input: #25252f;
-    --text-main: #e8e8f0;
-    --text-secondary: #a0a0b0;
-    --text-placeholder: #8a8a9a;
-    --border-color: rgba(101, 70, 199, 0.2);
-  }
 }
 
 @layer base {
@@ -67,42 +57,6 @@
     font-family: 'Nunito', sans-serif;
     color: var(--text-main);
   }
-}
-
-/* Принудительное переопределение для тёмной темы */
-.dark body {
-  background: var(--bg-main) !important;
-  color: var(--text-main) !important;
-}
-.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
-  color: var(--text-main) !important;
-}
-.dark .bg-white {
-  background-color: var(--bg-card) !important;
-}
-.dark .bg-\[#F9FAFB\],
-.dark .bg-\[#F3F4F6\] {
-  background-color: var(--bg-input) !important;
-}
-.dark .text-\[#1A1A1A\],
-.dark .text-sevchik-text {
-  color: var(--text-main) !important;
-}
-.dark .text-\[#6B7280\],
-.dark .text-sevchik-textSecondary {
-  color: var(--text-secondary) !important;
-}
-.dark .text-\[#9CA3AF\] {
-  color: var(--text-placeholder) !important;
-}
-.dark input::placeholder {
-  color: var(--text-placeholder) !important;
-}
-.dark .border-sevchik-purple\/8 {
-  border-color: var(--border-color) !important;
-}
-.dark .plastic-card::before {
-  background: transparent !important;
 }
 
 /* Scrollbar */
@@ -152,107 +106,4 @@
 }
 .btn-3d:active {
   transform: translateY(2px);
-}
-/* ========================================= */
-/* 🌙 ДОПОЛНИТЕЛЬНЫЕ ПРАВИЛА ДЛЯ ТЁМНОЙ ТЕМЫ */
-/* ========================================= */
-
-/* Принудительно затемняем фоны с inline-стилями */
-.dark [style*="FFF8ED"],
-.dark [style*="FFF0DB"],
-.dark [style*="FFF0DC"],
-.dark [style*="FFE9CC"],
-.dark [style*="radial-gradient"] {
-  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
-}
-
-/* Заголовки в тёмной теме */
-.dark h1,
-.dark h2,
-.dark h3 {
-  color: #f0f0f8 !important;
-}
-
-/* Подзаголовки и вторичный текст */
-.dark .text-\[#6B7280\] {
-  color: #a0a0b0 !important;
-}
-
-/* Поля ввода в тёмной теме */
-.dark input {
-  background-color: #2d2d3a !important;
-  color: #e8e8f0 !important;
-}
-.dark input::placeholder {
-  color: #8a8a9a !important;
-}
-/* ========================================= */
-/* 🌙 АГРЕССИВНЫЕ ПРАВИЛА ДЛЯ ТЁМНОЙ ТЕМЫ   */
-/* ========================================= */
-
-/* Принудительно затемняем ВСЕ фоны с inline-стилями */
-.dark [style*="FFF8ED"],
-.dark [style*="FFF0DB"],
-.dark [style*="FFF0DC"],
-.dark [style*="FFE9CC"],
-.dark [style*="radial-gradient"] {
-  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
-}
-
-/* Заголовки в тёмной теме */
-.dark h1,
-.dark h2,
-.dark h3 {
-  color: #f0f0f8 !important;
-}
-
-/* Подзаголовки и вторичный текст */
-.dark .text-\[#6B7280\] {
-  color: #a0a0b0 !important;
-}
-
-/* Поля ввода в тёмной теме */
-.dark input {
-  background-color: #2d2d3a !important;
-  color: #e8e8f0 !important;
-}
-.dark input::placeholder {
-  color: #8a8a9a !important;
-}
-/* ========================================= */
-/* 🌙 ПЕРЕБИВАЕМ INLINE-СТИЛИ С КРЕМОВЫМИ ЦВЕТАМИ */
-/* ========================================= */
-
-/* Перебиваем фоны с кремовыми цветами */
-.dark [style*="FFF8ED"],
-.dark [style*="FFF0DB"],
-.dark [style*="FFF0DC"],
-.dark [style*="FFE9CC"],
-.dark [style*="rgba(255,248,237"],
-.dark [style*="radial-gradient(circle at 50% 50%, #FFF8ED"] {
-  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
-}
-
-/* Перебиваем градиенты header */
-.dark [style*="linear-gradient(180deg, rgba(255,248,237"] {
-  background: linear-gradient(180deg, #1f1f28 80%, transparent 100%) !important;
-}
-
-/* Заголовки в тёмной теме */
-.dark h1,
-.dark h2,
-.dark h3 {
-  color: #f0f0f8 !important;
-}
-
-/* Текст в header */
-.dark [style*="color: #1A1A1A"],
-.dark [style*="color:#1A1A1A"] {
-  color: #e8e8f0 !important;
-}
-
-/* Вторичный текст */
-.dark [style*="color: #6B7280"],
-.dark [style*="color:#6B7280"] {
-  color: #a0a0b0 !important;
 }

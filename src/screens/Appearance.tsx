@@ -1,12 +1,10 @@
 import { motion } from 'framer-motion';
-import { ChevronLeft, Type, Sun, Moon, Palette } from 'lucide-react';
+import { ChevronLeft, Type, Palette } from 'lucide-react';
 
 interface AppearanceProps {
   onBack: () => void;
   fontSize: number;
   setFontSize: (size: number) => void;
-  darkMode: boolean;
-  setDarkMode: (mode: boolean) => void;
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
 }
@@ -60,8 +58,6 @@ export function Appearance({
   onBack, 
   fontSize, 
   setFontSize, 
-  darkMode, 
-  setDarkMode, 
   selectedTheme, 
   setSelectedTheme 
 }: AppearanceProps) {
@@ -74,25 +70,22 @@ export function Appearance({
 
   const currentTheme = themes.find(t => t.id === selectedTheme);
 
-  // Базовые цвета для адаптации под тёмную тему
-  const cardBg = darkMode ? '#2d2d3a' : '#FFFFFF';
-  const previewBg = darkMode ? '#25252f' : '#F9FAFB';
-  const textMain = darkMode ? '#e8e8f0' : '#1A1A1A';
-  const textSecondary = darkMode ? '#a0a0b0' : '#6B7280';
-  const containerBg = darkMode ? '#1f1f28' : (currentTheme?.bg || '#FFF8ED');
+  const cardBg = '#FFFFFF';
+  const previewBg = '#F9FAFB';
+  const textMain = '#1A1A1A';
+  const textSecondary = '#6B7280';
+  const containerBg = currentTheme?.bg || '#FFF8ED';
 
   return (
     <div
-      className={`h-full overflow-y-auto pb-24 md:pb-6 transition-colors duration-500 ${darkMode ? 'pattern-bg-dark' : 'pattern-bg-light'}`}
+      className="h-full overflow-y-auto pb-24 md:pb-6 transition-colors duration-500 pattern-bg-light"
       style={{ background: containerBg }}
     >
       {/* Шапка */}
       <div
         className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20"
         style={{
-          background: darkMode
-            ? 'linear-gradient(180deg, #1f1f28 80%, transparent 100%)'
-            : `linear-gradient(180deg, ${containerBg} 80%, transparent 100%)`,
+          background: `linear-gradient(180deg, ${containerBg} 80%, transparent 100%)`,
         }}
       >
         <div className="flex items-center gap-3">
@@ -102,7 +95,7 @@ export function Appearance({
             className="w-11 h-11 rounded-2xl flex items-center justify-center text-[#6546C7]"
             style={{ 
               backgroundColor: cardBg,
-              boxShadow: darkMode ? '0 4px 12px rgba(0,0,0,0.3)' : '0 4px 12px rgba(101,70,199,0.15)' 
+              boxShadow: '0 4px 12px rgba(101,70,199,0.15)'
             }}
           >
             <ChevronLeft size={22} />
@@ -120,7 +113,7 @@ export function Appearance({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl p-5"
-          style={{ backgroundColor: cardBg, boxShadow: darkMode ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(101,70,199,0.08)' }}
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
           <div className="flex items-center gap-3 mb-4">
             <div
@@ -150,7 +143,7 @@ export function Appearance({
               onChange={(e) => setFontSize(Number(e.target.value))}
               className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
               style={{
-                background: `linear-gradient(to right, #6546C7 ${((fontSize - 12) / 12) * 100}%, ${darkMode ? '#374151' : '#E5E7EB'} ${((fontSize - 12) / 12) * 100}%)`,
+                background: `linear-gradient(to right, #6546C7 ${((fontSize - 12) / 12) * 100}%, #E5E7EB ${((fontSize - 12) / 12) * 100}%)`,
               }}
             />
             <span className="text-lg font-body font-bold" style={{ color: textSecondary }}>A</span>
@@ -166,67 +159,13 @@ export function Appearance({
           </div>
         </motion.div>
 
-        {/* Тема (светлая/тёмная) */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-3xl p-5"
-          style={{ backgroundColor: cardBg, boxShadow: darkMode ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(101,70,199,0.08)' }}
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center"
-              style={{
-                background: 'linear-gradient(135deg, #FF9848, #FFB87A)',
-                boxShadow: '0 4px 12px rgba(255,152,72,0.3)',
-              }}
-            >
-              {darkMode ? <Moon size={20} className="text-white" /> : <Sun size={20} className="text-white" />}
-            </div>
-            <div className="flex-1">
-              <h3 className="font-heading font-bold" style={{ color: textMain }}>Тема</h3>
-              <p className="text-xs font-body mt-0.5" style={{ color: textSecondary }}>
-                Выберите тему, чтобы изменить фон и цвет сообщений
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex gap-3">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setDarkMode(false)}
-              className="flex-1 py-3 rounded-2xl font-heading font-bold transition-all"
-              style={{ 
-                backgroundColor: !darkMode ? '#6546C7' : (darkMode ? '#2d2d3a' : '#F3F4F6'),
-                boxShadow: !darkMode ? '0 4px 12px rgba(101,70,199,0.3)' : 'none',
-                color: !darkMode ? '#FFFFFF' : textSecondary
-              }}
-            >
-              Светлая
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setDarkMode(true)}
-              className="flex-1 py-3 rounded-2xl font-heading font-bold transition-all"
-              style={{ 
-                backgroundColor: darkMode ? '#6546C7' : (darkMode ? '#2d2d3a' : '#F3F4F6'),
-                boxShadow: darkMode ? '0 4px 12px rgba(101,70,199,0.3)' : 'none',
-                color: darkMode ? '#FFFFFF' : textSecondary
-              }}
-            >
-              Тёмная
-            </motion.button>
-          </div>
-        </motion.div>
-
         {/* Цветовые темы */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="rounded-3xl p-5"
-          style={{ backgroundColor: cardBg, boxShadow: darkMode ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(101,70,199,0.08)' }}
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
           <div className="flex items-center gap-3 mb-4">
             <div
@@ -272,8 +211,8 @@ export function Appearance({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className={`rounded-3xl p-5 ${darkMode ? 'pattern-bg-dark' : 'pattern-bg-light'}`}
-          style={{ backgroundColor: cardBg, boxShadow: darkMode ? '0 8px 24px rgba(0,0,0,0.2)' : '0 8px 24px rgba(101,70,199,0.08)' }}
+          className="rounded-3xl p-5 pattern-bg-light"
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
           <h3 className="font-heading font-bold mb-4" style={{ color: textMain }}>Предпросмотр</h3>
           <div className="space-y-3">
@@ -282,7 +221,7 @@ export function Appearance({
               <div
                 className="p-3 rounded-2xl rounded-tl-none max-w-[80%]"
                 style={{
-                  backgroundColor: darkMode ? '#3a3a48' : '#F3F4F6',
+                  backgroundColor: '#F3F4F6',
                   fontSize: `${fontSize}px`
                 }}
               >

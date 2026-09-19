@@ -84,7 +84,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               <AnimatePresence>
                 {showDropdown && (
                   <>
-                    {/* Затемнение фона */}
+                    {/* Оверлей фона */}
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
