@@ -19,7 +19,7 @@ export function Chats({ onOpenChat }: ChatsProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 pt-6 pb-4 px-4 sm:px-6" style={{ background: 'linear-gradient(180deg, rgba(255,248,237,0.98) 80%, transparent)' }}>
+      <div className="sticky top-0 z-10 pt-6 pb-4 px-4 sm:px-6 bg-[var(--bg-card)]">
         <div className="flex items-center justify-between mb-4">
           <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Чаты</h1>
           <div className="w-10 h-10 rounded-full bg-sevchik-orange flex items-center justify-center font-heading font-extrabold text-white text-sm relative overflow-hidden" style={{ boxShadow: '0 4px 12px rgba(255,152,72,0.3)' }}>
@@ -37,8 +37,8 @@ export function Chats({ onOpenChat }: ChatsProps) {
             placeholder="Поиск..."
             className="w-full text-white placeholder:text-white/80 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm relative overflow-hidden"
             style={{
-              background: 'linear-gradient(135deg, #FFB87A, #FF9848)',
-              boxShadow: '0 6px 20px rgba(255,152,72,0.3)',
+              background: 'var(--bg-input)',
+              boxShadow: 'none',
             }}
           />
         </div>

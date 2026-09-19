@@ -64,7 +64,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
     return (
       <div className="h-full overflow-y-auto pb-24 md:pb-6 relative" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
         {/* Шапка */}
-        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20" style={{ background: 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>
+        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20 bg-[var(--bg-card)]">
           <div className="flex items-center justify-between mb-4">
             <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#1A1A1A]">Контакты</h1>
             <div className="relative">
@@ -330,7 +330,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
     return (
       <div className="h-full overflow-y-auto pb-24 md:pb-6" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
         {/* Шапка */}
-        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20" style={{ background: 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>
+        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20 bg-[var(--bg-card)]">
           <div className="flex items-center gap-3 mb-4">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -446,7 +446,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
     return (
       <div className="h-full overflow-y-auto pb-24 md:pb-6" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
         {/* Шапка */}
-        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20" style={{ background: 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>
+        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20 bg-[var(--bg-card)]">
           <div className="flex items-center gap-3 mb-4">
             <motion.button
               whileTap={{ scale: 0.9 }}
