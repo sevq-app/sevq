@@ -30,6 +30,26 @@
     --chart-3: 174 60% 51%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    
+    /* Кастомные переменные для Севчик */
+    --bg-main: radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%);
+    --bg-card: #FFFFFF;
+    --bg-input: #F9FAFB;
+    --text-main: #1A1A1A;
+    --text-secondary: #6B7280;
+    --text-placeholder: #9CA3AF;
+    --border-color: rgba(101, 70, 199, 0.08);
+  }
+
+  /* ТЁМНАЯ ТЕМА — мгновенное переключение */
+  .dark {
+    --bg-main: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%);
+    --bg-card: #2d2d3a;
+    --bg-input: #25252f;
+    --text-main: #e8e8f0;
+    --text-secondary: #a0a0b0;
+    --text-placeholder: #8a8a9a;
+    --border-color: rgba(101, 70, 199, 0.2);
   }
 }
 
@@ -40,133 +60,49 @@
   body {
     @apply text-sevchik-text;
     font-family: 'Golos Text', sans-serif;
-    background: radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%);
+    background: var(--bg-main);
     background-attachment: fixed;
-    transition: background 0.4s ease, color 0.4s ease;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Nunito', sans-serif;
-    color: #1A1A1A;
-    transition: color 0.4s ease;
+    color: var(--text-main);
   }
 }
 
-/* ========================================= */
-/*  ТЁМНАЯ ТЕМА — ПОЛНОЕ ПЕРЕКЛЮЧЕНИЕ     */
-/* ========================================= */
-html.dark body {
-  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
-  color: #e8e8f0;
+/* Принудительное переопределение для тёмной темы */
+.dark body {
+  background: var(--bg-main) !important;
+  color: var(--text-main) !important;
 }
-html.dark h1, html.dark h2, html.dark h3, html.dark h4, html.dark h5, html.dark h6 {
-  color: #f0f0f8 !important;
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+  color: var(--text-main) !important;
 }
-
-/* Принудительно затемняем центральную часть экранов */
-html.dark .bg-gradient-to-b {
-  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
+.dark .bg-white {
+  background-color: var(--bg-card) !important;
 }
-html.dark [style*="FFF8ED"],
-html.dark [style*="FFF0DB"],
-html.dark [style*="FFF0DC"],
-html.dark [style*="FFE9CC"] {
-  background: radial-gradient(ellipse at top left, #2a2a35 0%, #1f1f28 60%, #16161d 100%) !important;
+.dark .bg-\[#F9FAFB\],
+.dark .bg-\[#F3F4F6\] {
+  background-color: var(--bg-input) !important;
 }
-
-/* Адаптация белых карточек в тёмной теме */
-html.dark .bg-white {
-  background-color: #2d2d3a !important;
+.dark .text-\[#1A1A1A\],
+.dark .text-sevchik-text {
+  color: var(--text-main) !important;
 }
-html.dark .bg-\[#F9FAFB\],
-html.dark .bg-\[#F3F4F6\] {
-  background-color: #25252f !important;
+.dark .text-\[#6B7280\],
+.dark .text-sevchik-textSecondary {
+  color: var(--text-secondary) !important;
 }
-
-/* ========================================= */
-/*  АДАПТАЦИЯ ВСЕХ ЦВЕТОВ ТЕКСТА           */
-/* ========================================= */
-
-/* Основной тёмный текст → белый */
-html.dark .text-\[#1A1A1A\],
-html.dark .text-sevchik-text {
-  color: #e8e8f0 !important;
+.dark .text-\[#9CA3AF\] {
+  color: var(--text-placeholder) !important;
 }
-
-/* Вторичный серый текст → светло-серый */
-html.dark .text-\[#6B7280\],
-html.dark .text-sevchik-textSecondary {
-  color: #a0a0b0 !important;
+.dark input::placeholder {
+  color: var(--text-placeholder) !important;
 }
-
-/* Placeholder и иконки → светло-серый */
-html.dark .text-\[#9CA3AF\] {
-  color: #8a8a9a !important;
+.dark .border-sevchik-purple\/8 {
+  border-color: var(--border-color) !important;
 }
-
-/* Кнопки и второстепенный текст */
-html.dark .text-\[#4B5563\] {
-  color: #9a9aaa !important;
-}
-
-/* Ошибки (красный) — оставляем, но делаем чуть ярче */
-html.dark .text-red-600 {
-  color: #f87171 !important;
-}
-
-/* Успех (зелёный) — оставляем, но делаем чуть ярче */
-html.dark .text-green-600 {
-  color: #4ade80 !important;
-}
-
-/* Placeholder в input */
-html.dark input::placeholder {
-  color: #8a8a9a !important;
-}
-
-/* Inline-стили с жёстко заданными цветами */
-html.dark [style*="color: #1A1A1A"],
-html.dark [style*="color:#1A1A1A"] {
-  color: #e8e8f0 !important;
-}
-html.dark [style*="color: #6B7280"],
-html.dark [style*="color:#6B7280"] {
-  color: #a0a0b0 !important;
-}
-html.dark [style*="color: #9CA3AF"],
-html.dark [style*="color:#9CA3AF"] {
-  color: #8a8a9a !important;
-}
-
-/* Адаптация границ */
-html.dark .border-sevchik-purple\/8 {
-  border-color: rgba(101, 70, 199, 0.2) !important;
-}
-html.dark .border-\[#F3F4F6\] {
-  border-color: #3a3a48 !important;
-}
-html.dark .border-\[#E5E7EB\] {
-  border-color: #3a3a48 !important;
-}
-
-/* Адаптация "пластикового" блика для тёмной темы */
-html.dark .plastic-card::before {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0) 100%) !important;
-}
-
-/* ========================================= */
-/* 🎨 ФОНОВЫЕ УЗОРЫ                          */
-/* ========================================= */
-.pattern-bg-light {
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(101, 70, 199, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255, 152, 72, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(79, 211, 200, 0.03) 0%, transparent 40%);
-}
-.pattern-bg-dark {
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(101, 70, 199, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(255, 152, 72, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(79, 211, 200, 0.05) 0%, transparent 40%);
+.dark .plastic-card::before {
+  background: transparent !important;
 }
 
 /* Scrollbar */
