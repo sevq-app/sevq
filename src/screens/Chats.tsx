@@ -7,9 +7,10 @@ import type { Chat } from '@/data/mock';
 
 interface ChatsProps {
   onOpenChat: (chat: Chat) => void;
+  grayMode: boolean;
 }
 
-export function Chats({ onOpenChat }: ChatsProps) {
+export function Chats({ onOpenChat, grayMode }: ChatsProps) {
   const [query, setQuery] = useState('');
   const [chats] = useState(initialChats);
   const filtered = chats.filter((c) =>
@@ -84,7 +85,7 @@ export function Chats({ onOpenChat }: ChatsProps) {
 
       {/* Chat list */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-6">
-        <div className="space-y-2.5">
+        <div className="space-y-2">
           {filtered.map((chat, i) => (
             <motion.button
               key={chat.id}
@@ -94,13 +95,15 @@ export function Chats({ onOpenChat }: ChatsProps) {
               whileHover={{ y: -4 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => onOpenChat(chat)}
-              className="w-full flex items-center gap-3 p-3.5 bg-white rounded-card text-left plastic-card btn-3d"
+              className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 ${
+                grayMode ? 'bg-[#2d2d3a]' : 'bg-white'
+              } rounded-2xl text-left btn-3d`}
               style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
             >
               <Avatar
                 initials={chat.initials}
                 color={chat.avatarColor}
-                size="lg"
+                size="md"
                 online={chat.online}
                 ringColor={chat.online ? '#4FD3C8' : undefined}
               />

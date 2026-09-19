@@ -136,7 +136,9 @@ function App() {
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="h-full"
             >
-              {screen === 'chats' && <Chats onOpenChat={handleOpenChat} />}
+              {screen === 'chats' && (
+                <Chats onOpenChat={handleOpenChat} grayMode={grayMode} />
+              )}
               {screen === 'conversation' && activeChat && (
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} />
               )}
