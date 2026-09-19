@@ -92,10 +92,10 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className={`h-screen w-full flex items-center justify-center ${darkMode ? 'dark' : ''}`} style={{ background: 'var(--bg-main)' }}>
+      <div className={`h-screen w-full flex items-center justify-center ${darkMode ? 'dark' : ''}`} style={{ background: 'var(--bg-main, radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%))' }}>
         <div className="flex flex-col items-center gap-4">
           <QLogo size={64} />
-          <p className="font-body" style={{ color: 'var(--text-secondary)' }}>Загрузка...</p>
+          <p className="font-body" style={{ color: 'var(--text-secondary, #6B7280)' }}>Загрузка...</p>
         </div>
       </div>
     );
@@ -177,7 +177,7 @@ function ProfilePreview() {
     <div className="space-y-4">
       <div className="flex items-center gap-3 mb-2">
         <QLogo size={36} />
-        <span className="font-heading font-extrabold text-xl" style={{ color: 'var(--text-main)' }}>Севчик</span>
+        <span className="font-heading font-extrabold text-xl" style={{ color: 'var(--text-main, #1A1A1A)' }}>Севчик</span>
       </div>
       <div className="bg-white rounded-card p-5 flex flex-col items-center plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
         <div className="relative z-10">
@@ -190,8 +190,8 @@ function ProfilePreview() {
             </div>
           </div>
         </div>
-        <h3 className="font-heading font-extrabold text-base mt-3 relative z-10" style={{ color: 'var(--text-main)' }}>Александр В.</h3>
-        <p className="text-xs font-body mt-0.5 relative z-10" style={{ color: 'var(--text-secondary)' }}>Твой маленький большой мир</p>
+        <h3 className="font-heading font-extrabold text-base mt-3 relative z-10" style={{ color: 'var(--text-main, #1A1A1A)' }}>Александр В.</h3>
+        <p className="text-xs font-body mt-0.5 relative z-10" style={{ color: 'var(--text-secondary, #6B7280)' }}>Твой маленький большой мир</p>
         <div className="flex items-center gap-1.5 mt-2 relative z-10">
           <span className="w-2 h-2 rounded-full bg-sevchik-mint" />
           <span className="text-xs text-sevchik-mint font-body">В сети</span>
@@ -203,12 +203,12 @@ function ProfilePreview() {
           <span className="relative z-10 text-sm font-heading font-bold">КП</span>
         </div>
         <div className="flex-1 min-w-0 relative z-10">
-          <p className="text-sm font-heading font-bold truncate" style={{ color: 'var(--text-main)' }}>Клуб путешественников</p>
-          <p className="text-xs font-body" style={{ color: 'var(--text-secondary)' }}>1.2k участников</p>
+          <p className="text-sm font-heading font-bold truncate" style={{ color: 'var(--text-main, #1A1A1A)' }}>Клуб путешественников</p>
+          <p className="text-xs font-body" style={{ color: 'var(--text-secondary, #6B7280)' }}>1.2k участников</p>
         </div>
       </div>
       <div className="bg-white rounded-card p-4 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
-        <h4 className="font-heading font-bold text-sm mb-3 relative z-10" style={{ color: 'var(--text-main)' }}>Персональная тема</h4>
+        <h4 className="font-heading font-bold text-sm mb-3 relative z-10" style={{ color: 'var(--text-main, #1A1A1A)' }}>Персональная тема</h4>
         <div className="flex gap-3 relative z-10">
           {['#6546C7', '#FF9848', '#4FD3C8'].map((color, i) => (
             <div
@@ -221,7 +221,7 @@ function ProfilePreview() {
           ))}
         </div>
         <div className="flex gap-2 mt-3 relative z-10">
-          {['⭐', '😊', '🌿', '❤️', '✨'].map((emoji, i) => (
+          {['⭐', '😊', '', '❤️', '✨'].map((emoji, i) => (
             <div key={i} className="w-8 h-8 rounded-xl bg-sevchik-cream flex items-center justify-center text-sm" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
               {emoji}
             </div>
