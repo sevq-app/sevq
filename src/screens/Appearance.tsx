@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ChevronLeft, Type, Palette } from 'lucide-react';
+import { ChevronLeft, Type, Palette, Moon } from 'lucide-react';
 
 interface AppearanceProps {
   onBack: () => void;
@@ -7,6 +7,8 @@ interface AppearanceProps {
   setFontSize: (size: number) => void;
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
+  grayMode: boolean;
+  setGrayMode: (enabled: boolean) => void;
 }
 
 const themes = [
@@ -59,7 +61,9 @@ export function Appearance({
   fontSize, 
   setFontSize, 
   selectedTheme, 
-  setSelectedTheme 
+  setSelectedTheme,
+  grayMode,
+  setGrayMode,
 }: AppearanceProps) {
   
   const getFontSizeLabel = () => {
@@ -70,11 +74,11 @@ export function Appearance({
 
   const currentTheme = themes.find(t => t.id === selectedTheme);
 
-  const cardBg = '#FFFFFF';
-  const previewBg = '#F9FAFB';
-  const textMain = '#1A1A1A';
-  const textSecondary = '#6B7280';
-  const containerBg = currentTheme?.bg || '#FFF8ED';
+  const cardBg = grayMode ? '#35383D' : '#FFFFFF';
+  const previewBg = grayMode ? '#2B2E33' : '#F9FAFB';
+  const textMain = grayMode ? '#FFFFFF' : '#1A1A1A';
+  const textSecondary = grayMode ? '#D6D9DE' : '#6B7280';
+  const containerBg = grayMode ? '#24272B' : (currentTheme?.bg || '#FFF8ED');
 
   return (
     <div
@@ -157,6 +161,41 @@ export function Appearance({
               Пример текста для просмотра размера шрифта
             </p>
           </div>
+        </motion.div>
+
+        {/* Серая тема */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="rounded-3xl p-5"
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div
+              className="w-10 h-10 rounded-2xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #555A62, #2B2E33)' }}
+            >
+              <Moon size={20} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-heading font-bold" style={{ color: textMain }}>Серая тема</h3>
+              <p className="text-xs font-body mt-0.5" style={{ color: textSecondary }}>
+                Нейтральный фон и белый текст для лучшего контраста
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setGrayMode(!grayMode)}
+            className="w-full py-3 rounded-2xl font-heading font-bold transition-colors"
+            style={{
+              backgroundColor: grayMode ? '#FFFFFF' : '#E5E7EB',
+              color: grayMode ? '#24272B' : '#1A1A1A',
+            }}
+          >
+            {grayMode ? 'Серая тема включена' : 'Включить серую тему'}
+          </button>
         </motion.div>
 
         {/* Цветовые темы */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'; 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search as SearchIcon } from 'lucide-react';
+import { Palette, Search as SearchIcon } from 'lucide-react';
 import { Sidebar, TabBar } from '@/components/Navigation';
 import { QLogo } from '@/components/QLogo';
 import { Login, Register } from '@/screens/Login';
@@ -24,15 +24,27 @@ function App() {
   // 🎨 Глобальные настройки оформления
   const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('sevchik-fontSize')) || 16);
   const [selectedTheme, setSelectedTheme] = useState(() => localStorage.getItem('sevchik-theme') || 'calm');
+  const [grayMode, setGrayMode] = useState(() => localStorage.getItem('sevchik-grayMode') === 'true');
+
+  const updateGrayMode = (enabled: boolean) => {
+    const html = document.documentElement;
+    html.classList.add('theme-switching');
+    setGrayMode(enabled);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => html.classList.remove('theme-switching'));
+    });
+  };
 
   // Применяем настройки оформления ко всему документу
   useEffect(() => {
     localStorage.setItem('sevchik-fontSize', String(fontSize));
     localStorage.setItem('sevchik-theme', selectedTheme);
+    localStorage.setItem('sevchik-grayMode', String(grayMode));
 
     const html = document.documentElement;
+    html.classList.toggle('gray-theme', grayMode);
     html.style.fontSize = `${fontSize}px`;
-  }, [fontSize, selectedTheme]);
+  }, [fontSize, selectedTheme, grayMode]);
 
   // Проверяем состояние аутентификации при загрузке
   useEffect(() => {
@@ -112,6 +124,20 @@ function App() {
   return (
     <div className="flex min-h-screen">
       <Sidebar current={screen} onNavigate={setScreen} />
+      <button
+        type="button"
+        onClick={() => updateGrayMode(!grayMode)}
+        aria-label={grayMode ? 'Выключить серую тему' : 'Включить серую тему'}
+        title={grayMode ? 'Выключить серую тему' : 'Включить серую тему'}
+        className="fixed top-4 right-4 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-colors"
+        style={{
+          backgroundColor: grayMode ? '#FFFFFF' : '#35383D',
+          color: grayMode ? '#24272B' : '#FFFFFF',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+        }}
+      >
+        <Palette size={19} />
+      </button>
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
         <div className="flex-1 min-w-0 overflow-hidden">
           <AnimatePresence mode="wait">
@@ -149,6 +175,8 @@ function App() {
                   setFontSize={setFontSize}
                   selectedTheme={selectedTheme}
                   setSelectedTheme={setSelectedTheme}
+                  grayMode={grayMode}
+                  setGrayMode={updateGrayMode}
                 />
               )}
             </motion.div>

@@ -4,8 +4,9 @@ import { Settings, Users, LogOut } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { userProfile, themeCircles, themeStickers } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
+import type { Screen } from '@/data/mock';
 
-export function Profile({ onNavigate }: { onNavigate?: (screen: string) => void }) {
+export function Profile({ onNavigate }: { onNavigate?: (screen: Screen) => void }) {
   const [online, setOnline] = useState(userProfile.online);
   const [selectedTheme, setSelectedTheme] = useState(0);
   const [logoutLoading, setLogoutLoading] = useState(false);

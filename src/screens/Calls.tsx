@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
 import { Phone, PhoneIncoming, PhoneOutgoing, Video } from 'lucide-react';
+import type { Screen } from '@/data/mock';
 
 interface CallsProps {
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: Screen) => void;
 }
 
 export function Calls({ onNavigate }: CallsProps) {

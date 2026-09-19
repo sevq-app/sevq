@@ -6,14 +6,24 @@ import {
   LogOut, ChevronRight
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import type { Screen } from '@/data/mock';
 
 interface SettingsProps {
   onBack: () => void;
   onLogout: () => void;
-  onNavigate?: (screen: string) => void; // <-- Добавлено
+  onNavigate?: (screen: Screen) => void;
 }
 
-// ВАЖНО: добавили onNavigate в параметры функции!
+type SettingsItem = {
+  icon: React.ElementType;
+  label: string;
+  color: string;
+  hasChevron?: boolean;
+  value?: string | boolean;
+  isToggle?: boolean;
+  action?: () => void;
+};
+
 export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
   const [notifications, setNotifications] = useState(true);
   const [powerSaving, setPowerSaving] = useState(false);
@@ -23,7 +33,7 @@ export function Settings({ onBack, onLogout, onNavigate }: SettingsProps) {
     onLogout();
   };
 
-  const sections = [
+  const sections: { title: string; items: SettingsItem[] }[] = [
     {
       title: 'Основное',
       items: [

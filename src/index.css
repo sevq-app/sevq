@@ -107,3 +107,89 @@
 .btn-3d:active {
   transform: translateY(2px);
 }
+
+/* Глобальная серая тема */
+html.gray-theme {
+  --bg-main: radial-gradient(ellipse at top left, #34383f 0%, #24272b 60%, #1b1e22 100%);
+  --bg-card: #35383d;
+  --bg-input: #2b2e33;
+  --text-main: #ffffff;
+  --text-secondary: #d6d9de;
+  --text-placeholder: #aeb4bc;
+  --border-color: rgba(255, 255, 255, 0.14);
+  color-scheme: dark;
+}
+
+html.theme-switching,
+html.theme-switching * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.gray-theme body {
+  background: var(--bg-main) !important;
+  color: #ffffff !important;
+}
+
+.gray-theme h1,
+.gray-theme h2,
+.gray-theme h3,
+.gray-theme h4,
+.gray-theme h5,
+.gray-theme h6,
+.gray-theme [class*="text-[#1A1A1A]"],
+.gray-theme [class*="text-sevchik-text"] {
+  color: #ffffff !important;
+}
+
+.gray-theme .bg-white,
+.gray-theme [class*="bg-white"],
+.gray-theme [class*="bg-gradient-to-b"] {
+  background-color: #35383d !important;
+  background-image: none !important;
+}
+
+.gray-theme [class*="from-[#FFF8ED]"],
+.gray-theme [class*="to-[#FFF0DB]"],
+.gray-theme [style*="FFF8ED"],
+.gray-theme [style*="FFF0DB"],
+.gray-theme [style*="FFF0DC"],
+.gray-theme [style*="FFE9CC"],
+.gray-theme [style*="radial-gradient"] {
+  background: var(--bg-main) !important;
+}
+
+.gray-theme [class*="text-[#6B7280]"],
+.gray-theme [class*="text-[#9CA3AF]"],
+.gray-theme [class*="text-sevchik-textSecondary"] {
+  color: #d6d9de !important;
+}
+
+.gray-theme [style*="color: #1A1A1A"],
+.gray-theme [style*="color:#1A1A1A"],
+.gray-theme [style*="color: rgb(26, 26, 26)"] {
+  color: #ffffff !important;
+}
+
+.gray-theme [style*="color: #6B7280"],
+.gray-theme [style*="color:#6B7280"],
+.gray-theme [style*="color: rgb(107, 114, 128)"] {
+  color: #d6d9de !important;
+}
+
+.gray-theme input,
+.gray-theme textarea {
+  background-color: #2b2e33 !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+.gray-theme input::placeholder,
+.gray-theme textarea::placeholder {
+  color: #aeb4bc !important;
+}
+
+.gray-theme [class*="border-[#F3F4F6]"],
+.gray-theme [class*="border-sevchik-purple"] {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
