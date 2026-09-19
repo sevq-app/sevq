@@ -28,7 +28,7 @@ export function Profile({ onNavigate }: { onNavigate?: (screen: Screen) => void 
     <div className="h-full overflow-y-auto pb-24 md:pb-6">
       {/* Header */}
       <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center justify-between">
-        <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Мой Севчик</h1>
+        <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Мой Севчик</h1>
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => onNavigate?.('settings')}

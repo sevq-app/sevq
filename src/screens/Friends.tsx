@@ -62,11 +62,11 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'main') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-6 relative" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
+      <div className="h-full overflow-y-auto pb-24 md:pb-6 relative bg-[var(--bg-main)]">
         {/* Шапка */}
-        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20 bg-[var(--bg-card)]">
+        <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#1A1A1A]">Контакты</h1>
+            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Контакты</h1>
             <div className="relative">
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -178,7 +178,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Поиск по имени или никнейму"
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[#1A1A1A] placeholder:text-[#9CA3AF]"
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
           </div>
@@ -328,9 +328,9 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'selectMembers') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-6" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
+      <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-[var(--bg-main)]">
         {/* Шапка */}
-        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20 bg-[var(--bg-card)]">
+        <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center gap-3 mb-4">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -340,7 +340,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             >
               <ChevronLeft size={22} />
             </motion.button>
-            <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A]">Выбери участников</h1>
+            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Выбери участников</h1>
           </div>
           {/* Поиск */}
           <div className="relative">
@@ -350,7 +350,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               value={groupSearch}
               onChange={(e) => setGroupSearch(e.target.value)}
               placeholder="Найти по имени"
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[#1A1A1A] placeholder:text-[#9CA3AF]"
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
           </div>
@@ -444,9 +444,9 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'createGroup') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-6" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
+      <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-[var(--bg-main)]">
         {/* Шапка */}
-        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20 bg-[var(--bg-card)]">
+        <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center gap-3 mb-4">
             <motion.button
               whileTap={{ scale: 0.9 }}
@@ -456,7 +456,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             >
               <ChevronLeft size={22} />
             </motion.button>
-            <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A]">Новая группа</h1>
+            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Новая группа</h1>
           </div>
         </div>
 
@@ -502,7 +502,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Например: Друзья из школы"
               maxLength={50}
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[#1A1A1A] placeholder:text-[#9CA3AF]"
+              className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
             <p className="text-xs text-[#9CA3AF] font-body text-right">

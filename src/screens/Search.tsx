@@ -12,13 +12,13 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
   const recentSearches = ['Анна', 'Клуб путешественников', 'Дизайн'];
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
+    <div className="flex flex-col h-full bg-[var(--bg-main)]">
       {/* Header */}
-      <div className="px-4 sm:px-6 pt-6 pb-4 flex items-center gap-3 sticky top-0 z-20" style={{ background: 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>
+      <div className="px-4 sm:px-6 pt-4 pb-3 flex items-center gap-3 sticky top-0 z-20 bg-transparent">
         <motion.button whileTap={{ scale: 0.9 }} onClick={onBack} className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-sevchik-purple" style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}>
           <ArrowLeft size={22} />
         </motion.button>
-        <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A]">Поиск</h1>
+        <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Поиск</h1>
       </div>
 
       {/* Search Input */}
@@ -30,7 +30,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Поиск людей, групп и сообщений..."
-            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-white border-2 border-transparent focus:border-sevchik-purple/30 outline-none transition-all font-body text-[#1A1A1A] placeholder:text-[#9CA3AF]"
+            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-sevchik-purple/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
             style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
           />
         </div>

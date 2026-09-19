@@ -8,10 +8,10 @@ interface CallsProps {
 
 export function Calls({ onNavigate }: CallsProps) {
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
-      <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20 bg-[var(--bg-card)]">
+    <div className="flex flex-col h-full bg-[var(--bg-main)]">
+      <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#1A1A1A]">Звонки</h1>
+          <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Звонки</h1>
           <motion.button
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}

@@ -70,8 +70,8 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
   ];
 
   return (
-    <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-gradient-to-b from-[#FFF8ED] to-[#FFF0DB]">
-      <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center gap-3 sticky top-0 bg-gradient-to-b from-[#FFF8ED] to-transparent z-20 pb-4">
+    <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-[var(--bg-main)]">
+      <div className="px-4 sm:px-6 pt-4 pb-3 flex items-center gap-3 sticky top-0 bg-transparent z-20">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onBack}
@@ -80,7 +80,7 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
         >
           <ChevronRight size={22} className="rotate-180" />
         </motion.button>
-        <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#1A1A1A]">Настройки</h1>
+        <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Настройки</h1>
       </div>
 
       <div className="px-4 sm:px-6 space-y-6 max-w-2xl mx-auto pt-2">

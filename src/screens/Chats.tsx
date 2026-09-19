@@ -20,9 +20,9 @@ export function Chats({ onOpenChat, grayMode }: ChatsProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 pt-6 pb-4 px-4 sm:px-6 bg-[var(--bg-card)]">
+      <div className="sticky top-0 z-10 pt-4 pb-3 px-4 sm:px-6 bg-transparent">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="font-heading font-extrabold text-2xl sm:text-3xl">Чаты</h1>
+          <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Чаты</h1>
           <div className="w-10 h-10 rounded-full bg-sevchik-orange flex items-center justify-center font-heading font-extrabold text-white text-sm relative overflow-hidden" style={{ boxShadow: '0 4px 12px rgba(255,152,72,0.3)' }}>
             <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)' }} />
             <span className="relative z-10">АВ</span>
@@ -30,13 +30,13 @@ export function Chats({ onOpenChat, grayMode }: ChatsProps) {
         </div>
         {/* Orange search bar */}
         <div className="relative">
-          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80" />
+          <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Поиск..."
-            className="w-full text-white placeholder:text-white/80 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm relative overflow-hidden"
+            className="w-full text-[var(--text-main)] placeholder:text-[var(--text-secondary)] rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm relative overflow-hidden bg-[var(--bg-input)]"
             style={{
               background: 'var(--bg-input)',
               boxShadow: 'none',
