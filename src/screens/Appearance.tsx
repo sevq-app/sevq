@@ -78,7 +78,9 @@ export function Appearance({
   const previewBg = grayMode ? '#2B2E33' : '#F9FAFB';
   const textMain = grayMode ? '#FFFFFF' : '#1A1A1A';
   const textSecondary = grayMode ? '#D6D9DE' : '#6B7280';
-  const containerBg = grayMode ? '#24272B' : (currentTheme?.bg || '#FFF8ED');
+  const containerBg = grayMode
+    ? 'radial-gradient(ellipse at top left, #34383F 0%, #24272B 60%, #1B1E22 100%)'
+    : (currentTheme?.bg || '#FFF8ED');
 
   return (
     <div
@@ -260,11 +262,11 @@ export function Appearance({
               <div
                 className="p-3 rounded-2xl rounded-tl-none max-w-[80%]"
                 style={{
-                  backgroundColor: '#F3F4F6',
+                  backgroundColor: grayMode ? '#2B2E33' : '#252936',
                   fontSize: `${fontSize}px`
                 }}
               >
-                <p className="font-body" style={{ color: textMain }}>
+                <p className="font-body" style={{ color: '#FFFFFF' }}>
                   Здесь ты можешь поменять цвет под своё настроение 🎨
                 </p>
               </div>

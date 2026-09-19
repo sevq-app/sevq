@@ -124,20 +124,22 @@ function App() {
   return (
     <div className="flex min-h-screen">
       <Sidebar current={screen} onNavigate={setScreen} />
-      <button
-        type="button"
-        onClick={() => updateGrayMode(!grayMode)}
-        aria-label={grayMode ? 'Выключить серую тему' : 'Включить серую тему'}
-        title={grayMode ? 'Выключить серую тему' : 'Включить серую тему'}
-        className="fixed top-4 right-4 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-colors"
-        style={{
-          backgroundColor: grayMode ? '#FFFFFF' : '#35383D',
-          color: grayMode ? '#24272B' : '#FFFFFF',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
-        }}
-      >
-        <Palette size={19} />
-      </button>
+      {screen !== 'appearance' && (
+        <button
+          type="button"
+          onClick={() => updateGrayMode(!grayMode)}
+          aria-label={grayMode ? 'Выключить серую тему' : 'Включить серую тему'}
+          title={grayMode ? 'Выключить серую тему' : 'Включить серую тему'}
+          className="fixed top-4 right-4 z-50 w-11 h-11 rounded-full flex items-center justify-center transition-colors"
+          style={{
+            backgroundColor: grayMode ? '#FFFFFF' : '#35383D',
+            color: grayMode ? '#24272B' : '#FFFFFF',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+          }}
+        >
+          <Palette size={19} />
+        </button>
+      )}
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
         <div className="flex-1 min-w-0 overflow-hidden">
           <AnimatePresence mode="wait">
