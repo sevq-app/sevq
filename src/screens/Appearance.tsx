@@ -115,21 +115,21 @@ export function Appearance({
 
   return (
     <div
-      className="h-full overflow-y-auto pb-24 md:pb-6 transition-colors duration-500 pattern-bg-light"
+      className="h-full overflow-y-auto pb-[96px] md:pb-[24px] transition-colors duration-500 pattern-bg-light"
       style={{ background: containerBg }}
     >
       {/* Шапка */}
       <div
-        className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20"
+        className="px-[16px] sm:px-[24px] pt-[24px] pb-[16px] sticky top-0 z-20"
         style={{
           background: `linear-gradient(180deg, ${containerBg} 80%, transparent 100%)`,
         }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-[12px]">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onBack}
-            className="w-11 h-11 rounded-2xl flex items-center justify-center text-[#6546C7]"
+            className="w-[44px] h-[44px] rounded-2xl flex items-center justify-center text-[#6546C7]"
             style={{
               backgroundColor: cardBg,
               boxShadow: '0 4px 12px rgba(101,70,199,0.15)'
@@ -143,18 +143,18 @@ export function Appearance({
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 space-y-6 max-w-2xl mx-auto pt-2">
+      <div className="px-[16px] sm:px-[24px] space-y-[24px] max-w-2xl mx-auto pt-[8px]">
 
         {/* Размер текста */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl p-5"
+          className="rounded-3xl p-[20px]"
           style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-[12px] mb-[16px]">
             <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center"
+              className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
                 background: 'linear-gradient(135deg, #6546C7, #8366D9)',
                 boxShadow: '0 4px 12px rgba(101,70,199,0.3)',
@@ -165,28 +165,28 @@ export function Appearance({
             <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Размер текста</h3>
           </div>
 
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-body" style={{ color: textSecondary }}>Текущий размер:</span>
+          <div className="flex items-center justify-between mb-[12px]">
+            <span className="text-sm font-body" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>Текущий размер:</span>
             <span className="font-heading font-bold text-[#6546C7]" style={{ fontSize: `${fontSize}px` }}>{getFontSizeLabel()}</span>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-xs font-body" style={{ color: textSecondary }}>A</span>
+          <div className="flex items-center gap-[16px]">
+            <span className="text-xs font-body" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>A</span>
             <input
               type="range"
               min="12"
               max="24"
               value={fontSize}
               onChange={(e) => setFontSize(Number(e.target.value))}
-              className="flex-1 h-2 rounded-full appearance-none cursor-pointer"
+              className="flex-1 h-[8px] rounded-full appearance-none cursor-pointer"
               style={{
                 background: `linear-gradient(to right, #6546C7 ${((fontSize - 12) / 12) * 100}%, #E5E7EB ${((fontSize - 12) / 12) * 100}%)`,
               }}
             />
-            <span className="text-lg font-body font-bold" style={{ color: textSecondary }}>A</span>
+            <span className="text-lg font-body font-bold" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>A</span>
           </div>
 
-          <div className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: previewBg }}>
+          <div className="mt-[16px] p-[16px] rounded-2xl" style={{ backgroundColor: previewBg }}>
             <p
               className="font-body transition-all duration-300"
               style={{ fontSize: `${fontSize}px`, color: textMain }}
@@ -201,19 +201,19 @@ export function Appearance({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="rounded-3xl p-5"
+          className="rounded-3xl p-[20px]"
           style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
         >
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-[12px] mb-[16px]">
             <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center"
+              className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #555A62, #2B2E33)' }}
             >
               <Moon size={20} className="text-white" />
             </div>
             <div className="flex-1">
               <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Серая тема</h3>
-              <p className="text-xs font-body mt-0.5" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>
+              <p className="text-xs font-body mt-[2px]" style={{ color: textSecondary, fontSize: `${fontSize}px` }}>
                 Нейтральный фон и белый текст для лучшего контраста
               </p>
             </div>
@@ -221,13 +221,15 @@ export function Appearance({
           <button
             type="button"
             onClick={() => setGrayMode(!grayMode)}
-            className="w-full py-3 rounded-2xl font-heading font-bold transition-colors"
+            className="w-full py-[12px] rounded-2xl font-heading font-bold transition-colors"
             style={{
               backgroundColor: grayMode ? '#FFFFFF' : '#E5E7EB',
               color: grayMode ? '#24272B' : '#1A1A1A',
             }}
           >
-            {grayMode ? 'Серая тема включена' : 'Включить серую тему'}
+            <span style={{ fontSize: `${fontSize}px` }}>
+              {grayMode ? 'Серая тема включена' : 'Включить серую тему'}
+            </span>
           </button>
         </motion.div>
 
@@ -236,12 +238,12 @@ export function Appearance({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="rounded-3xl p-5"
+          className="rounded-3xl p-[20px]"
           style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
-          <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-[12px] mb-[16px]">
             <div
-              className="w-10 h-10 rounded-2xl flex items-center justify-center"
+              className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
                 background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
                 boxShadow: '0 4px 12px rgba(79,211,200,0.3)',
@@ -249,10 +251,10 @@ export function Appearance({
             >
               <Palette size={20} className="text-white" />
             </div>
-            <h3 className="font-heading font-bold" style={{ color: textMain }}>Цветовая тема</h3>
+            <h3 className="font-heading font-bold" style={{ color: textMain, fontSize: `${fontSize}px` }}>Цветовая тема</h3>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-[8px]">
             {themes.map((theme) => {
               const ThemeIcon = theme.icon;
               return (
@@ -261,7 +263,7 @@ export function Appearance({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => applyTheme(theme.id)}
-                className={`group relative h-20 rounded-2xl bg-gradient-to-br transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl ${
+                className={`group relative h-[80px] rounded-2xl bg-gradient-to-br transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-xl ${
                   selectedTheme === theme.id ? 'ring-2 ring-white/50 ring-offset-2 ring-offset-[var(--bg-main)]' : ''
                 }`}
                 style={{
@@ -269,9 +271,9 @@ export function Appearance({
                   boxShadow: selectedTheme === theme.id ? `0 12px 28px ${theme.primary}66` : `0 6px 16px ${theme.primary}33`,
                 }}
               >
-                <div className="relative z-10 flex h-full flex-col items-center justify-center gap-1 text-white drop-shadow-sm">
-                  <ThemeIcon className="h-6 w-6" />
-                  <span className="font-heading font-bold text-xs">{theme.name}</span>
+                <div className="relative z-10 flex h-full flex-col items-center justify-center gap-[4px] text-white drop-shadow-sm">
+                  <ThemeIcon className="h-[24px] w-[24px]" />
+                  <span className="font-heading font-bold text-xs" style={{ fontSize: `${fontSize}px` }}>{theme.name}</span>
                 </div>
               </motion.button>
               );
@@ -284,18 +286,15 @@ export function Appearance({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-3xl p-5 pattern-bg-light"
+          className="rounded-3xl p-[20px] pattern-bg-light"
           style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
         >
-          <h3 className="font-heading font-bold mb-4" style={{ color: textMain }}>Предпросмотр</h3>
-          <div className="space-y-3">
+          <h3 className="font-heading font-bold mb-[16px]" style={{ color: textMain, fontSize: `${fontSize}px` }}>Предпросмотр</h3>
+          <div className="space-y-[12px]">
             {/* Входящее сообщение (нейтральное) */}
             <div className="flex justify-start">
               <div
-                className="message-incoming-pattern p-3 rounded-2xl rounded-bl-sm max-w-[80%]"
-                style={{
-                  fontSize: `${fontSize}px`
-                }}
+                className="message-incoming-pattern p-[12px] rounded-2xl rounded-bl-sm max-w-[80%]"
               >
                 <p className="font-body" style={{ color: textMain, fontSize: `${fontSize}px` }}>
                   Здесь ты можешь поменять цвет под своё настроение 🎨
@@ -306,9 +305,8 @@ export function Appearance({
             {/* Исходящее сообщение (цвет темы) */}
             <div className="flex justify-end">
               <div
-                className="message-outgoing-pattern p-3 rounded-2xl rounded-br-sm max-w-[80%]"
+                className="message-outgoing-pattern p-[12px] rounded-2xl rounded-br-sm max-w-[80%]"
                 style={{
-                  fontSize: `${fontSize}px`,
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }}
               >
