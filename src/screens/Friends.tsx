@@ -5,7 +5,11 @@ import { friendsData } from '@/data/mock';
 
 type FriendsView = 'main' | 'selectMembers' | 'createGroup';
 
-export function Friends() {
+interface FriendsProps {
+  darkMode?: boolean;
+}
+
+export function Friends({ darkMode = false }: FriendsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showConnectPrompt, setShowConnectPrompt] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -58,11 +62,11 @@ export function Friends() {
   // ============================================
   if (currentView === 'main') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-6 relative" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
+      <div className="h-full overflow-y-auto pb-24 md:pb-6 relative" style={{ background: darkMode ? 'radial-gradient(circle at 50% 50%, #1f1f28 0%, #25252f 100%)' : 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
         {/* Шапка */}
-        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20" style={{ background: 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>
+        <div className="px-4 sm:px-6 pt-6 pb-4 sticky top-0 z-20" style={{ background: darkMode ? 'linear-gradient(180deg, #1f1f28 80%, transparent)' : 'linear-gradient(180deg, #FFF8ED 80%, transparent 100%)' }}>
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl text-[#1A1A1A]">Контакты</h1>
+            <h1 className="font-heading font-extrabold text-2xl sm:text-3xl" style={{ color: darkMode ? '#e8e8f0' : '#1A1A1A' }}>Контакты</h1>
             <div className="relative">
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -186,8 +190,8 @@ export function Friends() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-3xl p-5"
-            style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+            className="rounded-3xl p-5"
+            style={{ background: darkMode ? '#2d2d3a' : '#FFFFFF', boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
           >
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -206,8 +210,8 @@ export function Friends() {
                 <Users size={24} className="text-white relative z-10" />
               </div>
               <div className="flex-1 text-left">
-                <h3 className="font-heading font-bold text-[#1A1A1A] text-sm">Подключите контакты</h3>
-                <p className="text-xs text-[#6B7280] font-body mt-0.5">Разрешите доступ, чтобы найти друзей</p>
+                <h3 className="font-heading font-bold text-sm" style={{ color: darkMode ? '#e8e8f0' : '#1A1A1A' }}>Подключите контакты</h3>
+                <p className="text-xs font-body mt-0.5" style={{ color: darkMode ? '#a0a0b0' : '#6B7280' }}>Разрешите доступ, чтобы найти друзей</p>
               </div>
             </motion.button>
           </motion.div>
@@ -215,7 +219,7 @@ export function Friends() {
           {/* Список друзей */}
           {filteredFriends.length > 0 ? (
             <div className="space-y-2">
-              <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1">
+              <h2 className="text-xs font-bold uppercase tracking-wider mb-3 ml-1" style={{ color: darkMode ? '#a0a0b0' : '#6B7280' }}>
                 Ваши контакты ({filteredFriends.length})
               </h2>
               {filteredFriends.map((friend, index) => (
@@ -224,8 +228,8 @@ export function Friends() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 + index * 0.05 }}
-                  className="bg-white rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg transition-shadow"
-                  style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
+                  className="rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg transition-shadow"
+                  style={{ background: darkMode ? '#2d2d3a' : '#FFFFFF', boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
                 >
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative overflow-hidden shrink-0"
@@ -238,13 +242,13 @@ export function Friends() {
                     <span className="relative z-10">{friend.initials}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-heading font-bold text-[#1A1A1A] text-sm truncate">{friend.name}</h3>
-                    <p className="text-xs text-[#6B7280] font-body mt-0.5">{friend.handle}</p>
+                    <h3 className="font-heading font-bold text-sm truncate" style={{ color: darkMode ? '#e8e8f0' : '#1A1A1A' }}>{friend.name}</h3>
+                    <p className="text-xs font-body mt-0.5" style={{ color: darkMode ? '#a0a0b0' : '#6B7280' }}>{friend.handle}</p>
                   </div>
                   {friend.online && (
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-sevchik-mint" />
-                      <span className="text-xs text-sevchik-mint font-body">В сети</span>
+                      <span className="text-xs font-body" style={{ color: '#4FD3C8' }}>В сети</span>
                     </div>
                   )}
                 </motion.div>
@@ -252,7 +256,7 @@ export function Friends() {
             </div>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-              <p className="text-[#6B7280] font-body text-sm">Ничего не найдено</p>
+              <p className="font-body text-sm" style={{ color: darkMode ? '#a0a0b0' : '#6B7280' }}>Ничего не найдено</p>
             </motion.div>
           )}
         </div>
