@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'; 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search as SearchIcon } from 'lucide-react';
 import { Sidebar, TabBar } from '@/components/Navigation';
 import { QLogo } from '@/components/QLogo';
 import { Login, Register } from '@/screens/Login';
@@ -190,74 +189,8 @@ function App() {
             </motion.div>
           </AnimatePresence>
         </div>
-        <div className="hidden xl:block w-80 shrink-0 overflow-y-auto p-5 border-l border-sevchik-purple/8">
-          <ProfilePreview user={currentUser} />
-        </div>
       </div>
       {showTabBar && <TabBar current={screen} onNavigate={setScreen} />}
-    </div>
-  );
-}
-
-function ProfilePreview({ user }: { user: User | null }) {
-  const metadata = user?.user_metadata as Record<string, unknown> | undefined;
-  const name = typeof metadata?.name === 'string' ? metadata.name : typeof metadata?.full_name === 'string' ? metadata.full_name : '';
-  const username = typeof metadata?.username === 'string' ? metadata.username : '';
-  const avatarUrl = typeof metadata?.avatarUrl === 'string' ? metadata.avatarUrl : typeof metadata?.avatar_url === 'string' ? metadata.avatar_url : '';
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3 mb-2">
-        <QLogo size={36} />
-        <span className="font-heading font-extrabold text-xl" style={{ color: 'var(--text-main, #1A1A1A)' }}>Севчик</span>
-      </div>
-      <div className="bg-white rounded-card p-5 flex flex-col items-center plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
-        <div className="relative z-10">
-          <div className="p-1 rounded-full" style={{ background: 'linear-gradient(135deg, #FFB87A, #FF9848)', boxShadow: '0 4px 14px rgba(255,152,72,0.3)' }}>
-            <div className="p-[2px] rounded-full bg-white">
-              {avatarUrl ? <img src={avatarUrl} alt="" className="w-16 h-16 rounded-full object-cover" /> : <div className="w-16 h-16 rounded-full flex items-center justify-center font-heading font-extrabold text-white text-lg relative overflow-hidden" style={{ background: '#6546C7' }}>
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%)' }} />
-                <span className="relative z-10">+</span>
-              </div>}
-            </div>
-          </div>
-        </div>
-        <h3 className="font-heading font-extrabold text-base mt-3 relative z-10" style={{ color: 'var(--text-main, #1A1A1A)' }}>{name || 'Загрузка...'}</h3>
-        <p className="text-xs font-body mt-0.5 relative z-10" style={{ color: 'var(--text-secondary, #6B7280)' }}>{username ? `@${username.replace(/^@/, '')}` : ''}</p>
-        <div className="flex items-center gap-1.5 mt-2 relative z-10">
-          <span className="w-2 h-2 rounded-full bg-sevchik-mint" />
-          <span className="text-xs text-sevchik-mint font-body">В сети</span>
-        </div>
-      </div>
-      <div className="bg-white rounded-card p-4 plastic-card" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
-        <h4 className="font-heading font-bold text-sm mb-3 relative z-10" style={{ color: 'var(--text-main, #1A1A1A)' }}>Персональная тема</h4>
-        <div className="flex gap-3 relative z-10">
-          {['#6546C7', '#FF9848', '#4FD3C8'].map((color, i) => (
-            <div
-              key={i}
-              className="w-10 h-10 rounded-full relative overflow-hidden"
-              style={{ background: `linear-gradient(135deg, ${color}dd, ${color})`, boxShadow: `0 3px 10px ${color}40` }}
-            >
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-2 mt-3 relative z-10">
-          {['⭐', '😊', '', '❤️', '✨'].map((emoji, i) => (
-            <div key={i} className="w-8 h-8 rounded-xl bg-sevchik-cream flex items-center justify-center text-sm" style={{ boxShadow: '0 2px 6px rgba(0,0,0,0.05)' }}>
-              {emoji}
-            </div>
-          ))}
-        </div>
-      </div>
-      <button
-        onClick={() => window.dispatchEvent(new CustomEvent('sevchik-navigate', { detail: 'search' }))}
-        className="w-full flex items-center gap-3 px-4 py-3 rounded-card text-white font-heading font-bold btn-3d relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #FFB87A, #FF9848)', boxShadow: '0 4px 14px rgba(255,152,72,0.25)' }}
-      >
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 50%)' }} />
-        <SearchIcon size={18} className="relative z-10" />
-        <span className="relative z-10 text-sm">Найти друзей</span>
-      </button>
     </div>
   );
 }

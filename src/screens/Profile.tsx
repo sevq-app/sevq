@@ -8,23 +8,27 @@ import type { Screen } from '@/data/mock';
 const photosKey = 'sevchik-profile-photos';
 
 export type ProfileGroup = { id: string; name: string; initials?: string; avatarUrl?: string };
+type ProfileUser = User & { name?: string; username?: string; avatarUrl?: string };
 
-type ProfileProps = { user: User | null; onNavigate?: (screen: Screen) => void };
+type ProfileProps = { user: ProfileUser | null; onNavigate?: (screen: Screen) => void };
 
 function readPhotos() {
   try { return JSON.parse(localStorage.getItem(photosKey) || '[]') as string[]; } catch { return []; }
 }
 
-function getMetadata(user: User | null) {
+function getMetadata(user: ProfileUser | null) {
   const metadata = user?.user_metadata as Record<string, unknown> | undefined;
-  const name = typeof metadata?.name === 'string' ? metadata.name : typeof metadata?.full_name === 'string' ? metadata.full_name : '';
-  const username = typeof metadata?.username === 'string' ? metadata.username : '';
-  const avatarUrl = typeof metadata?.avatarUrl === 'string' ? metadata.avatarUrl : typeof metadata?.avatar_url === 'string' ? metadata.avatar_url : '';
+  const emailName = user?.email?.split('@')[0] || '';
+  const metadataName = typeof metadata?.full_name === 'string' ? metadata.full_name : '';
+  const metadataUsername = typeof metadata?.username === 'string' ? metadata.username : '';
+  const name = metadataName || user?.name || emailName || 'Пользователь';
+  const username = metadataUsername || user?.username || emailName;
+  const avatarUrl = user?.avatarUrl || (typeof metadata?.avatarUrl === 'string' ? metadata.avatarUrl : typeof metadata?.avatar_url === 'string' ? metadata.avatar_url : '');
   const groups = Array.isArray(metadata?.groups) ? metadata.groups.filter((group): group is ProfileGroup => typeof group === 'object' && group !== null && typeof (group as ProfileGroup).id === 'string' && typeof (group as ProfileGroup).name === 'string') : [];
   return { name, username, avatarUrl, groups };
 }
 
-export function getProfileGroups(user: User | null): ProfileGroup[] {
+export function getProfileGroups(user: ProfileUser | null): ProfileGroup[] {
   return getMetadata(user).groups;
 }
 
@@ -72,8 +76,10 @@ export function Profile({ user, onNavigate }: ProfileProps) {
           </button>
           <div className="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-[var(--bg-card)] flex items-center justify-center text-lg shadow-[0_4px_12px_rgba(101,70,199,0.2)]">⭐</div>
         </div>
-        <h2 className="font-heading font-extrabold text-xl mt-4">{name || 'Загрузка...'}</h2>
-        <p className="text-sevchik-textSecondary text-sm font-body mt-0.5">{username ? `@${username.replace(/^@/, '')}` : ''}</p>
+        <div className="text-center mt-4 space-y-1">
+          <h2 className="font-heading font-semibold text-xl">{name}</h2>
+          <p className="text-sm text-[var(--text-secondary)] font-body">{username ? `@${username.replace(/^@/, '')}` : ''}</p>
+        </div>
       </div>
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
 
