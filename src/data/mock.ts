@@ -13,8 +13,9 @@ export type Screen =
   | 'about'
   | 'photos'
   | 'my-groups'
-  | 'group';
-  
+  | 'group'
+  | 'start-chat';
+ 
 export interface Message {
   id: string;
   senderId: string;

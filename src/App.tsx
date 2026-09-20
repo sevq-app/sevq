@@ -16,6 +16,7 @@ import { AboutMe, type ProfileData } from '@/screens/AboutMe';
 import { Photos } from '@/screens/Photos';
 import { MyGroups } from '@/screens/MyGroups';
 import { Group } from '@/screens/Group';
+import { StartChat } from '@/screens/StartChat';
 import { supabase } from '@/lib/supabase';
 import type { User } from '@supabase/supabase-js';
 import type { Screen, Chat } from '@/data/mock';
@@ -158,7 +159,15 @@ function App() {
               className="h-full"
             >
               {screen === 'chats' && (
-                <Chats onOpenChat={handleOpenChat} grayMode={grayMode} fontSize={fontSize} />
+                <Chats 
+                  onOpenChat={handleOpenChat} 
+                  onStartChat={() => setScreen('start-chat')} 
+                  grayMode={grayMode} 
+                  fontSize={fontSize} 
+                />
+              )}
+              {screen === 'start-chat' && (
+                <StartChat onBack={() => setScreen('chats')} />
               )}
               {screen === 'conversation' && activeChat && (
                 <Conversation chat={activeChat} onBack={() => setScreen('chats')} fontSize={fontSize} />
