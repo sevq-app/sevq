@@ -12,7 +12,7 @@ import { Clubs } from '@/screens/Clubs';
 import { Settings } from '@/screens/Settings';
 import { Calls } from '@/screens/Calls';
 import { Appearance } from '@/screens/Appearance';
-import { AboutMe } from '@/screens/AboutMe';
+import { AboutMe, type ProfileData } from '@/screens/AboutMe';
 import { Photos } from '@/screens/Photos';
 import { MyGroups } from '@/screens/MyGroups';
 import { Group } from '@/screens/Group';
@@ -25,6 +25,13 @@ function App() {
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [profileData, setProfileData] = useState<ProfileData>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('sevchik-profile-data') || '{}') as ProfileData;
+    } catch {
+      return {} as ProfileData;
+    }
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // 🎨 Глобальные настройки оформления
@@ -159,8 +166,8 @@ function App() {
               {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
               {screen === 'calls' && <Calls onNavigate={setScreen} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
-              {screen === 'profile' && <Profile user={currentUser} onNavigate={setScreen} />}
-              {screen === 'about' && <AboutMe user={currentUser} onBack={() => setScreen('profile')} />}
+              {screen === 'profile' && <Profile user={currentUser} profileData={profileData} onNavigate={setScreen} />}
+              {screen === 'about' && <AboutMe user={currentUser} setProfileData={setProfileData} onBack={() => setScreen('profile')} />}
               {screen === 'photos' && <Photos onBack={() => setScreen('profile')} />}
               {screen === 'my-groups' && <MyGroups groups={getProfileGroups(currentUser)} onBack={() => setScreen('profile')} onOpenGroup={handleOpenGroup} />}
               {screen === 'group' && activeGroup && <Group name={activeGroup} onBack={() => setScreen('my-groups')} />}

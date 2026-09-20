@@ -4,30 +4,31 @@ import type { User } from '@supabase/supabase-js';
 import { Copy, Link, QrCode, Share2, ChevronRight, Settings, Sparkles, Users, X } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Screen } from '@/data/mock';
+import type { ProfileData } from '@/screens/AboutMe';
 
 const photosKey = 'sevchik-profile-photos';
-const profileStorageKey = 'sevchik-profile';
+const profileStorageKey = 'sevchik-profile-data';
 
 export type ProfileGroup = { id: string; name: string; initials?: string; avatarUrl?: string };
 type ProfileUser = User & { name?: string; username?: string; avatarUrl?: string };
 
-type ProfileProps = { user: ProfileUser | null; onNavigate?: (screen: Screen) => void };
+type ProfileProps = { user: ProfileUser | null; profileData: ProfileData; onNavigate?: (screen: Screen) => void };
 
 function readPhotos() {
   try { return JSON.parse(localStorage.getItem(photosKey) || '[]') as string[]; } catch { return []; }
 }
 
-function readSavedProfile() {
+function readSavedProfile(): Partial<ProfileData> {
   try {
-    return JSON.parse(localStorage.getItem(profileStorageKey) || '{}') as { name?: string; username?: string; avatarUrl?: string };
+    return JSON.parse(localStorage.getItem(profileStorageKey) || '{}') as Partial<ProfileData>;
   } catch {
     return {};
   }
 }
 
-function getMetadata(user: ProfileUser | null) {
+function getMetadata(user: ProfileUser | null, profileData: ProfileData) {
   const metadata = user?.user_metadata as Record<string, unknown> | undefined;
-  const savedProfile = readSavedProfile();
+  const savedProfile = profileData.name || profileData.username ? profileData : readSavedProfile();
   const emailName = user?.email?.split('@')[0] || '';
   const metadataName = typeof metadata?.full_name === 'string' ? metadata.full_name : '';
   const metadataUsername = typeof metadata?.username === 'string' ? metadata.username : '';
@@ -39,10 +40,10 @@ function getMetadata(user: ProfileUser | null) {
 }
 
 export function getProfileGroups(user: ProfileUser | null): ProfileGroup[] {
-  return getMetadata(user).groups;
+  return getMetadata(user, {} as ProfileData).groups;
 }
 
-export function Profile({ user, onNavigate }: ProfileProps) {
+export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [online, setOnline] = useState(true);
   const [photos, setPhotos] = useState<string[]>(readPhotos);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
@@ -50,7 +51,10 @@ export function Profile({ user, onNavigate }: ProfileProps) {
   const [isInviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'menu' | 'qr'>('menu');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { name, username, avatarUrl, groups } = getMetadata(user);
+  const { name, username, avatarUrl, groups } = getMetadata(user, profileData);
+  const savedProfile = profileData.name || profileData.username ? profileData : readSavedProfile();
+  const displayName = [savedProfile.name || name, savedProfile.lastName].filter(Boolean).join(' ') || user?.email?.split('@')[0] || 'Пользователь';
+  const displayUsername = savedProfile.username || username || user?.email?.split('@')[0] || '';
   const profilePhoto = photos[0] || avatarUrl;
 
   useEffect(() => { localStorage.setItem(photosKey, JSON.stringify(photos)); }, [photos]);
@@ -87,8 +91,9 @@ export function Profile({ user, onNavigate }: ProfileProps) {
           <div className="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-[var(--bg-card)] flex items-center justify-center text-lg shadow-[0_4px_12px_rgba(101,70,199,0.2)]">⭐</div>
         </div>
         <div className="text-center mt-4 space-y-1">
-          <h2 className="font-heading font-semibold text-xl">{name}</h2>
-          <p className="text-sm text-[var(--text-secondary)] font-body">{username ? `@${username.replace(/^@/, '')}` : ''}</p>
+          <h2 className="font-heading font-semibold text-xl">{displayName}</h2>
+          <p className="text-sm text-[var(--text-secondary)] font-body">{displayUsername ? `@${displayUsername.replace(/^@/, '')}` : ''}</p>
+          {savedProfile.about && <p className="text-sm text-[var(--text-secondary)] font-body">{savedProfile.about}</p>}
         </div>
       </div>
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />

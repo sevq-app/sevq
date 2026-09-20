@@ -5,7 +5,7 @@ import { ArrowLeft, AtSign, Calendar, Eye, Globe, Mail, MessageSquare, Phone, Sh
 import { supabase } from '@/lib/supabase';
 
 const storageKey = 'sevchik-about-me';
-const profileStorageKey = 'sevchik-profile';
+const profileStorageKey = 'sevchik-profile-data';
 type Visibility = 'Все' | 'Друзья' | 'Никто';
 type AboutData = {
   firstName: string;
@@ -23,7 +23,22 @@ type AboutData = {
   websiteVisibility: Visibility;
 };
 
-type AboutMeProps = { user: User | null; onBack: () => void };
+export type ProfileData = {
+  name: string;
+  lastName: string;
+  username: string;
+  phone: string;
+  phoneVisibility: Visibility;
+  birthDate: string;
+  birthDateVisibility: Visibility;
+  about: string;
+  socials: string;
+  socialsVisibility: Visibility;
+  site: string;
+  siteVisibility: Visibility;
+};
+
+type AboutMeProps = { user: User | null; onBack: () => void; setProfileData: (data: ProfileData) => void };
 
 const emptyData: AboutData = {
   firstName: '',
@@ -44,7 +59,23 @@ const emptyData: AboutData = {
 function readSavedData(): Partial<AboutData> {
   try {
     const saved = localStorage.getItem(storageKey);
-    return saved ? JSON.parse(saved) as Partial<AboutData> : {};
+    const legacy = saved ? JSON.parse(saved) as Partial<AboutData> : {};
+    const profile = JSON.parse(localStorage.getItem(profileStorageKey) || '{}') as Partial<ProfileData>;
+    return {
+      ...legacy,
+      firstName: profile.name || legacy.firstName,
+      lastName: profile.lastName || legacy.lastName,
+      username: profile.username || legacy.username,
+      phone: profile.phone || legacy.phone,
+      phoneVisibility: profile.phoneVisibility || legacy.phoneVisibility,
+      birthDate: profile.birthDate || legacy.birthDate,
+      birthDateVisibility: profile.birthDateVisibility || legacy.birthDateVisibility,
+      about: profile.about || legacy.about,
+      social: profile.socials || legacy.social,
+      socialVisibility: profile.socialsVisibility || legacy.socialVisibility,
+      website: profile.site || legacy.website,
+      websiteVisibility: profile.siteVisibility || legacy.websiteVisibility,
+    };
   } catch {
     return {};
   }
@@ -70,7 +101,7 @@ function initialData(user: User | null): AboutData {
   };
 }
 
-export function AboutMe({ user, onBack }: AboutMeProps) {
+export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
   const [data, setData] = useState<AboutData>(() => initialData(user));
   const [openVisibility, setOpenVisibility] = useState<keyof AboutData | null>(null);
   const [saving, setSaving] = useState(false);
@@ -82,12 +113,22 @@ export function AboutMe({ user, onBack }: AboutMeProps) {
   const handleSave = async () => {
     setSaving(true);
     localStorage.setItem(storageKey, JSON.stringify(data));
-    localStorage.setItem(profileStorageKey, JSON.stringify({
-      name: [data.firstName, data.lastName].filter(Boolean).join(' '),
+    const profileData: ProfileData = {
+      name: data.firstName,
+      lastName: data.lastName,
       username: data.username,
       phone: data.phone,
+      phoneVisibility: data.phoneVisibility,
+      birthDate: data.birthDate,
+      birthDateVisibility: data.birthDateVisibility,
       about: data.about,
-    }));
+      socials: data.social,
+      socialsVisibility: data.socialVisibility,
+      site: data.website,
+      siteVisibility: data.websiteVisibility,
+    };
+    localStorage.setItem(profileStorageKey, JSON.stringify(profileData));
+    setProfileData(profileData);
     if (user) {
       await supabase.auth.updateUser({ data });
     }
