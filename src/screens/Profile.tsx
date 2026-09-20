@@ -6,6 +6,7 @@ import { Avatar } from '@/components/Avatar';
 import type { Screen } from '@/data/mock';
 
 const photosKey = 'sevchik-profile-photos';
+const profileStorageKey = 'sevchik-profile';
 
 export type ProfileGroup = { id: string; name: string; initials?: string; avatarUrl?: string };
 type ProfileUser = User & { name?: string; username?: string; avatarUrl?: string };
@@ -16,13 +17,22 @@ function readPhotos() {
   try { return JSON.parse(localStorage.getItem(photosKey) || '[]') as string[]; } catch { return []; }
 }
 
+function readSavedProfile() {
+  try {
+    return JSON.parse(localStorage.getItem(profileStorageKey) || '{}') as { name?: string; username?: string; avatarUrl?: string };
+  } catch {
+    return {};
+  }
+}
+
 function getMetadata(user: ProfileUser | null) {
   const metadata = user?.user_metadata as Record<string, unknown> | undefined;
+  const savedProfile = readSavedProfile();
   const emailName = user?.email?.split('@')[0] || '';
   const metadataName = typeof metadata?.full_name === 'string' ? metadata.full_name : '';
   const metadataUsername = typeof metadata?.username === 'string' ? metadata.username : '';
-  const name = metadataName || user?.name || emailName || 'Пользователь';
-  const username = metadataUsername || user?.username || emailName;
+  const name = savedProfile.name || metadataName || user?.name || emailName || 'Пользователь';
+  const username = savedProfile.username || metadataUsername || user?.username || emailName;
   const avatarUrl = user?.avatarUrl || (typeof metadata?.avatarUrl === 'string' ? metadata.avatarUrl : typeof metadata?.avatar_url === 'string' ? metadata.avatar_url : '');
   const groups = Array.isArray(metadata?.groups) ? metadata.groups.filter((group): group is ProfileGroup => typeof group === 'object' && group !== null && typeof (group as ProfileGroup).id === 'string' && typeof (group as ProfileGroup).name === 'string') : [];
   return { name, username, avatarUrl, groups };
