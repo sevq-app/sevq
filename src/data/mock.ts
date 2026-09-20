@@ -15,7 +15,7 @@ export type Screen =
   | 'my-groups'
   | 'group'
   | 'start-chat';
- 
+
 export interface Message {
   id: string;
   senderId: string;
@@ -55,17 +55,11 @@ export interface SearchResult {
   online: boolean;
 }
 
-export interface UserProfile {
-  name: string;
-  bio: string;
-  avatarColor: string;
-  initials: string;
-  online: boolean;
-  favoriteCommunity: string;
-  communityMembers: string;
-  about: string;
-}
+// ==========================================
+// ДАННЫЕ
+// ==========================================
 
+// Истории (оставляем на будущее)
 export const stories: Story[] = [
   { id: 's1', name: 'Алексей', avatarColor: '#6546C7', initials: 'АЛ', ringColor: '#4FD3C8', hasStatusDot: true },
   { id: 's2', name: 'Мария', avatarColor: '#FF6B6B', initials: 'МА', ringColor: '#FF9848', hasStatusDot: false },
@@ -74,6 +68,7 @@ export const stories: Story[] = [
   { id: 's5', name: 'Саша', avatarColor: '#A78BFA', initials: 'СА', ringColor: '#FF9848', hasStatusDot: true },
 ];
 
+// Чаты (основа для экранов Chats и Conversation)
 export const chats: Chat[] = [
   {
     id: 'c1',
@@ -179,6 +174,7 @@ export const chats: Chat[] = [
   },
 ];
 
+// Результаты поиска (для экрана Search)
 export const searchResults: SearchResult[] = [
   { id: 'r1', name: 'Анна Петрова', handle: '@anna_p', avatarColor: '#FF9848', initials: 'АП', status: 'В сети', online: true },
   { id: 'r2', name: 'Миша Иванов', handle: '@misha_iv', avatarColor: '#4FD3C8', initials: 'МИ', status: 'В сети', online: true },
@@ -189,6 +185,7 @@ export const searchResults: SearchResult[] = [
   { id: 'r7', name: 'Оля Зайцева', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
 ];
 
+// Данные друзей/контактов (для экрана "Начать общение" и Contacts)
 export const friendsData = [
   { id: 'f1', name: 'Анна Петрова', handle: '@anna_p', avatarColor: '#FF9848', initials: 'АП', status: 'В сети', online: true },
   { id: 'f2', name: 'Миша Иванов', handle: '@misha_iv', avatarColor: '#4FD3C8', initials: 'МИ', status: 'В сети', online: true },
@@ -196,37 +193,4 @@ export const friendsData = [
   { id: 'f4', name: 'Никита Волков', handle: '@nikita_v', avatarColor: '#A78BFA', initials: 'НВ', status: 'В сети', online: true },
   { id: 'f5', name: 'Оля Зайцева', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
   { id: 'f6', name: 'Катя Сидорова', handle: '@kate_sid', avatarColor: '#FF6B6B', initials: 'КС', status: 'Был(а) 2 ч назад', online: false },
-];
-
-export const clubsData = [
-  { id: 'cl1', name: 'Клуб путешественников', members: '1.2k участников', avatarColor: '#6546C7', initials: 'КП', desc: 'Делимся маршрутами и историями' },
-  { id: 'cl2', name: 'Фотоклуб', members: '856 участников', avatarColor: '#FF9848', initials: 'ФК', desc: 'Обсуждаем кадры и технику' },
-  { id: 'cl3', name: 'Книголюбов', members: '2.1k участников', avatarColor: '#4FD3C8', initials: 'КЛ', desc: 'Читаем и обсуждаем вместе' },
-  { id: 'cl4', name: 'Киноклуб', members: '643 участника', avatarColor: '#FF6B6B', initials: 'КК', desc: 'Фильмы недели и дискуссии' },
-  { id: 'cl5', name: 'Музыкальный клуб', members: '987 участников', avatarColor: '#A78BFA', initials: 'МК', desc: 'Плейлисты и новые релизы' },
-];
-
-export const userProfile: UserProfile = {
-  name: 'Александр В.',
-  bio: 'Твой маленький большой мир',
-  avatarColor: '#6546C7',
-  initials: 'АВ',
-  online: true,
-  favoriteCommunity: 'Клуб путешественников',
-  communityMembers: '1.2k участников',
-  about: 'Люблю прозрачную электронику и уютные чаты',
-};
-
-export const themeCircles = [
-  { id: 't1', color: '#6546C7', emoji: '⭐' },
-  { id: 't2', color: '#FF9848', emoji: '😊' },
-  { id: 't3', color: '#4FD3C8', emoji: '🌿' },
-];
-
-export const themeStickers = [
-  { id: 'st1', emoji: '⭐', label: 'Звезда' },
-  { id: 'st2', emoji: '😊', label: 'Смайл' },
-  { id: 'st3', emoji: '🌿', label: 'Лист' },
-  { id: 'st4', emoji: '❤️', label: 'Сердечко' },
-  { id: 'st5', emoji: '✨', label: 'Звездочка' },
 ];
