@@ -1,71 +1,215 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { motion } from 'framer-motion';
-import { ArrowLeft, AtSign, Calendar, Globe, Lock, LockOpen, Mail, MessageSquare, Phone, Share2, User as UserIcon } from 'lucide-react';
+import {
+  ArrowLeft,
+  AtSign,
+  Calendar,
+  ChevronDown,
+  Globe,
+  Lock,
+  LockOpen,
+  Mail,
+  MessageSquare,
+  Phone,
+  Share2,
+  User as UserIcon,
+} from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const storageKey = 'sevchik-about-me';
 const profileStorageKey = 'sevchik-profile-data';
 type Visibility = 'Все' | 'Контакты' | 'Никто';
-type AboutData = { firstName: string; lastName: string; username: string; phone: string; phoneVisibility: Visibility; birthDate: string; birthDateVisibility: Visibility; about: string; email: string; social: string; socialVisibility: Visibility; website: string; websiteVisibility: Visibility };
-export type ProfileData = { name: string; lastName: string; username: string; phone: string; phoneVisibility: Visibility; birthDate: string; birthDateVisibility: Visibility; about: string; socials: string; socialsVisibility: Visibility; site: string; siteVisibility: Visibility };
-type AboutMeProps = { user: User | null; onBack: () => void; setProfileData: (data: ProfileData) => void };
 
-const emptyData: AboutData = { firstName: '', lastName: '', username: '', phone: '', phoneVisibility: 'Все', birthDate: '', birthDateVisibility: 'Все', about: '', email: '', social: '', socialVisibility: 'Все', website: '', websiteVisibility: 'Все' };
-function normalizeVisibility(value: unknown): Visibility { return value === 'Никто' ? 'Никто' : value === 'Контакты' || value === 'Друзья' ? 'Контакты' : 'Все'; }
+type AboutData = {
+  firstName: string;
+  lastName: string;
+  username: string;
+  phone: string;
+  phoneVisibility: Visibility;
+  birthDate: string;
+  birthDateVisibility: Visibility;
+  about: string;
+  email: string;
+  social: string;
+  socialVisibility: Visibility;
+  website: string;
+  websiteVisibility: Visibility;
+};
+
+export type ProfileData = {
+  name: string;
+  lastName: string;
+  username: string;
+  phone: string;
+  phoneVisibility: Visibility;
+  birthDate: string;
+  birthDateVisibility: Visibility;
+  about: string;
+  socials: string;
+  socialsVisibility: Visibility;
+  site: string;
+  siteVisibility: Visibility;
+};
+
+type AboutMeProps = {
+  user: User | null;
+  onBack: () => void;
+  setProfileData: (data: ProfileData) => void;
+};
+
+const emptyData: AboutData = {
+  firstName: '',
+  lastName: '',
+  username: '',
+  phone: '',
+  phoneVisibility: 'Все',
+  birthDate: '',
+  birthDateVisibility: 'Все',
+  about: '',
+  email: '',
+  social: '',
+  socialVisibility: 'Все',
+  website: '',
+  websiteVisibility: 'Все',
+};
+
+function normalizeVisibility(value: unknown): Visibility {
+  if (value === 'Никто') return 'Никто';
+  if (value === 'Контакты' || value === 'Друзья') return 'Контакты';
+  return 'Все';
+}
+
 function readSavedData(): Partial<AboutData> {
   try {
     const legacy = JSON.parse(localStorage.getItem(storageKey) || '{}') as Partial<AboutData>;
     const profile = JSON.parse(localStorage.getItem(profileStorageKey) || '{}') as Partial<ProfileData>;
-    return { ...legacy, firstName: profile.name || legacy.firstName, lastName: profile.lastName || legacy.lastName, username: profile.username || legacy.username, phone: profile.phone || legacy.phone, phoneVisibility: normalizeVisibility(profile.phoneVisibility || legacy.phoneVisibility), birthDate: profile.birthDate || legacy.birthDate, birthDateVisibility: normalizeVisibility(profile.birthDateVisibility || legacy.birthDateVisibility), about: profile.about || legacy.about, social: profile.socials || legacy.social, socialVisibility: normalizeVisibility(profile.socialsVisibility || legacy.socialVisibility), website: profile.site || legacy.website, websiteVisibility: normalizeVisibility(profile.siteVisibility || legacy.websiteVisibility) };
-  } catch { return {}; }
+    return {
+      ...legacy,
+      firstName: profile.name || legacy.firstName,
+      lastName: profile.lastName || legacy.lastName,
+      username: profile.username || legacy.username,
+      phone: profile.phone || legacy.phone,
+      phoneVisibility: normalizeVisibility(profile.phoneVisibility || legacy.phoneVisibility),
+      birthDate: profile.birthDate || legacy.birthDate,
+      birthDateVisibility: normalizeVisibility(profile.birthDateVisibility || legacy.birthDateVisibility),
+      about: profile.about || legacy.about,
+      social: profile.socials || legacy.social,
+      socialVisibility: normalizeVisibility(profile.socialsVisibility || legacy.socialVisibility),
+      website: profile.site || legacy.website,
+      websiteVisibility: normalizeVisibility(profile.siteVisibility || legacy.websiteVisibility),
+    };
+  } catch {
+    return {};
+  }
 }
+
 function initialData(user: User | null): AboutData {
   const metadata = user?.user_metadata as Record<string, unknown> | undefined;
   const saved = readSavedData();
   const emailName = user?.email?.split('@')[0] || '';
   const stringValue = (key: string) => typeof metadata?.[key] === 'string' ? metadata[key] as string : undefined;
-  return { ...emptyData, ...saved, firstName: saved.firstName || stringValue('full_name') || stringValue('name') || stringValue('firstName') || emailName, lastName: saved.lastName || stringValue('lastName') || '', username: saved.username || stringValue('username') || emailName, phone: saved.phone || stringValue('phone') || stringValue('phoneNumber') || '', birthDate: saved.birthDate || stringValue('birthDate') || '', about: saved.about || stringValue('about') || '', email: user?.email || saved.email || '', social: saved.social || stringValue('social') || '', website: saved.website || stringValue('website') || '' };
+
+  return {
+    ...emptyData,
+    ...saved,
+    firstName: saved.firstName || stringValue('full_name') || stringValue('name') || stringValue('firstName') || emailName,
+    lastName: saved.lastName || stringValue('lastName') || '',
+    username: saved.username || stringValue('username') || emailName,
+    phone: saved.phone || stringValue('phone') || stringValue('phoneNumber') || '',
+    birthDate: saved.birthDate || stringValue('birthDate') || '',
+    about: saved.about || stringValue('about') || '',
+    email: user?.email || saved.email || '',
+    social: saved.social || stringValue('social') || '',
+    website: saved.website || stringValue('website') || '',
+  };
 }
 
 export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
   const [data, setData] = useState<AboutData>(() => initialData(user));
   const [openVisibility, setOpenVisibility] = useState<keyof AboutData | null>(null);
   const [saving, setSaving] = useState(false);
-  const update = <K extends keyof AboutData>(key: K, value: AboutData[K]) => setData((current) => ({ ...current, [key]: value }));
+
+  const update = <K extends keyof AboutData>(key: K, value: AboutData[K]) => {
+    setData((current) => ({ ...current, [key]: value }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     localStorage.setItem(storageKey, JSON.stringify(data));
-    const profileData: ProfileData = { name: data.firstName, lastName: data.lastName, username: data.username, phone: data.phone, phoneVisibility: data.phoneVisibility, birthDate: data.birthDate, birthDateVisibility: data.birthDateVisibility, about: data.about, socials: data.social, socialsVisibility: data.socialVisibility, site: data.website, siteVisibility: data.websiteVisibility };
+    const profileData: ProfileData = {
+      name: data.firstName,
+      lastName: data.lastName,
+      username: data.username,
+      phone: data.phone,
+      phoneVisibility: data.phoneVisibility,
+      birthDate: data.birthDate,
+      birthDateVisibility: data.birthDateVisibility,
+      about: data.about,
+      socials: data.social,
+      socialsVisibility: data.socialVisibility,
+      site: data.website,
+      siteVisibility: data.websiteVisibility,
+    };
     localStorage.setItem(profileStorageKey, JSON.stringify(profileData));
     setProfileData(profileData);
     if (user) await supabase.auth.updateUser({ data });
     setSaving(false);
     onBack();
   };
-  return <div className="h-full overflow-y-auto px-5 py-5 pb-24 max-w-2xl mx-auto"><div className="flex items-center gap-3 mb-6"><button onClick={onBack} className="w-10 h-10 rounded-full bg-[var(--bg-card)] flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 hover:bg-[var(--bg-input)]" aria-label="Назад"><ArrowLeft size={20} /></button><h1 className="font-heading font-extrabold text-2xl">Информация о себе</h1></div><div className="space-y-3">
-    <Field label="Имя" icon={UserIcon} iconColor="#6546C7"><input value={data.firstName} onChange={(event) => update('firstName', event.target.value)} placeholder="Введите имя" /></Field>
-    <Field label="Фамилия" icon={UserIcon} iconColor="#FF9848"><input value={data.lastName} onChange={(event) => update('lastName', event.target.value)} placeholder="Введите фамилию" /></Field>
-    <Field label="Никнейм" icon={AtSign} iconColor="#4FD3C8"><input value={data.username} onChange={(event) => update('username', event.target.value)} placeholder="Введите никнейм" /></Field>
-    <VisibilityField label="Номер телефона" icon={Phone} iconColor="#FF9848" value={data.phone} placeholder="Добавьте номер телефона" type="tel" visibility={data.phoneVisibility} isOpen={openVisibility === 'phoneVisibility'} onChange={(value) => update('phone', value)} onToggle={() => setOpenVisibility(openVisibility === 'phoneVisibility' ? null : 'phoneVisibility')} onVisibilityChange={(value) => { update('phoneVisibility', value); setOpenVisibility(null); }} />
-    <VisibilityField label="Дата рождения" icon={Calendar} iconColor="#A78BFA" value={data.birthDate} placeholder="ДД.ММ.ГГГГ" isDate visibility={data.birthDateVisibility} isOpen={openVisibility === 'birthDateVisibility'} onChange={(value) => update('birthDate', value)} onToggle={() => setOpenVisibility(openVisibility === 'birthDateVisibility' ? null : 'birthDateVisibility')} onVisibilityChange={(value) => { update('birthDateVisibility', value); setOpenVisibility(null); }} />
-    <Field label="О себе" icon={MessageSquare} iconColor="#4FD3C8"><textarea rows={3} value={data.about} onChange={(event) => update('about', event.target.value)} placeholder="Расскажите о себе" /></Field>
-    <Field label="Email" icon={Mail} iconColor="#FF9848" help="Никто не видит ваш email. Нужен для восстановления доступа"><input type="email" value={data.email} readOnly placeholder="Добавьте свой адрес электронной почты" /></Field>
-    <VisibilityField label="Другие соцсети" icon={Share2} iconColor="#6546C7" value={data.social} placeholder="Добавьте ссылки на другие соцсети" visibility={data.socialVisibility} isOpen={openVisibility === 'socialVisibility'} onChange={(value) => update('social', value)} onToggle={() => setOpenVisibility(openVisibility === 'socialVisibility' ? null : 'socialVisibility')} onVisibilityChange={(value) => { update('socialVisibility', value); setOpenVisibility(null); }} />
-    <VisibilityField label="Сайт" icon={Globe} iconColor="#4FD3C8" value={data.website} placeholder="Добавьте ссылку на сайт" visibility={data.websiteVisibility} isOpen={openVisibility === 'websiteVisibility'} onChange={(value) => update('website', value)} onToggle={() => setOpenVisibility(openVisibility === 'websiteVisibility' ? null : 'websiteVisibility')} onVisibilityChange={(value) => { update('websiteVisibility', value); setOpenVisibility(null); }} />
-  </div><button onClick={handleSave} disabled={saving} className="w-full mt-6 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(101,70,199,0.25)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(101,70,199,0.35)] active:scale-95 disabled:opacity-60">{saving ? 'Сохранение...' : 'Сохранить'}</button></div>;
+
+  return (
+    <div className="h-full overflow-y-auto px-5 py-5 pb-24 max-w-2xl mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={onBack} className="w-10 h-10 rounded-full bg-[var(--bg-card)] flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 hover:bg-[var(--bg-input)]" aria-label="Назад">
+          <ArrowLeft size={20} />
+        </button>
+        <h1 className="font-heading font-extrabold text-2xl">Информация о себе</h1>
+      </div>
+
+      <div className="space-y-3">
+        <Field label="Имя" icon={UserIcon} iconColor="#6546C7"><input type="text" value={data.firstName} onChange={(event) => update('firstName', event.target.value)} placeholder="Введите имя" /></Field>
+        <Field label="Фамилия" icon={UserIcon} iconColor="#FF9848"><input type="text" value={data.lastName} onChange={(event) => update('lastName', event.target.value)} placeholder="Введите фамилию" /></Field>
+        <Field label="Никнейм" icon={AtSign} iconColor="#4FD3C8"><input type="text" value={data.username} onChange={(event) => update('username', event.target.value)} placeholder="Введите никнейм" /></Field>
+        <Field label="Номер телефона" icon={Phone} iconColor="#FF9848"><input type="tel" value={data.phone} onChange={(event) => update('phone', event.target.value)} placeholder="Добавьте номер телефона" /></Field>
+        <VisibilityField label="Дата рождения" icon={Calendar} iconColor="#A78BFA" value={data.birthDate} placeholder="ДД.ММ.ГГГГ" isDate visibility={data.birthDateVisibility} isOpen={openVisibility === 'birthDateVisibility'} onChange={(value) => update('birthDate', value)} onToggle={() => setOpenVisibility(openVisibility === 'birthDateVisibility' ? null : 'birthDateVisibility')} onVisibilityChange={(value) => { update('birthDateVisibility', value); setOpenVisibility(null); }} />
+        <Field label="О себе" icon={MessageSquare} iconColor="#4FD3C8"><textarea rows={3} value={data.about} onChange={(event) => update('about', event.target.value)} placeholder="Расскажите о себе" /></Field>
+        <Field label="Email" icon={Mail} iconColor="#FF9848" help="Никто не видит ваш email. Нужен для восстановления доступа"><input type="email" value={data.email} readOnly placeholder="Добавьте свой адрес электронной почты" /></Field>
+        <VisibilityField label="Другие соцсети" icon={Share2} iconColor="#6546C7" value={data.social} placeholder="Добавьте ссылки на другие соцсети" visibility={data.socialVisibility} isOpen={openVisibility === 'socialVisibility'} onChange={(value) => update('social', value)} onToggle={() => setOpenVisibility(openVisibility === 'socialVisibility' ? null : 'socialVisibility')} onVisibilityChange={(value) => { update('socialVisibility', value); setOpenVisibility(null); }} />
+        <VisibilityField label="Сайт" icon={Globe} iconColor="#4FD3C8" value={data.website} placeholder="Добавьте ссылку на сайт" visibility={data.websiteVisibility} isOpen={openVisibility === 'websiteVisibility'} onChange={(value) => update('website', value)} onToggle={() => setOpenVisibility(openVisibility === 'websiteVisibility' ? null : 'websiteVisibility')} onVisibilityChange={(value) => { update('websiteVisibility', value); setOpenVisibility(null); }} />
+      </div>
+
+      <button onClick={handleSave} disabled={saving} className="w-full mt-6 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(101,70,199,0.25)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(101,70,199,0.35)] active:scale-95 disabled:opacity-60">
+        {saving ? 'Сохранение...' : 'Сохранить'}
+      </button>
+    </div>
+  );
 }
 
 function Field({ label, icon: Icon, iconColor, help, children }: { label: string; icon: typeof UserIcon; iconColor: string; help?: string; children: ReactNode }) {
-  return <label className="group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-purple-500/50"><div className="flex items-start gap-3"><div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}><Icon size={19} /></div><div className="min-w-0 flex-1"><span className="block text-sm font-heading font-bold mb-2">{label}</span><div className="field-input [&_input]:w-full [&_input]:border-0 [&_input]:!bg-transparent [&_input]:shadow-none [&_input]:appearance-none [&_input]:outline-none [&_input]:touch-manipulation [&_input]:transition-all [&_input]:duration-200 [&_input]:text-[var(--text-main)] [&_input]:placeholder:text-[var(--text-secondary)] [&_textarea]:w-full [&_textarea]:border-0 [&_textarea]:!bg-transparent [&_textarea]:shadow-none [&_textarea]:appearance-none [&_textarea]:outline-none [&_textarea]:touch-manipulation [&_textarea]:resize-none [&_textarea]:transition-all [&_textarea]:duration-200 [&_textarea]:text-[var(--text-main)] [&_textarea]:placeholder:text-[var(--text-secondary)]">{children}</div>{help && <span className="block text-xs text-[var(--text-secondary)] mt-2">{help}</span>}</div></div></label>;
+  return (
+    <label className="group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-purple-500/50">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}><Icon size={19} /></div>
+        <div className="min-w-0 flex-1">
+          <span className="block text-sm font-heading font-bold mb-2">{label}</span>
+          <div className="field-input [&_input]:w-full [&_input]:border-0 [&_input]:!bg-transparent [&_input]:shadow-none [&_input]:appearance-none [&_input]:outline-none [&_input]:pointer-events-auto [&_input]:cursor-text [&_input]:touch-manipulation [&_input]:transition-all [&_input]:duration-200 [&_input]:text-[var(--text-main)] [&_input]:placeholder:text-[var(--text-secondary)] [&_textarea]:w-full [&_textarea]:border-0 [&_textarea]:!bg-transparent [&_textarea]:shadow-none [&_textarea]:appearance-none [&_textarea]:outline-none [&_textarea]:pointer-events-auto [&_textarea]:cursor-text [&_textarea]:touch-manipulation [&_textarea]:resize-none [&_textarea]:transition-all [&_textarea]:duration-200 [&_textarea]:text-[var(--text-main)] [&_textarea]:placeholder:text-[var(--text-secondary)]">{children}</div>
+          {help && <span className="block text-xs text-[var(--text-secondary)] mt-2">{help}</span>}
+        </div>
+      </div>
+    </label>
+  );
 }
 
 function VisibilityField({ label, icon: Icon, iconColor, value, placeholder, type = 'text', isDate = false, visibility, isOpen, onChange, onToggle, onVisibilityChange }: { label: string; icon: typeof UserIcon; iconColor: string; value: string; placeholder: string; type?: string; isDate?: boolean; visibility: Visibility; isOpen: boolean; onChange: (value: string) => void; onToggle: () => void; onVisibilityChange: (value: Visibility) => void }) {
   const datePickerRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!isOpen) return;
-    const handler = (event: MouseEvent) => { if (!menuRef.current?.contains(event.target as Node)) onToggle(); };
+    const handler = (event: MouseEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) onToggle();
+    };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, [isOpen, onToggle]);
@@ -77,9 +221,37 @@ function VisibilityField({ label, icon: Icon, iconColor, value, placeholder, typ
     if (masked.length >= 5) masked = `${masked.slice(0, 5)}.${masked.slice(5)}`;
     onChange(masked);
   };
-  const handlePickerChange = (nextValue: string) => { const [year, month, day] = nextValue.split('-'); onChange(year && month && day ? `${day}.${month}.${year}` : ''); };
+  const handlePickerChange = (nextValue: string) => {
+    const [year, month, day] = nextValue.split('-');
+    onChange(year && month && day ? `${day}.${month}.${year}` : '');
+  };
+  const lockColor = visibility === 'Никто' ? 'bg-red-500' : 'bg-green-500';
   const LockIcon = visibility === 'Никто' ? Lock : LockOpen;
-  const lockColor = visibility === 'Никто' ? 'bg-red-500' : visibility === 'Все' || visibility === 'Контакты' ? 'bg-green-500' : 'bg-gray-400';
 
-  return <div className="group relative bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-purple-500/50"><div className="flex items-start gap-3"><div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}><Icon size={19} /></div><div className="min-w-0 flex-1"><span className="block text-sm font-heading font-bold mb-2">{label}</span><div className="relative"><div className="field-input pr-14 [&_input]:w-full [&_input]:border-0 [&_input]:!bg-transparent [&_input]:shadow-none [&_input]:appearance-none [&_input]:outline-none [&_input]:touch-manipulation [&_input]:transition-all [&_input]:duration-200 [&_input]:text-[var(--text-main)] [&_input]:placeholder:text-[var(--text-secondary)]"><input type={isDate ? 'text' : type} value={value} onChange={(event) => handleTextChange(event.target.value)} placeholder={placeholder} maxLength={isDate ? 10 : undefined} autoFocus={false} onClick={(event) => event.stopPropagation()} onTouchStart={(event) => event.stopPropagation()} /></div>{isDate && <input ref={datePickerRef} type="date" value={value ? value.split('.').reverse().join('-') : ''} onChange={(event) => handlePickerChange(event.target.value)} className="absolute w-px h-px opacity-0 pointer-events-none" tabIndex={-1} />}<div ref={menuRef}>{isOpen && <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity duration-200" onClick={onToggle} aria-hidden="true" />}<button type="button" onClick={(event) => { event.stopPropagation(); onToggle(); }} className={`absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-105 ${lockColor}`} aria-label={`Видимость: ${visibility}`}><LockIcon className="w-5 h-5 text-white" /></button>{isOpen && <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, ease: 'easeOut' }} className="absolute right-3 top-full mt-2 w-40 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-50 p-2">{(['Все', 'Контакты', 'Никто'] as Visibility[]).map((option) => <button type="button" key={option} onClick={() => { onVisibilityChange(option); onToggle(); }} className={`w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${visibility === option ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>{option}</button>)}</motion.div>}</div></div></div></div></div>;
+  return (
+    <div className="group relative bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-purple-500/50">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}><Icon size={19} /></div>
+        <div className="min-w-0 flex-1">
+          <span className="block text-sm font-heading font-bold mb-2">{label}</span>
+          <div className="relative">
+            <div className="field-input pr-14 [&_input]:w-full [&_input]:border-0 [&_input]:!bg-transparent [&_input]:shadow-none [&_input]:appearance-none [&_input]:outline-none [&_input]:touch-manipulation [&_input]:transition-all [&_input]:duration-200 [&_input]:text-[var(--text-main)] [&_input]:placeholder:text-[var(--text-secondary)]">
+              <input type="text" value={value} onChange={(event) => handleTextChange(event.target.value)} placeholder={placeholder} maxLength={isDate ? 10 : undefined} autoFocus={false} onClick={(event) => event.stopPropagation()} onTouchStart={(event) => event.stopPropagation()} />
+            </div>
+            {isDate && <input ref={datePickerRef} type="date" value={value ? value.split('.').reverse().join('-') : ''} onChange={(event) => handlePickerChange(event.target.value)} className="absolute w-px h-px opacity-0 pointer-events-none" tabIndex={-1} />}
+            <div ref={menuRef}>
+              {isOpen && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }} className="fixed inset-0 z-40 bg-black/15 backdrop-blur-[1px]" onClick={onToggle} aria-hidden="true" />}
+              <button type="button" onClick={(event) => { event.stopPropagation(); onToggle(); }} className={`absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center gap-0.5 transition-all duration-200 hover:scale-105 ${lockColor}`} aria-label={`Видимость: ${visibility}`}>
+                <LockIcon className="w-4 h-4 text-white" />
+                <ChevronDown size={11} className="text-white" />
+              </button>
+              {isOpen && <motion.div initial={{ opacity: 0, scale: 0.94, y: 4 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.18, ease: 'easeOut' }} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-36 rounded-2xl bg-[var(--bg-card)]/95 backdrop-blur-md shadow-2xl border border-[var(--border-color)] p-1.5">
+                {(['Все', 'Контакты', 'Никто'] as Visibility[]).map((option) => <button type="button" key={option} onClick={() => { onVisibilityChange(option); onToggle(); }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${visibility === option ? 'bg-purple-100 text-purple-600' : 'text-[var(--text-main)] hover:bg-[var(--bg-input)]'}`}>{option}</button>)}
+              </motion.div>}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
