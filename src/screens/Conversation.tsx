@@ -128,3 +128,4 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     </div>
   );
 }
+
