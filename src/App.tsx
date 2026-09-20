@@ -136,10 +136,10 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar current={screen} onNavigate={setScreen} />
       <div className="flex-1 min-w-0 flex h-screen overflow-hidden">
-        <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex-1 min-w-0 h-full overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={screen}

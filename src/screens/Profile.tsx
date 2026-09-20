@@ -63,7 +63,7 @@ export function Profile({ user, onNavigate }: ProfileProps) {
   const referralUrl = `${inviteUrl}?ref=${user?.id || 'user'}`;
 
   return (
-    <div className="h-full overflow-y-auto pb-24 md:pb-6">
+    <div className="h-full overflow-y-auto pb-24 md:pb-0">
       <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center justify-between">
         <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Мой Севчик</h1>
         <button onClick={() => onNavigate?.('settings')} className="w-11 h-11 rounded-card bg-[var(--bg-card)] flex items-center justify-center text-sevchik-textSecondary hover:text-sevchik-purple transition-colors" aria-label="Настройки"><Settings size={20} /></button>

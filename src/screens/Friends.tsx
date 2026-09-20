@@ -62,7 +62,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'main') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-6 relative bg-[var(--bg-main)]">
+      <div className="h-full overflow-y-auto pb-24 md:pb-0 relative bg-[var(--bg-main)]">
         {/* Шапка */}
         <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center justify-between mb-4">
@@ -328,7 +328,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'selectMembers') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-[var(--bg-main)]">
+      <div className="h-full overflow-y-auto pb-24 md:pb-0 bg-[var(--bg-main)]">
         {/* Шапка */}
         <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center gap-3 mb-4">
@@ -444,7 +444,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'createGroup') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-[var(--bg-main)]">
+      <div className="h-full overflow-y-auto pb-24 md:pb-0 bg-[var(--bg-main)]">
         {/* Шапка */}
         <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center gap-3 mb-4">

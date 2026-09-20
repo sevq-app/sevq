@@ -70,8 +70,8 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 py-2 pb-3" style={{ background: 'rgba(255,248,237,0.95)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(101,70,199,0.08)' }}>
-      <div className="flex items-center justify-around">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-16 px-3 bg-[var(--bg-card)] border-t border-[var(--bg-input)] transition-all duration-200">
+      <div className="h-full flex items-center justify-around">
         {items.map(({ key, label, icon: Icon }) => {
           const active = current === key;
           return (
@@ -79,19 +79,19 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               key={key}
               whileTap={{ scale: 0.9, y: 2 }}
               onClick={() => onNavigate(key)}
-              className="flex flex-col items-center gap-1 px-3 py-1.5"
+              className="flex flex-col items-center gap-1 px-3 py-1.5 transition-all duration-200"
             >
               <div
-                className={`p-2.5 rounded-2xl transition-all relative overflow-hidden ${active ? 'text-white' : 'text-sevchik-textSecondary'}`}
+                className={`p-2.5 rounded-2xl transition-all duration-200 relative overflow-hidden ${active ? 'text-white opacity-100' : 'text-[var(--text-secondary)] opacity-70'}`}
                 style={
                   active
                     ? { background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 12px rgba(101,70,199,0.3)' }
-                    : { background: 'white', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }
+                    : { background: 'var(--bg-input)' }
                 }
               >
                 <Icon size={20} />
               </div>
-              <span className={`text-[10px] font-heading font-bold ${active ? 'text-sevchik-purple' : 'text-sevchik-textSecondary'}`}>
+              <span className={`text-[10px] font-heading font-bold transition-all duration-200 ${active ? 'text-sevchik-purple opacity-100' : 'text-[var(--text-secondary)] opacity-70'}`}>
                 {label}
               </span>
             </motion.button>

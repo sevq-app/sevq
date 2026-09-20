@@ -24,7 +24,7 @@ export function Calls({ onNavigate }: CallsProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-6 flex flex-col items-center justify-center text-center">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0 flex flex-col items-center justify-center text-center">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

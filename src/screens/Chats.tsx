@@ -85,7 +85,7 @@ export function Chats({ onOpenChat, grayMode, fontSize }: ChatsProps) {
       </div>
 
       {/* Chat list */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-6">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0">
         <div className="space-y-2">
           {filtered.map((chat, i) => (
             <motion.button
