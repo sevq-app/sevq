@@ -12,7 +12,7 @@ import { Clubs } from '@/screens/Clubs';
 import { Settings } from '@/screens/Settings';
 import { Calls } from '@/screens/Calls';
 import { Appearance } from '@/screens/Appearance';
-import { AboutEdit } from '@/screens/AboutEdit';
+import { AboutMe } from '@/screens/AboutMe';
 import { Photos } from '@/screens/Photos';
 import { MyGroups } from '@/screens/MyGroups';
 import { Group } from '@/screens/Group';
@@ -160,7 +160,7 @@ function App() {
               {screen === 'calls' && <Calls onNavigate={setScreen} />}
               {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
               {screen === 'profile' && <Profile user={currentUser} onNavigate={setScreen} />}
-              {screen === 'about-edit' && <AboutEdit onBack={() => setScreen('profile')} />}
+              {screen === 'about' && <AboutMe user={currentUser} onBack={() => setScreen('profile')} />}
               {screen === 'photos' && <Photos onBack={() => setScreen('profile')} />}
               {screen === 'my-groups' && <MyGroups groups={getProfileGroups(currentUser)} onBack={() => setScreen('profile')} onOpenGroup={handleOpenGroup} />}
               {screen === 'group' && activeGroup && <Group name={activeGroup} onBack={() => setScreen('my-groups')} />}

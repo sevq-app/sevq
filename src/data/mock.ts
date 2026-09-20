@@ -10,7 +10,7 @@ export type Screen =
   | 'search'
   | 'settings'
   | 'appearance'
-  | 'about-edit'
+  | 'about'
   | 'photos'
   | 'my-groups'
   | 'group';
