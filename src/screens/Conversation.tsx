@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Lock, Timer } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Timer } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -19,7 +19,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   // Состояния для записи голосового
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [isLocked, setIsLocked] = useState(false);
   const [showHoldHint, setShowHoldHint] = useState(false);
   
   const endRef = useRef<HTMLDivElement>(null);
@@ -71,7 +70,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const handleMute = (duration: string) => {
-    alert(`🔕 Уведомления отключены: ${duration}`);
+    alert(` Уведомления отключены: ${duration}`);
     setShowNotificationsModal(false);
     setShowMenu(false);
   };
@@ -91,8 +90,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     holdTimeoutRef.current = setTimeout(() => {
       setIsRecording(true);
       setRecordingTime(0);
-      setIsLocked(false);
-    }, 300); // 300мс удержания для начала записи
+    }, 300);
   };
 
   // Конец удержания микрофона
@@ -102,20 +100,17 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       holdTimeoutRef.current = null;
     }
     
-    if (isRecording && !isLocked) {
-      // Отпускаем палец — отправляем запись
+    if (isRecording) {
       const voiceMsg: Message = {
         id: `voice-${Date.now()}`,
         senderId: 'me',
-        text: ` Голосовое сообщение (${formatRecordingTime(recordingTime)})`,
+        text: `🎤 Голосовое сообщение (${formatRecordingTime(recordingTime)})`,
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, voiceMsg]);
       setIsRecording(false);
       setRecordingTime(0);
-      setIsLocked(false);
       
-      // Автоответ
       setTimeout(() => {
         const reply: Message = {
           id: `voice-${Date.now()}-r`,
@@ -125,8 +120,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         };
         setMessages((prev) => [...prev, reply]);
       }, 1500);
-    } else if (!isRecording) {
-      // Короткое нажатие — показываем подсказку
+    } else {
       setShowHoldHint(true);
       setTimeout(() => setShowHoldHint(false), 2000);
     }
@@ -136,12 +130,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const handleCancelRecording = () => {
     setIsRecording(false);
     setRecordingTime(0);
-    setIsLocked(false);
-  };
-
-  // Блокировка записи (можно убрать палец)
-  const handleLockRecording = () => {
-    setIsLocked(!isLocked);
   };
 
   return (
@@ -169,7 +157,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         <motion.button
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
+          onClick={() => alert(' Функция звонков скоро будет доступна!')}
           className="p-2 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
         >
@@ -311,7 +299,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       {/* Input Panel */}
       <AnimatePresence mode="wait">
         {isRecording ? (
-          /* Панель записи голосового */
+          /* Панель записи голосового с анимацией */
           <motion.div
             key="recording"
             initial={{ y: 20, opacity: 0 }}
@@ -330,49 +318,89 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <X size={22} />
               </motion.button>
 
-              {/* Таймер и индикатор записи */}
-              <div className="flex-1 flex items-center gap-3">
+              {/* Анимированный микрофон с волнами */}
+              <div className="flex-1 flex items-center justify-center gap-3">
+                {/* Пульсирующие круги вокруг микрофона */}
                 <div className="relative">
                   <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                    className="w-3 h-3 rounded-full bg-red-500"
+                    animate={{
+                      scale: [1, 1.3, 1],
+                      opacity: [0.6, 0, 0.6],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                    className="absolute inset-0 rounded-full bg-red-500/30"
+                    style={{ width: '60px', height: '60px', left: '-8px', top: '-8px' }}
                   />
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.4, 0, 0.4],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                      delay: 0.3,
+                    }}
+                    className="absolute inset-0 rounded-full bg-red-500/20"
+                    style={{ width: '70px', height: '70px', left: '-13px', top: '-13px' }}
+                  />
+                  
+                  {/* Центральный микрофон */}
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 0.8,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                    className="relative w-11 h-11 rounded-full flex items-center justify-center"
+                    style={{
+                      background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
+                      boxShadow: '0 4px 14px rgba(239,68,68,0.4)',
+                    }}
+                  >
+                    <Mic size={20} className="text-white relative z-10" />
+                  </motion.div>
                 </div>
+
+                {/* Таймер */}
                 <div className="flex items-center gap-2">
-                  <Timer size={16} className="text-red-500" />
+                  <motion.div
+                    animate={{
+                      opacity: [1, 0.3, 1],
+                    }}
+                    transition={{
+                      duration: 1,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                    className="w-2 h-2 rounded-full bg-red-500"
+                  />
                   <span className="font-mono text-sm font-bold text-red-500">
                     {formatRecordingTime(recordingTime)}
                   </span>
                 </div>
               </div>
 
-              {/* Кнопка блокировки/отправки */}
-              <div className="relative">
-                {isLocked && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-8 right-0 w-8 h-8 rounded-full bg-[#6546C7] flex items-center justify-center"
-                    style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.3)' }}
-                  >
-                    <Lock size={16} className="text-white" />
-                  </motion.div>
-                )}
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={isLocked ? handleMicHoldEnd : handleLockRecording}
-                  className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white"
-                  style={{
-                    background: isLocked 
-                      ? 'linear-gradient(135deg, #6546C7, #8366D9)' 
-                      : 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                    boxShadow: '0 4px 14px rgba(79,211,200,0.35)',
-                  }}
-                >
-                  {isLocked ? <Send size={20} /> : <Mic size={20} />}
-                </motion.button>
-              </div>
+              {/* Кнопка отправки */}
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleMicHoldEnd}
+                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white"
+                style={{
+                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                  boxShadow: '0 4px 14px rgba(79,211,200,0.35)',
+                }}
+              >
+                <Send size={20} />
+              </motion.button>
             </div>
           </motion.div>
         ) : (
