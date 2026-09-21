@@ -92,7 +92,7 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
-      animate={{ height: 360, opacity: 1 }}
+      animate={{ height: '45vh', opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
       className="overflow-hidden relative"
@@ -101,9 +101,10 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         boxShadow: '0 -4px 16px rgba(15,23,42,0.05)',
+        maxHeight: '400px',
       }}
     >
-      <div className="h-[360px] flex flex-col">
+      <div className="h-full flex flex-col">
         {/* Строка быстрого перехода по категориям */}
         <div className="flex items-center gap-2 px-3 pt-3 pb-2 overflow-x-auto no-scrollbar shrink-0">
           <button
