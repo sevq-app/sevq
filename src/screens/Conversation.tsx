@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
+import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
 import { chats } from '@/data/mock';
 import type { Chat, Message } from '@/data/mock';
 
@@ -89,6 +90,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [menuMessage, setMenuMessage] = useState<Message | null>(null);
   const [forwardMessage, setForwardMessage] = useState<Message | null>(null);
+  const [showStickerPanel, setShowStickerPanel] = useState(false);
   
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -306,6 +308,23 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
 
   const isVoiceMessage = (text: string) => text.startsWith('voice:');
   const getVoiceDuration = (text: string) => text.replace('voice:', '');
+  const isStickerMessage = (text: string) => text.startsWith('sticker:');
+  const getStickerEmoji = (text: string) => text.replace('sticker:', '');
+
+  const handleSelectEmoji = (emoji: string) => {
+    setInput((prev) => prev + emoji);
+  };
+
+  const handleSelectSticker = (emoji: string) => {
+    const msg: Message = {
+      id: `sticker-${Date.now()}`,
+      senderId: 'me',
+      text: `sticker:${emoji}`,
+      time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages((prev) => [...prev, msg]);
+    setShowStickerPanel(false);
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -418,6 +437,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
           const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
+          const isSticker = isStickerMessage(msg.text);
 
           return (
             <motion.div
@@ -433,7 +453,15 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               onTouchStart={() => handleMessageHoldStart(msg)}
               onTouchEnd={handleMessageHoldEnd}
             >
-              {isVoice ? (
+              {isSticker ? (
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  <span className="text-6xl leading-none">{getStickerEmoji(msg.text)}</span>
+                  <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-sevchik-textSecondary' : 'text-sevchik-textSecondary'}`}>
+                    <span className="text-[10px]">{msg.time}</span>
+                    {isMe && (msg.read ? <CheckCheck size={12} /> : <Check size={12} />)}
+                  </div>
+                </div>
+              ) : isVoice ? (
                 <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} read={msg.read} />
               ) : (
                 <div
@@ -456,6 +484,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         })}
         <div ref={endRef} />
       </div>
+
+      {/* Панель стикеров и эмодзи */}
+      <AnimatePresence>
+        {showStickerPanel && (
+          <StickerEmojiPanel onSelectEmoji={handleSelectEmoji} onSelectSticker={handleSelectSticker} />
+        )}
+      </AnimatePresence>
 
       {/* Input Panel */}
       <AnimatePresence mode="wait">
@@ -559,6 +594,18 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
               />
 
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowStickerPanel((prev) => !prev)}
+                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center btn-3d"
+                style={{
+                  background: showStickerPanel ? '#6546C7' : 'var(--bg-input)',
+                  color: showStickerPanel ? '#fff' : 'var(--theme-primary)',
+                }}
+              >
+                <Smile size={20} />
+              </motion.button>
+
               <AnimatePresence mode="wait">
                 {input.trim() ? (
                   <motion.button
@@ -572,6 +619,19 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.22)' }}
                   >
                     <Send size={20} className="relative z-10" />
+                  </motion.button>
+                ) : showStickerPanel ? (
+                  <motion.button
+                    key="keyboard"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    whileTap={{ scale: 0.88, y: 2 }}
+                    onClick={() => setShowStickerPanel(false)}
+                    className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d"
+                    style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
+                  >
+                    <Keyboard size={20} />
                   </motion.button>
                 ) : (
                   <div className="relative">
@@ -589,7 +649,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                    
+
                     <motion.button
                       key="mic"
                       initial={{ scale: 0.5, opacity: 0 }}
@@ -801,7 +861,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
                 </motion.button>
 
-                {!isVoiceMessage(menuMessage.text) && (
+                {!isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && (
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
