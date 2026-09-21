@@ -27,7 +27,9 @@ function App() {
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(15);
-  const [grayMode, setGrayMode] = useState<boolean>(false);
+  const [grayMode, setGrayMode] = useState<boolean>(() => {
+    return localStorage.getItem('grayMode') === 'true';
+  });
   const [selectedTheme, setSelectedTheme] = useState<string>(() => {
     const saved = localStorage.getItem('selectedTheme');
     return saved || 'spring';
@@ -49,14 +51,17 @@ function App() {
     };
   }, []);
 
-  // Восстановление темы при загрузке
+  // Восстановление темы при загрузке (не трогаем class gray-theme)
   useEffect(() => {
-    const savedTheme = localStorage.getItem('selectedTheme');
-    if (savedTheme) {
-      document.documentElement.className = savedTheme;
-      setSelectedTheme(savedTheme);
-    } else {
-      document.documentElement.className = 'spring';
+    const savedTheme = localStorage.getItem('selectedTheme') || 'spring';
+    document.documentElement.classList.add(savedTheme);
+    setSelectedTheme(savedTheme);
+  }, []);
+
+  // Восстановление серого режима при загрузке
+  useEffect(() => {
+    if (grayMode) {
+      document.documentElement.classList.add('gray-theme');
     }
   }, []);
 
@@ -64,6 +69,11 @@ function App() {
   useEffect(() => {
     localStorage.setItem('selectedTheme', selectedTheme);
   }, [selectedTheme]);
+
+  // Сохранение серого режима при изменении
+  useEffect(() => {
+    localStorage.setItem('grayMode', String(grayMode));
+  }, [grayMode]);
 
   const handleOpenChat = (chat: Chat) => {
     setActiveChat(chat);
