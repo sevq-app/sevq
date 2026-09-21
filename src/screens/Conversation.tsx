@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Lock, Timer } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -15,11 +15,39 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [input, setInput] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  
+  // Состояния для записи голосового
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [showHoldHint, setShowHoldHint] = useState(false);
+  
   const endRef = useRef<HTMLDivElement>(null);
+  const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Таймер записи
+  useEffect(() => {
+    if (isRecording) {
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 10);
+      }, 10);
+    } else {
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+        recordingIntervalRef.current = null;
+      }
+    }
+    return () => {
+      if (recordingIntervalRef.current) {
+        clearInterval(recordingIntervalRef.current);
+      }
+    };
+  }, [isRecording]);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -43,9 +71,77 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const handleMute = (duration: string) => {
-    alert(` Уведомления отключены: ${duration}`);
+    alert(`🔕 Уведомления отключены: ${duration}`);
     setShowNotificationsModal(false);
     setShowMenu(false);
+  };
+
+  // Форматирование времени записи (мм:сс,мс)
+  const formatRecordingTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    const milliseconds = Math.floor((ms % 1000) / 10);
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')},${milliseconds.toString().padStart(2, '0')}`;
+  };
+
+  // Начало удержания микрофона
+  const handleMicHoldStart = () => {
+    setShowHoldHint(false);
+    holdTimeoutRef.current = setTimeout(() => {
+      setIsRecording(true);
+      setRecordingTime(0);
+      setIsLocked(false);
+    }, 300); // 300мс удержания для начала записи
+  };
+
+  // Конец удержания микрофона
+  const handleMicHoldEnd = () => {
+    if (holdTimeoutRef.current) {
+      clearTimeout(holdTimeoutRef.current);
+      holdTimeoutRef.current = null;
+    }
+    
+    if (isRecording && !isLocked) {
+      // Отпускаем палец — отправляем запись
+      const voiceMsg: Message = {
+        id: `voice-${Date.now()}`,
+        senderId: 'me',
+        text: ` Голосовое сообщение (${formatRecordingTime(recordingTime)})`,
+        time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, voiceMsg]);
+      setIsRecording(false);
+      setRecordingTime(0);
+      setIsLocked(false);
+      
+      // Автоответ
+      setTimeout(() => {
+        const reply: Message = {
+          id: `voice-${Date.now()}-r`,
+          senderId: chat.id,
+          text: 'Прослушал голосовое 👂',
+          time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages((prev) => [...prev, reply]);
+      }, 1500);
+    } else if (!isRecording) {
+      // Короткое нажатие — показываем подсказку
+      setShowHoldHint(true);
+      setTimeout(() => setShowHoldHint(false), 2000);
+    }
+  };
+
+  // Отмена записи
+  const handleCancelRecording = () => {
+    setIsRecording(false);
+    setRecordingTime(0);
+    setIsLocked(false);
+  };
+
+  // Блокировка записи (можно убрать палец)
+  const handleLockRecording = () => {
+    setIsLocked(!isLocked);
   };
 
   return (
@@ -212,64 +308,163 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         <div ref={endRef} />
       </div>
 
-      {/* Input */}
-      <div className="px-4 py-3 bg-white md:pb-4 pb-20" style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}>
-        <div className="flex items-center gap-2">
-          {/* Кнопка вложений (СКРЕПКА) */}
-          <motion.button
-            whileTap={{ scale: 0.9, y: 2 }}
-            whileHover={{ scale: 1.05 }}
-            onClick={() => alert('📎 Панель вложений будет добавлена позже')}
-            className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
-            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+      {/* Input Panel */}
+      <AnimatePresence mode="wait">
+        {isRecording ? (
+          /* Панель записи голосового */
+          <motion.div
+            key="recording"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+            className="px-4 py-3 bg-white md:pb-4 pb-20"
+            style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
           >
-            <Paperclip size={22} />
-          </motion.button>
-
-          {/* Поле ввода */}
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Написать сообщение..."
-            className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
-          />
-
-          {/* Динамическая кнопка: микрофон или отправка */}
-          <AnimatePresence mode="wait">
-            {input.trim() ? (
+            <div className="flex items-center gap-3">
+              {/* Кнопка отмены */}
               <motion.button
-                key="send"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                whileTap={{ scale: 0.88, y: 2 }}
-                onClick={handleSend}
-                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 14px rgba(101,70,199,0.35)' }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCancelRecording}
+                className="shrink-0 w-11 h-11 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
               >
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-                <Send size={20} className="relative z-10" />
+                <X size={22} />
               </motion.button>
-            ) : (
+
+              {/* Таймер и индикатор записи */}
+              <div className="flex-1 flex items-center gap-3">
+                <div className="relative">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                    className="w-3 h-3 rounded-full bg-red-500"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Timer size={16} className="text-red-500" />
+                  <span className="font-mono text-sm font-bold text-red-500">
+                    {formatRecordingTime(recordingTime)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Кнопка блокировки/отправки */}
+              <div className="relative">
+                {isLocked && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute -top-8 right-0 w-8 h-8 rounded-full bg-[#6546C7] flex items-center justify-center"
+                    style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.3)' }}
+                  >
+                    <Lock size={16} className="text-white" />
+                  </motion.div>
+                )}
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={isLocked ? handleMicHoldEnd : handleLockRecording}
+                  className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white"
+                  style={{
+                    background: isLocked 
+                      ? 'linear-gradient(135deg, #6546C7, #8366D9)' 
+                      : 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                    boxShadow: '0 4px 14px rgba(79,211,200,0.35)',
+                  }}
+                >
+                  {isLocked ? <Send size={20} /> : <Mic size={20} />}
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        ) : (
+          /* Обычная панель ввода */
+          <motion.div
+            key="input"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 20, opacity: 0 }}
+            className="px-4 py-3 bg-white md:pb-4 pb-20"
+            style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
+          >
+            <div className="flex items-center gap-2">
+              {/* Кнопка вложений (скрепка) */}
               <motion.button
-                key="mic"
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.5, opacity: 0 }}
-                whileTap={{ scale: 0.88, y: 2 }}
-                onClick={() => alert('🎤 Запись голосового будет добавлена позже')}
-                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 4px 14px rgba(79,211,200,0.35)' }}
+                whileTap={{ scale: 0.9, y: 2 }}
+                whileHover={{ scale: 1.05 }}
+                onClick={() => alert('📎 Панель вложений будет добавлена позже')}
+                className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
+                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
               >
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-                <Mic size={20} className="relative z-10" />
+                <Paperclip size={22} />
               </motion.button>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+
+              {/* Поле ввода */}
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Написать сообщение..."
+                className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
+              />
+
+              {/* Динамическая кнопка: микрофон или отправка */}
+              <AnimatePresence mode="wait">
+                {input.trim() ? (
+                  <motion.button
+                    key="send"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    whileTap={{ scale: 0.88, y: 2 }}
+                    onClick={handleSend}
+                    className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
+                    style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 14px rgba(101,70,199,0.35)' }}
+                  >
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
+                    <Send size={20} className="relative z-10" />
+                  </motion.button>
+                ) : (
+                  <div className="relative">
+                    {/* Подсказка "Удерживайте для записи" */}
+                    <AnimatePresence>
+                      {showHoldHint && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 10 }}
+                          className="absolute bottom-14 right-0 bg-[#1A1A1A] text-white text-xs px-3 py-2 rounded-xl whitespace-nowrap"
+                          style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.2)' }}
+                        >
+                          Удерживайте для записи
+                          <div className="absolute bottom-0 right-4 w-2 h-2 bg-[#1A1A1A] rotate-45 translate-y-1" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    
+                    <motion.button
+                      key="mic"
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.5, opacity: 0 }}
+                      whileTap={{ scale: 0.88, y: 2 }}
+                      onMouseDown={handleMicHoldStart}
+                      onMouseUp={handleMicHoldEnd}
+                      onMouseLeave={handleMicHoldEnd}
+                      onTouchStart={handleMicHoldStart}
+                      onTouchEnd={handleMicHoldEnd}
+                      className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
+                      style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 4px 14px rgba(79,211,200,0.35)' }}
+                    >
+                      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
+                      <Mic size={20} className="relative z-10" />
+                    </motion.button>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Модальное окно "Уведомления" (шторка снизу) */}
       <AnimatePresence>
