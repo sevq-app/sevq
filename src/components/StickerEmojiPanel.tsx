@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Trash2 } from 'lucide-react';
+import { Search, X, Trash2, Clock } from 'lucide-react';
 import { stickers, emojiCategories, animatedEmojis } from '@/data/stickers';
 
 interface StickerEmojiPanelProps {
@@ -31,6 +31,8 @@ function pushRecent(key: string, value: string, current: string[]): string[] {
   return next;
 }
 
+const GLASS_BG = 'rgba(255,255,255,0.65)';
+
 export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmojiPanelProps) {
   const [tab, setTab] = useState<'stickers' | 'emoji'>('stickers');
   const [stickerSearch, setStickerSearch] = useState('');
@@ -39,6 +41,8 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const holdTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     return () => {
@@ -81,61 +85,74 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
     setShowClearConfirm(false);
   };
 
+  const scrollToSection = (id: string) => {
+    sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <motion.div
       initial={{ height: 0, opacity: 0 }}
-      animate={{ height: 340, opacity: 1 }}
+      animate={{ height: 360, opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
-      className="overflow-hidden bg-white relative"
-      style={{ boxShadow: '0 -4px 16px rgba(15,23,42,0.05)' }}
+      className="overflow-hidden relative"
+      style={{
+        background: GLASS_BG,
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        boxShadow: '0 -4px 16px rgba(15,23,42,0.05)',
+      }}
     >
-      <div className="h-[340px] flex flex-col">
-        {/* Вкладки */}
-        <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+      <div className="h-[360px] flex flex-col">
+        {/* Строка быстрого перехода по категориям */}
+        <div className="flex items-center gap-2 px-3 pt-3 pb-2 overflow-x-auto no-scrollbar shrink-0">
           <button
-            onClick={() => setTab('stickers')}
-            className="px-4 py-2 rounded-full font-heading font-bold text-sm transition-colors"
-            style={
-              tab === 'stickers'
-                ? { background: '#6546C7', color: '#fff' }
-                : { background: 'var(--bg-input)', color: 'var(--text-secondary)' }
-            }
+            onClick={() => scrollToSection('recent')}
+            className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center"
+            style={{ background: 'rgba(255,255,255,0.6)' }}
           >
-            Стикеры
+            <Clock size={16} style={{ color: 'var(--text-secondary)' }} />
           </button>
-          <button
-            onClick={() => setTab('emoji')}
-            className="px-4 py-2 rounded-full font-heading font-bold text-sm transition-colors"
-            style={
-              tab === 'emoji'
-                ? { background: '#6546C7', color: '#fff' }
-                : { background: 'var(--bg-input)', color: 'var(--text-secondary)' }
-            }
-          >
-            Эмодзи
-          </button>
+          {tab === 'emoji' &&
+            emojiCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => scrollToSection(cat.id)}
+                className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-lg"
+                style={{ background: 'rgba(255,255,255,0.6)' }}
+              >
+                {cat.emojis[0]}
+              </button>
+            ))}
         </div>
 
-        {tab === 'stickers' ? (
-          <>
-            <div className="px-4 pb-2">
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
-                <input
-                  type="text"
-                  value={stickerSearch}
-                  onChange={(e) => setStickerSearch(e.target.value)}
-                  placeholder="Поиск стикеров"
-                  className="w-full bg-[var(--bg-input)] rounded-full py-2 pl-9 pr-3 text-sm font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)] focus:outline-none"
-                />
-              </div>
+        {tab === 'stickers' && (
+          <div className="px-4 pb-2 shrink-0">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
+              <input
+                type="text"
+                value={stickerSearch}
+                onChange={(e) => setStickerSearch(e.target.value)}
+                placeholder="Найти стикер"
+                className="w-full rounded-full py-2 pl-9 pr-3 text-sm font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)] focus:outline-none"
+                style={{ background: 'rgba(255,255,255,0.6)' }}
+              />
             </div>
+          </div>
+        )}
 
-            <div className="flex-1 overflow-y-auto px-4 pb-3">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pb-2">
+          {tab === 'stickers' ? (
+            <>
               {recentStickers.length > 0 && !stickerSearch && (
-                <div className="mb-3">
-                  <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Недавние</h3>
+                <div ref={(el) => { sectionRefs.current.recent = el; }} className="mb-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">Недавние</h3>
+                    <button onClick={() => setShowClearConfirm(true)} className="text-[var(--text-secondary)]">
+                      <X size={14} />
+                    </button>
+                  </div>
                   <div className="grid grid-cols-6 gap-2">
                     {recentStickers.map((emoji, i) => (
                       <motion.button
@@ -147,7 +164,8 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
                         onMouseLeave={handleStickerHoldEnd}
                         onTouchStart={handleStickerHoldStart}
                         onTouchEnd={handleStickerHoldEnd}
-                        className="aspect-square rounded-2xl bg-[var(--bg-input)] flex items-center justify-center text-3xl"
+                        className="aspect-square rounded-2xl flex items-center justify-center text-3xl"
+                        style={{ background: 'rgba(255,255,255,0.5)' }}
                       >
                         {emoji}
                       </motion.button>
@@ -168,7 +186,8 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
                     onMouseLeave={handleStickerHoldEnd}
                     onTouchStart={handleStickerHoldStart}
                     onTouchEnd={handleStickerHoldEnd}
-                    className="aspect-square rounded-2xl bg-[var(--bg-input)] flex items-center justify-center text-3xl"
+                    className="aspect-square rounded-2xl flex items-center justify-center text-3xl"
+                    style={{ background: 'rgba(255,255,255,0.5)' }}
                     title={s.label}
                   >
                     {s.emoji}
@@ -180,60 +199,86 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
                   </p>
                 )}
               </div>
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 overflow-y-auto px-4 pb-3 pt-1">
-            {recentEmoji.length > 0 && (
+            </>
+          ) : (
+            <>
+              {recentEmoji.length > 0 && (
+                <div ref={(el) => { sectionRefs.current.recent = el; }} className="mb-3">
+                  <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Недавние</h3>
+                  <div className="grid grid-cols-8 gap-1">
+                    {recentEmoji.map((emoji, i) => (
+                      <button
+                        key={`recent-e-${i}`}
+                        onClick={() => handleEmojiClick(emoji)}
+                        className="aspect-square rounded-xl flex items-center justify-center text-2xl"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="mb-3">
-                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Недавние</h3>
+                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Анимированные</h3>
                 <div className="grid grid-cols-8 gap-1">
-                  {recentEmoji.map((emoji, i) => (
+                  {animatedEmojis.map((emoji, i) => (
                     <button
-                      key={`recent-e-${i}`}
+                      key={`anim-${i}`}
                       onClick={() => handleEmojiClick(emoji)}
-                      className="aspect-square rounded-xl flex items-center justify-center text-2xl hover:bg-[var(--bg-input)]"
+                      className="aspect-square rounded-xl flex items-center justify-center text-2xl"
                     >
                       {emoji}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
 
-            <div className="mb-3">
-              <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">Анимированные</h3>
-              <div className="grid grid-cols-8 gap-1">
-                {animatedEmojis.map((emoji, i) => (
-                  <button
-                    key={`anim-${i}`}
-                    onClick={() => handleEmojiClick(emoji)}
-                    className="aspect-square rounded-xl flex items-center justify-center text-2xl hover:bg-[var(--bg-input)]"
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {emojiCategories.map((cat) => (
-              <div key={cat.id} className="mb-3">
-                <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">{cat.label}</h3>
-                <div className="grid grid-cols-8 gap-1">
-                  {cat.emojis.map((emoji, i) => (
-                    <button
-                      key={`${cat.id}-${i}`}
-                      onClick={() => handleEmojiClick(emoji)}
-                      className="aspect-square rounded-xl flex items-center justify-center text-2xl hover:bg-[var(--bg-input)]"
-                    >
-                      {emoji}
-                    </button>
-                  ))}
+              {emojiCategories.map((cat) => (
+                <div key={cat.id} ref={(el) => { sectionRefs.current[cat.id] = el; }} className="mb-3">
+                  <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-2">{cat.label}</h3>
+                  <div className="grid grid-cols-8 gap-1">
+                    {cat.emojis.map((emoji, i) => (
+                      <button
+                        key={`${cat.id}-${i}`}
+                        onClick={() => handleEmojiClick(emoji)}
+                        className="aspect-square rounded-xl flex items-center justify-center text-2xl"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </>
+          )}
+        </div>
+
+        {/* Вкладки снизу панели */}
+        <div className="flex items-center gap-2 px-4 py-2.5 shrink-0" style={{ background: 'rgba(255,255,255,0.35)' }}>
+          <button
+            onClick={() => setTab('stickers')}
+            className="px-4 py-1.5 rounded-full font-heading font-bold text-sm transition-colors"
+            style={
+              tab === 'stickers'
+                ? { background: '#6546C7', color: '#fff' }
+                : { background: 'rgba(255,255,255,0.5)', color: 'var(--text-secondary)' }
+            }
+          >
+            Стикеры
+          </button>
+          <button
+            onClick={() => setTab('emoji')}
+            className="px-4 py-1.5 rounded-full font-heading font-bold text-sm transition-colors"
+            style={
+              tab === 'emoji'
+                ? { background: '#6546C7', color: '#fff' }
+                : { background: 'rgba(255,255,255,0.5)', color: 'var(--text-secondary)' }
+            }
+          >
+            Эмодзи
+          </button>
+        </div>
       </div>
 
       {/* Подтверждение очистки недавних стикеров */}

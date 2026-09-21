@@ -500,8 +500,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 bg-white md:pb-4 pb-20"
-            style={{ boxShadow: '0 -4px 16px rgba(15,23,42,0.04)' }}
+            className="px-4 py-3 md:pb-4 pb-20"
+            style={{
+              background: 'rgba(255,255,255,0.65)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
+            }}
           >
             <div className="flex items-center gap-3">
               <motion.button
@@ -571,8 +576,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 bg-white md:pb-4 pb-20"
-            style={{ boxShadow: '0 -4px 16px rgba(15,23,42,0.04)' }}
+            className="px-4 py-3 md:pb-4 pb-20"
+            style={{
+              background: 'rgba(255,255,255,0.65)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
+            }}
           >
             <div className="flex items-center gap-2">
               <motion.button
