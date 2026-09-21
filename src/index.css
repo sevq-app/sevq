@@ -163,6 +163,10 @@ html.gray-theme {
   color-scheme: dark;
 }
 
+.gray-theme [class*="bg-sevchik-cream"] {
+  background-color: #2b2e33 !important;
+}
+
 html.theme-switching,
 html.theme-switching * {
   transition: none !important;
