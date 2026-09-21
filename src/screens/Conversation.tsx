@@ -17,14 +17,12 @@ function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: 
   return (
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl ${
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl min-w-[220px] ${
           isMe
             ? 'text-white rounded-br-sm'
             : 'bg-white text-[var(--text-main)] rounded-bl-sm'
         }`}
         style={{
-          minWidth: '220px',
-          maxWidth: '280px',
           background: isMe ? 'linear-gradient(135deg, #8366D9, #6546C7)' : undefined,
           boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
         }}
@@ -54,7 +52,7 @@ function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: 
         </div>
 
         {/* Таймер */}
-        <span className={`text-xs font-mono font-bold shrink-0 ${isMe ? 'text-white/90' : 'text-[#6546C7]'}`}>
+        <span className={`text-xs font-mono font-bold ${isMe ? 'text-white/90' : 'text-[#6546C7]'}`}>
           {duration}
         </span>
 
@@ -225,9 +223,9 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const getVoiceDuration = (text: string) => text.replace('🎤', '');
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent w-full">
+      <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent">
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
           onClick={onBack}
@@ -334,51 +332,47 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         </div>
       </div>
 
-      {/* Messages - ИСПРАВЛЕННЫЕ СТИЛИ */}
-      <div className="flex-1 overflow-y-auto w-full" style={{ minHeight: 0 }}>
-        <div className="px-3 py-4 space-y-3 w-full">
-          {messages.map(msg => {
-            const isMe = msg.senderId === 'me';
-            const isVoice = isVoiceMessage(msg.text);
-            const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+        {messages.map(msg => {
+          const isMe = msg.senderId === 'me';
+          const isVoice = isVoiceMessage(msg.text);
+          const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
 
-            return (
-              <motion.div
-                key={msg.id}
-                initial={isMe ? { scale: 0.95, opacity: 0, x: 20 } : { scale: 0.95, opacity: 0, x: -20 }}
-                animate={{ scale: 1, opacity: 1, x: 0 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
-                className={`w-full flex ${isMe ? 'justify-end' : 'justify-start'}`}
-              >
-                {isVoice ? (
-                  <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} />
-                ) : (
-                  <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                    <div
-                      className={`px-4 py-2.5 font-body text-sm rounded-2xl ${
-                        isMe
-                          ? 'text-white rounded-br-sm'
-                          : 'bg-white text-[var(--text-main)] rounded-bl-sm'
-                      }`}
-                      style={{
-                        maxWidth: '70%',
-                        minWidth: '80px',
-                        background: isMe ? 'linear-gradient(135deg, #8366D9, #6546C7)' : undefined,
-                        boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
-                      }}
-                    >
-                      <p className="break-words" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
-                      <p className={`text-[10px] mt-1 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
-                        {msg.time}
-                      </p>
-                    </div>
+          return (
+            <motion.div
+              key={msg.id}
+              initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
+              animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
+              transition={isMe ? { duration: 0.22, ease: 'easeOut' } : { duration: 0.4, type: 'spring', bounce: 0.5 }}
+              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+            >
+              {isVoice ? (
+                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} />
+              ) : (
+                <div>
+                  <div
+                    className={`max-w-[75%] px-4 py-2.5 font-body text-sm rounded-2xl ${
+                      isMe
+                        ? 'text-white rounded-br-sm'
+                        : 'bg-white text-[var(--text-main)] rounded-bl-sm'
+                    }`}
+                    style={{
+                      background: isMe ? 'linear-gradient(135deg, #8366D9, #6546C7)' : undefined,
+                      boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
+                    }}
+                  >
+                    <p style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
+                    <p className={`text-[10px] mt-1 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
+                      {msg.time}
+                    </p>
                   </div>
-                )}
-              </motion.div>
-            );
-          })}
-          <div ref={endRef} />
-        </div>
+                </div>
+              )}
+            </motion.div>
+          );
+        })}
+        <div ref={endRef} />
       </div>
 
       {/* Input Panel */}
@@ -389,7 +383,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 bg-white md:pb-4 pb-20 w-full"
+            className="px-4 py-3 bg-white md:pb-4 pb-20"
             style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
           >
             <div className="flex items-center gap-3">
@@ -459,14 +453,14 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 bg-white md:pb-4 pb-20 w-full"
+            className="px-4 py-3 bg-white md:pb-4 pb-20"
             style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
           >
             <div className="flex items-center gap-2">
               <motion.button
                 whileTap={{ scale: 0.9, y: 2 }}
                 whileHover={{ scale: 1.05 }}
-                onClick={() => alert(' Панель вложений будет добавлена позже')}
+                onClick={() => alert('📎 Панель вложений будет добавлена позже')}
                 className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
                 style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
               >
