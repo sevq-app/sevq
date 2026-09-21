@@ -492,24 +492,29 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         )}
       </AnimatePresence>
 
-      {/* Input Panel */}
-      <AnimatePresence mode="wait">
-        {isRecording ? (
-          <motion.div
-            key="recording"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-2.5 pb-4 select-none"
-            style={{
-              background: 'rgba(255,255,255,0.65)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
-              userSelect: 'none',
-              WebkitUserSelect: 'none',
-            }}
-          >
+      {/* Input Panel — стеклянный контейнер статичен и не пересоздаётся,
+          чтобы backdrop-filter не «глючил» на iOS Safari во время
+          анимации перехода между состояниями (баг с блюр-артефактом) */}
+      <div
+        className="px-4 py-2.5 pb-4"
+        style={{
+          background: 'rgba(255,255,255,0.65)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
+        }}
+      >
+        <AnimatePresence mode="wait">
+          {isRecording ? (
+            <motion.div
+              key="recording"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="select-none"
+              style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+            >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 min-w-0">
                 <motion.button
@@ -561,21 +566,15 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 </motion.button>
               </div>
             </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="input"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-2.5 pb-4"
-            style={{
-              background: 'rgba(255,255,255,0.65)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
-            }}
-          >
+            </motion.div>
+          ) : (
+            <motion.div
+              key="input"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
             <div className="flex items-center gap-2">
               <motion.button
                 whileTap={{ scale: 0.9, y: 2 }}
@@ -672,9 +671,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 )}
               </AnimatePresence>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Модальное окно "Уведомления" */}
       <AnimatePresence>
