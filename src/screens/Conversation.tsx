@@ -21,14 +21,14 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
       <div
         className={`flex flex-col gap-1 px-4 py-3 rounded-2xl ${
-          isMe
-            ? 'text-white rounded-br-sm'
-            : 'bg-white text-[var(--text-main)] rounded-bl-sm'
+          isMe ? 'text-white rounded-br-sm' : 'text-[var(--text-main)] rounded-bl-sm'
         }`}
         style={{
           minWidth: '220px',
           maxWidth: '280px',
-          background: isMe ? 'var(--theme-message-gradient)' : undefined,
+          background: isMe ? 'rgba(var(--theme-primary-rgb), 0.55)' : 'rgba(255,255,255,0.55)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
           boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
         }}
       >
@@ -327,7 +327,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full chat-wallpaper">
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent">
         <motion.button
