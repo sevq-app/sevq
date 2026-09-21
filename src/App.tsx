@@ -70,11 +70,6 @@ function App() {
     setScreen('conversation');
   };
 
-  const handleSearchWrite = (chat: Chat) => {
-    setActiveChat(chat);
-    setScreen('conversation');
-  };
-
   const handleWriteToName = (name: string) => {
     const chat = chats.find((c) => c.name === name);
     if (chat) {
@@ -88,8 +83,11 @@ function App() {
     setScreen('group');
   };
 
-  const handleLogout = () => {
-    supabase.auth.signOut();
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Ошибка при выходе:', error.message);
+    }
     setCurrentUser(null);
     setProfileData({});
     setScreen('chats');
