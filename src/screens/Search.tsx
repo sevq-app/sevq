@@ -48,7 +48,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
               <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1 flex items-center gap-2">
                 <Clock size={14} /> Недавние
               </h2>
-              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
                 {recentSearches.map((item, i) => (
                   <motion.button
                     key={i}
@@ -70,7 +70,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
               <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1 flex items-center gap-2">
                 <TrendingUp size={14} /> Популярное в Севчик
               </h2>
-              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
                 {['Новости дизайна', 'IT сообщество', 'Музыка 24/7'].map((item, i) => (
                   <motion.button
                     key={i}

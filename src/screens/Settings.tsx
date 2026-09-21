@@ -95,7 +95,7 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
               {section.title}
             </h2>
             
-            <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+            <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
               {section.items.map((item, itemIdx) => (
                 <motion.button
                   key={item.label}
@@ -110,10 +110,9 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
                     className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
                     style={{
                       background: `linear-gradient(135deg, ${item.color}dd, ${item.color})`,
-                      boxShadow: `0 4px 12px ${item.color}40`,
+                      boxShadow: `0 4px 12px ${item.color}26`,
                     }}
                   >
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
                     <item.icon size={20} className="text-white relative z-10" />
                   </div>
                   
@@ -162,7 +161,6 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
               boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
             <LogOut size={20} className="relative z-10" />
             <span className="relative z-10">Выйти из аккаунта</span>
           </motion.button>

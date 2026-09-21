@@ -55,14 +55,14 @@ export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSe
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="rounded-3xl p-5"
-          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
         >
           <div className="flex items-center gap-[12px] mb-[16px]">
             <div
               className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
                 background: 'linear-gradient(135deg, #6546C7, #8366D9)',
-                boxShadow: '0 4px 12px rgba(101,70,199,0.3)',
+                boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
               }}
             >
               <span className="text-white font-bold text-lg">A</span>
@@ -92,14 +92,14 @@ export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSe
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="rounded-3xl p-5"
-          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
         >
           <div className="flex items-center gap-[12px] mb-[16px]">
             <div
               className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
                 background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                boxShadow: '0 4px 12px rgba(79,211,200,0.3)',
+                boxShadow: '0 4px 12px rgba(79,211,200,0.2)',
               }}
             >
               <Palette size={20} className="text-white" />
@@ -139,7 +139,7 @@ export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSe
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="rounded-3xl p-5 pattern-bg-light"
-          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
         >
           <h3 className="font-heading font-bold mb-[16px]" style={{ color: textMain }}>Предпросмотр</h3>
           <div className="space-y-[12px]">
@@ -169,7 +169,7 @@ export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSe
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="rounded-3xl p-5 flex items-center justify-between"
-          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
         >
           <div>
             <h3 className="font-heading font-bold" style={{ color: textMain }}>Серый режим</h3>

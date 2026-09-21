@@ -28,7 +28,7 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
           minWidth: '220px',
           maxWidth: '280px',
           background: isMe ? 'var(--theme-message-gradient)' : undefined,
-          boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
+          boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
         }}
       >
         <div className="flex items-center gap-3">
@@ -143,10 +143,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const attachOptions = [
-    { label: 'Галерея', icon: Image, gradient: 'linear-gradient(135deg, #6546C7, #8366D9)', shadow: 'rgba(101,70,199,0.3)' },
-    { label: 'Файл', icon: File, gradient: 'linear-gradient(135deg, #FF9848, #FFB87A)', shadow: 'rgba(255,152,72,0.3)' },
-    { label: 'Опрос', icon: BarChart3, gradient: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', shadow: 'rgba(79,211,200,0.3)' },
-    { label: 'Контакт', icon: Contact, gradient: 'linear-gradient(135deg, #FF6B9D, #FF8FB3)', shadow: 'rgba(255,107,157,0.3)' },
+    { label: 'Галерея', icon: Image },
+    { label: 'Файл', icon: File },
+    { label: 'Опрос', icon: BarChart3 },
+    { label: 'Контакт', icon: Contact },
   ];
 
   const handleAttach = (label: string) => {
@@ -363,9 +363,9 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   initial={{ opacity: 0, scale: 0.9, y: -10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  className="absolute right-0 top-14 w-64 bg-white rounded-2xl overflow-hidden z-40"
-                  style={{ boxShadow: '0 12px 40px rgba(101,70,199,0.2)' }}
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
+                  className="absolute right-0 top-14 w-60 bg-white rounded-2xl overflow-hidden z-40"
+                  style={{ boxShadow: '0 12px 32px rgba(15,23,42,0.12)' }}
                 >
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -376,15 +376,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                   >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #FF9848, #FFB87A)',
-                        boxShadow: '0 3px 10px rgba(255,152,72,0.3)',
-                      }}
-                    >
-                      <Bell size={18} className="text-white" />
-                    </div>
+                    <Bell size={19} style={{ color: 'var(--text-secondary)' }} />
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Уведомления</span>
                   </motion.button>
 
@@ -397,15 +389,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                   >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #6546C7, #8366D9)',
-                        boxShadow: '0 3px 10px rgba(101,70,199,0.3)',
-                      }}
-                    >
-                      <Check size={18} className="text-white" />
-                    </div>
+                    <Check size={19} style={{ color: 'var(--text-secondary)' }} />
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
                   </motion.button>
 
@@ -418,15 +402,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                   >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                        boxShadow: '0 3px 10px rgba(79,211,200,0.3)',
-                      }}
-                    >
-                      <Search size={18} className="text-white" />
-                    </div>
+                    <Search size={19} style={{ color: 'var(--text-secondary)' }} />
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Найти</span>
                   </motion.button>
                 </motion.div>
@@ -448,7 +424,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               key={msg.id}
               initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
               animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
-              transition={isMe ? { duration: 0.22, ease: 'easeOut' } : { duration: 0.4, type: 'spring', bounce: 0.5 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
               className={`flex select-none ${isMe ? 'justify-end' : 'justify-start'}`}
               onContextMenu={(e) => handleMessageContextMenu(e, msg)}
               onMouseDown={() => handleMessageHoldStart(msg)}
@@ -466,7 +442,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                       ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
                       : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
                   }`}
-                  style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
+                  style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)' }}
                 >
                   <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
                   <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
@@ -490,7 +466,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
             className="px-4 py-3 bg-white md:pb-4 pb-20"
-            style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
+            style={{ boxShadow: '0 -4px 16px rgba(15,23,42,0.04)' }}
           >
             <div className="flex items-center gap-3">
               <motion.button
@@ -522,7 +498,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     className="relative w-11 h-11 rounded-full flex items-center justify-center"
                     style={{
                       background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
-                      boxShadow: '0 4px 14px rgba(239,68,68,0.4)',
+                      boxShadow: '0 4px 14px rgba(239,68,68,0.25)',
                     }}
                   >
                     <Mic size={20} className="text-white relative z-10" />
@@ -547,7 +523,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white"
                 style={{
                   background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                  boxShadow: '0 4px 14px rgba(79,211,200,0.35)',
+                  boxShadow: '0 4px 14px rgba(79,211,200,0.22)',
                 }}
               >
                 <Send size={20} />
@@ -561,7 +537,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
             className="px-4 py-3 bg-white md:pb-4 pb-20"
-            style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
+            style={{ boxShadow: '0 -4px 16px rgba(15,23,42,0.04)' }}
           >
             <div className="flex items-center gap-2">
               <motion.button
@@ -593,9 +569,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={handleSend}
                     className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.35)' }}
+                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.22)' }}
                   >
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
                     <Send size={20} className="relative z-10" />
                   </motion.button>
                 ) : (
@@ -627,9 +602,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                       onTouchStart={handleMicHoldStart}
                       onTouchEnd={handleMicHoldEnd}
                       className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                      style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 4px 14px rgba(79,211,200,0.35)' }}
+                      style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
                     >
-                      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
                       <Mic size={20} className="relative z-10" />
                     </motion.button>
                   </div>
@@ -742,16 +716,15 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   return (
                     <motion.button
                       key={item.label}
-                      whileTap={{ scale: 0.92 }}
-                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.94 }}
                       onClick={() => handleAttach(item.label)}
                       className="flex flex-col items-center gap-2"
                     >
                       <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                        style={{ background: item.gradient, boxShadow: `0 4px 14px ${item.shadow}` }}
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[var(--bg-input)]"
+                        style={{ boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}
                       >
-                        <Icon size={24} className="text-white" />
+                        <Icon size={22} style={{ color: 'var(--theme-primary)' }} />
                       </div>
                       <span className="font-heading font-semibold text-xs text-[#1A1A1A] text-center">{item.label}</span>
                     </motion.button>

@@ -46,7 +46,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowCloseConfirm(true)}
             className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-sevchik-textSecondary"
-            style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.1)' }}
+            style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
           >
             <X size={20} />
           </motion.button>
@@ -83,7 +83,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
                 className={`w-full flex items-center gap-3 px-4 py-3 bg-white rounded-2xl text-left btn-3d ${
                   isSelected ? 'ring-2 ring-[#6546C7]' : ''
                 }`}
-                style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+                style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
               >
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
@@ -129,7 +129,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
           className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden disabled:opacity-40"
           style={{
             background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-            boxShadow: selectedIds.length > 0 ? '0 4px 14px rgba(101,70,199,0.35)' : 'none',
+            boxShadow: selectedIds.length > 0 ? '0 4px 14px rgba(101,70,199,0.22)' : 'none',
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
