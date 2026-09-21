@@ -74,7 +74,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         ) : (
           /* Обычная шапка */
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">
+            <h1 className="font-heading font-extrabold text-xl text-sevchik-text">
               Чаты
             </h1>
             <div className="flex items-center gap-2">
@@ -84,10 +84,10 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setShowMenu(!showMenu)}
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-sevchik-textSecondary bg-white"
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-sevchik-textSecondary bg-white"
                   style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
                 >
-                  <MoreVertical size={22} />
+                  <MoreVertical size={24} />
                 </motion.button>
 
                 {/* Выпадающее меню */}
@@ -134,13 +134,13 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 whileTap={{ scale: 0.9 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={() => onStartChat?.()}
-                className="w-11 h-11 rounded-full flex items-center justify-center text-white"
+                className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                 style={{
                   background: '#6546C7',
                   boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
                 }}
               >
-                <Plus size={22} />
+                <Plus size={24} />
               </motion.button>
             </div>
           </div>
@@ -169,7 +169,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
       </div>
 
       {/* Список чатов */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
         <div className="space-y-2">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);
@@ -188,7 +188,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     onOpenChat(chat);
                   }
                 }}
-                className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 rounded-2xl text-left btn-3d ${
+                className={`w-full h-20 flex items-center gap-4 px-4 py-3 rounded-2xl text-left btn-3d ${
                   isSelected ? 'ring-2 ring-[#6546C7]' : ''
                 }`}
                 style={{

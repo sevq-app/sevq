@@ -11,19 +11,19 @@ interface AvatarProps {
 }
 
 const sizeMap = {
-  sm: 'w-10 h-10 text-xs',
-  md: 'w-12 h-12 text-sm',
-  lg: 'w-14 h-14 text-sm',
-  xl: 'w-20 h-20 text-lg',
-  xxl: 'w-[120px] h-[120px] text-3xl',
+  sm: 'w-11 h-11 text-sm',
+  md: 'w-14 h-14 text-base',
+  lg: 'w-16 h-16 text-lg',
+  xl: 'w-24 h-24 text-xl',
+  xxl: 'w-[140px] h-[140px] text-4xl',
 };
 
 const dotSizeMap = {
-  sm: 'w-3 h-3 border-2',
-  md: 'w-3.5 h-3.5 border-2',
-  lg: 'w-4 h-4 border-2',
-  xl: 'w-5 h-5 border-[3px]',
-  xxl: 'w-6 h-6 border-[3px]',
+  sm: 'w-3.5 h-3.5 border-2',
+  md: 'w-4 h-4 border-2',
+  lg: 'w-[18px] h-[18px] border-[3px]',
+  xl: 'w-6 h-6 border-[3px]',
+  xxl: 'w-7 h-7 border-[3px]',
 };
 
 export function Avatar({

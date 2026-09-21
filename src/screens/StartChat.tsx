@@ -41,12 +41,12 @@ export function StartChat({ onBack }: StartChatProps) {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onBack}
-            className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
+            className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
             style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
           >
             <ArrowLeft size={22} />
           </motion.button>
-          <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Начать общение</h1>
+          <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Начать общение</h1>
         </div>
 
         {/* Search */}
@@ -64,7 +64,7 @@ export function StartChat({ onBack }: StartChatProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0 relative">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0 relative">
         <div className="max-w-2xl mx-auto pt-2">
           {/* Action buttons */}
           <div className="space-y-2 mb-6">
@@ -73,7 +73,7 @@ export function StartChat({ onBack }: StartChatProps) {
               className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left"
               style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
                 <Users size={18} style={{ color: 'var(--theme-primary)' }} />
               </div>
               <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Создать группу</span>
@@ -84,7 +84,7 @@ export function StartChat({ onBack }: StartChatProps) {
               className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left"
               style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
                 <Phone size={18} style={{ color: 'var(--theme-primary)' }} />
               </div>
               <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Найти по номеру</span>
@@ -95,7 +95,7 @@ export function StartChat({ onBack }: StartChatProps) {
               className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left"
               style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
                 <Link size={18} style={{ color: 'var(--theme-primary)' }} />
               </div>
               <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Пригласить по ссылке</span>

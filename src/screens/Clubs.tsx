@@ -16,8 +16,8 @@ export function Clubs({ onOpenClub }: ClubsProps) {
     <div className="flex flex-col h-full bg-[var(--bg-main)]">
       <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Клубы</h1>
-          <div className="w-10 h-10 rounded-full bg-sevchik-orange flex items-center justify-center font-heading font-extrabold text-white text-sm" style={{ boxShadow: '0 2px 8px rgba(255,152,72,0.2)' }}>
+          <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Клубы</h1>
+          <div className="w-11 h-11 rounded-full bg-sevchik-orange flex items-center justify-center font-heading font-extrabold text-white text-sm" style={{ boxShadow: '0 2px 8px rgba(255,152,72,0.2)' }}>
             <span>АВ</span>
           </div>
         </div>
@@ -32,7 +32,7 @@ export function Clubs({ onOpenClub }: ClubsProps) {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
         <div className="space-y-3 mt-2">
           {mockClubs.map((club, i) => (
             <motion.button

@@ -62,23 +62,23 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'main') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-0 relative bg-[var(--bg-main)]">
+      <div className="h-full overflow-y-auto pb-28 md:pb-0 relative bg-[var(--bg-main)]">
         {/* Шапка */}
         <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Контакты</h1>
+            <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Контакты</h1>
             <div className="relative">
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="w-11 h-11 rounded-full flex items-center justify-center text-white"
+                className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                 style={{
                   background: '#6546C7',
                   boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
                 }}
               >
-                <Plus size={22} />
+                <Plus size={24} />
               </motion.button>
               {/* Выпадающее меню */}
               <AnimatePresence>
@@ -302,19 +302,19 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'selectMembers') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-0 bg-[var(--bg-main)]">
+      <div className="h-full overflow-y-auto pb-28 md:pb-0 bg-[var(--bg-main)]">
         {/* Шапка */}
         <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center gap-3 mb-4">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentView('main')}
-              className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
+              className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
               style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.08)' }}
             >
               <ChevronLeft size={22} />
             </motion.button>
-            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Выбери участников</h1>
+            <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Выбери участников</h1>
           </div>
           {/* Поиск */}
           <div className="relative">
@@ -416,19 +416,19 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   // ============================================
   if (currentView === 'createGroup') {
     return (
-      <div className="h-full overflow-y-auto pb-24 md:pb-0 bg-[var(--bg-main)]">
+      <div className="h-full overflow-y-auto pb-28 md:pb-0 bg-[var(--bg-main)]">
         {/* Шапка */}
         <div className="px-4 sm:px-6 pt-4 pb-3 sticky top-0 z-20 bg-transparent">
           <div className="flex items-center gap-3 mb-4">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentView('selectMembers')}
-              className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
+              className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
               style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.08)' }}
             >
               <ChevronLeft size={22} />
             </motion.button>
-            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Новая группа</h1>
+            <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Новая группа</h1>
           </div>
         </div>
 
