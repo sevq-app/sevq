@@ -15,13 +15,15 @@ import { Search } from '@/screens/Search';
 import { Settings } from '@/screens/Settings';
 import { Appearance } from '@/screens/Appearance';
 import { Login } from '@/screens/Login';
-import type { Chat } from '@/data/mock';
+import type { Chat, Screen } from '@/data/mock';
 import { chats } from '@/data/mock';
+import { supabase } from '@/lib/supabase';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [profileData, setProfileData] = useState<any>({});
-  const [screen, setScreen] = useState<string>('chats');
+  const [screen, setScreen] = useState<Screen>('chats');
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(15);
@@ -30,6 +32,22 @@ function App() {
     const saved = localStorage.getItem('selectedTheme');
     return saved || 'spring';
   });
+
+  // Проверка текущей сессии Supabase при загрузке приложения
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setCurrentUser(data.session?.user ?? null);
+      setAuthLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   // Восстановление темы при загрузке
   useEffect(() => {
@@ -57,12 +75,21 @@ function App() {
     setScreen('conversation');
   };
 
+  const handleWriteToName = (name: string) => {
+    const chat = chats.find((c) => c.name === name);
+    if (chat) {
+      setActiveChat(chat);
+      setScreen('conversation');
+    }
+  };
+
   const handleOpenGroup = (groupName: string) => {
     setActiveGroup(groupName);
     setScreen('group');
   };
 
   const handleLogout = () => {
+    supabase.auth.signOut();
     setCurrentUser(null);
     setProfileData({});
     setScreen('chats');
@@ -79,7 +106,7 @@ function App() {
   };
 
   // Умная навигация по вкладкам
-  const handleTabNavigate = (tab: string) => {
+  const handleTabNavigate = (tab: Screen) => {
     if (tab === 'chats' && activeChat) {
       // Если есть активная переписка — возвращаемся в неё
       setScreen('conversation');
@@ -90,8 +117,16 @@ function App() {
 
   const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group';
 
+  if (authLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-[var(--bg-main)]">
+        <span className="text-sevchik-text">Загрузка...</span>
+      </div>
+    );
+  }
+
   if (!currentUser) {
-    return <Login onLogin={setCurrentUser} />;
+    return <Login onLogin={() => {}} onRegister={() => {}} />;
   }
 
   return (
@@ -111,14 +146,12 @@ function App() {
                 onOpenChat={handleOpenChat}
                 grayMode={grayMode}
                 fontSize={fontSize}
-                currentUser={currentUser}
-                profileData={profileData}
               />
             )}
             {screen === 'conversation' && activeChat && (
               <Conversation chat={activeChat} onBack={() => setScreen('chats')} fontSize={fontSize} />
             )}
-            {screen === 'contacts' && <Friends onWriteMessage={handleSearchWrite} />}
+            {screen === 'contacts' && <Friends onWriteMessage={handleWriteToName} />}
             {screen === 'calls' && <Calls onNavigate={setScreen} />}
             {screen === 'clubs' && <Clubs onOpenClub={() => {}} />}
             {screen === 'profile' && <Profile user={currentUser} profileData={profileData} onNavigate={setScreen} />}
@@ -127,7 +160,7 @@ function App() {
             {screen === 'my-groups' && <MyGroups groups={[]} onBack={() => setScreen('profile')} onOpenGroup={handleOpenGroup} />}
             {screen === 'group' && activeGroup && <Group name={activeGroup} onBack={() => setScreen('my-groups')} />}
             {screen === 'search' && (
-              <Search onBack={() => setScreen('chats')} onWriteMessage={handleSearchWrite} />
+              <Search onBack={() => setScreen('chats')} onWriteMessage={handleWriteToName} />
             )}
             {screen === 'settings' && (
               <Settings
