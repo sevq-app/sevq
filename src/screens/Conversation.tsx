@@ -191,7 +191,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       const voiceMsg: Message = {
         id: `voice-${Date.now()}`,
         senderId: 'me',
-        text: `🎤${duration}`,
+        text: `${duration}`,
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, voiceMsg]);
@@ -332,8 +332,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      {/* Messages - ИСПРАВЛЕННЫЕ СТИЛИ */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-2">
         {messages.map(msg => {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
@@ -342,17 +342,17 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           return (
             <motion.div
               key={msg.id}
-              initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
-              animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
-              transition={isMe ? { duration: 0.22, ease: 'easeOut' } : { duration: 0.4, type: 'spring', bounce: 0.5 }}
+              initial={isMe ? { scale: 0.95, opacity: 0, x: 20 } : { scale: 0.95, opacity: 0, x: -20 }}
+              animate={{ scale: 1, opacity: 1, x: 0 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
               className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
             >
               {isVoice ? (
                 <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} />
               ) : (
-                <div>
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                   <div
-                    className={`max-w-[75%] px-4 py-2.5 font-body text-sm rounded-2xl ${
+                    className={`px-4 py-2.5 font-body text-sm rounded-2xl ${
                       isMe
                         ? 'text-white rounded-br-sm'
                         : 'bg-white text-[var(--text-main)] rounded-bl-sm'
@@ -360,6 +360,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     style={{
                       background: isMe ? 'linear-gradient(135deg, #8366D9, #6546C7)' : undefined,
                       boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
+                      maxWidth: '70%',
                     }}
                   >
                     <p style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
