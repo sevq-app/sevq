@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Plus, Send, Phone, Bell, Check, Search, X, Mic } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -43,7 +43,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const handleMute = (duration: string) => {
-    alert(`🔕 Уведомления отключены: ${duration}`);
+    alert(` Уведомления отключены: ${duration}`);
     setShowNotificationsModal(false);
     setShowMenu(false);
   };
@@ -215,14 +215,15 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       {/* Input */}
       <div className="px-4 py-3 bg-white md:pb-4 pb-20" style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}>
         <div className="flex items-center gap-2">
-          {/* Кнопка вложений (скрепка) */}
+          {/* Кнопка вложений (СКРЕПКА) */}
           <motion.button
             whileTap={{ scale: 0.9, y: 2 }}
+            whileHover={{ scale: 1.05 }}
             onClick={() => alert('📎 Панель вложений будет добавлена позже')}
             className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           >
-            <Plus size={22} />
+            <Paperclip size={22} />
           </motion.button>
 
           {/* Поле ввода */}
