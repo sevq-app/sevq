@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, Lock, ChevronLeft } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
@@ -500,74 +500,66 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-2.5 pb-4"
+            className="px-4 py-2.5 pb-4 select-none"
             style={{
               background: 'rgba(255,255,255,0.65)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
             }}
           >
-            <div className="flex items-center gap-3">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={handleCancelRecording}
-                className="shrink-0 w-11 h-11 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
-              >
-                <X size={22} />
-              </motion.button>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleCancelRecording}
+                  className="shrink-0 w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
+                >
+                  <Trash2 size={17} />
+                </motion.button>
 
-              <div className="flex-1 flex items-center justify-center gap-3">
-                <div className="relative">
-                  <motion.div
-                    animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0, 0.6] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                    className="absolute inset-0 rounded-full bg-red-500/30"
-                    style={{ width: '60px', height: '60px', left: '-8px', top: '-8px' }}
-                  />
-                  <motion.div
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0, 0.4] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-                    className="absolute inset-0 rounded-full bg-red-500/20"
-                    style={{ width: '70px', height: '70px', left: '-13px', top: '-13px' }}
-                  />
-                  
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 0.8, repeat: Infinity, ease: 'easeInOut' }}
-                    className="relative w-11 h-11 rounded-full flex items-center justify-center"
-                    style={{
-                      background: '#EF4444',
-                      boxShadow: '0 4px 14px rgba(239,68,68,0.25)',
-                    }}
-                  >
-                    <Mic size={20} className="text-white relative z-10" />
-                  </motion.div>
-                </div>
-
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <motion.div
                     animate={{ opacity: [1, 0.3, 1] }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
-                    className="w-2 h-2 rounded-full bg-red-500"
+                    className="w-2 h-2 rounded-full bg-red-500 shrink-0"
                   />
-                  <span className="font-mono text-sm font-bold text-red-500">
+                  <span className="font-mono text-sm font-bold text-[var(--text-main)] select-none" style={{ userSelect: 'none', WebkitUserSelect: 'none' }}>
                     {formatRecordingTime(recordingTime)}
                   </span>
                 </div>
+
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleCancelRecording}
+                  className="flex items-center gap-0.5 text-sm font-body text-[var(--text-secondary)] truncate"
+                >
+                  <ChevronLeft size={15} className="shrink-0" />
+                  <span className="truncate">Отменить</span>
+                </motion.button>
               </div>
 
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={handleMicHoldEnd}
-                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white"
-                style={{
-                  background: '#4FD3C8',
-                  boxShadow: '0 4px 14px rgba(79,211,200,0.22)',
-                }}
-              >
-                <Send size={20} />
-              </motion.button>
+              <div className="relative shrink-0">
+                <div
+                  className="absolute -top-12 right-0 w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', boxShadow: '0 2px 8px rgba(15,23,42,0.08)' }}
+                >
+                  <Lock size={14} />
+                </div>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleMicHoldEnd}
+                  className="w-11 h-11 rounded-full flex items-center justify-center text-white"
+                  style={{
+                    background: 'var(--theme-primary)',
+                    boxShadow: '0 4px 14px rgba(101,70,199,0.22)',
+                  }}
+                >
+                  <Send size={20} />
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         ) : (
