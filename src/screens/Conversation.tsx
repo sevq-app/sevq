@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -84,6 +84,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [input, setInput] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -134,6 +135,18 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       };
       setMessages(prev => [...prev, reply]);
     }, 1500);
+  };
+
+  const attachOptions = [
+    { label: 'Галерея', icon: Image, gradient: 'linear-gradient(135deg, #6546C7, #8366D9)', shadow: 'rgba(101,70,199,0.3)' },
+    { label: 'Файл', icon: File, gradient: 'linear-gradient(135deg, #FF9848, #FFB87A)', shadow: 'rgba(255,152,72,0.3)' },
+    { label: 'Опрос', icon: BarChart3, gradient: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', shadow: 'rgba(79,211,200,0.3)' },
+    { label: 'Контакт', icon: Contact, gradient: 'linear-gradient(135deg, #FF6B9D, #FF8FB3)', shadow: 'rgba(255,107,157,0.3)' },
+  ];
+
+  const handleAttach = (label: string) => {
+    alert(`${label}: функция будет добавлена позже`);
+    setShowAttachMenu(false);
   };
 
   const handleMute = (duration: string) => {
@@ -460,7 +473,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               <motion.button
                 whileTap={{ scale: 0.9, y: 2 }}
                 whileHover={{ scale: 1.05 }}
-                onClick={() => alert('📎 Панель вложений будет добавлена позже')}
+                onClick={() => setShowAttachMenu(true)}
                 className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
                 style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
               >
@@ -594,6 +607,63 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               >
                 Отменить
               </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Модальное окно "Вложения" */}
+      <AnimatePresence>
+        {showAttachMenu && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowAttachMenu(false)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl bg-white rounded-t-3xl p-6"
+              style={{ boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-heading font-extrabold text-xl text-[#1A1A1A]">Вложения</h3>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowAttachMenu(false)}
+                  className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
+                >
+                  <X size={20} />
+                </motion.button>
+              </div>
+
+              <div className="grid grid-cols-4 gap-3 pb-2">
+                {attachOptions.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.button
+                      key={item.label}
+                      whileTap={{ scale: 0.92 }}
+                      whileHover={{ scale: 1.05 }}
+                      onClick={() => handleAttach(item.label)}
+                      className="flex flex-col items-center gap-2"
+                    >
+                      <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center"
+                        style={{ background: item.gradient, boxShadow: `0 4px 14px ${item.shadow}` }}
+                      >
+                        <Icon size={24} className="text-white" />
+                      </div>
+                      <span className="font-heading font-semibold text-xs text-[#1A1A1A] text-center">{item.label}</span>
+                    </motion.button>
+                  );
+                })}
+              </div>
             </motion.div>
           </motion.div>
         )}
