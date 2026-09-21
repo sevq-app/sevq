@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Timer, Play, Pause } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Play, Pause } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -10,20 +10,14 @@ interface ConversationProps {
   fontSize: number;
 }
 
-// ============================================
-// КОМПОНЕНТ ГОЛОСОВОГО СООБЩЕНИЯ
-// ============================================
+// Компонент голосового сообщения
 function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: string; isMe: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl ${
-          isMe
-            ? 'text-white rounded-br-sm'
-            : 'bg-white text-[var(--text-main)] rounded-bl-sm'
-        }`}
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl ${isMe ? 'text-white rounded-br-sm' : 'bg-white text-[var(--text-main)] rounded-bl-sm'}`}
         style={{
           minWidth: '220px',
           maxWidth: '280px',
@@ -121,7 +115,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       text: input.trim(),
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
     };
-    setMessages((prev) => [...prev, msg]);
+    setMessages(prev => [...prev, msg]);
     setInput('');
     setTimeout(() => {
       const reply: Message = {
@@ -130,12 +124,12 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         text: 'Принято! 👍',
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages((prev) => [...prev, reply]);
+      setMessages(prev => [...prev, reply]);
     }, 1500);
   };
 
   const handleMute = (duration: string) => {
-    alert(` Уведомления отключены: ${duration}`);
+    alert(`🔕 Уведомления отключены: ${duration}`);
     setShowNotificationsModal(false);
     setShowMenu(false);
   };
@@ -178,10 +172,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       const voiceMsg: Message = {
         id: `voice-${Date.now()}`,
         senderId: 'me',
-        text: `${duration}`,
+        text: `voice:${duration}`, // ✅ Ключевой фикс: добавлен маркер "voice:"
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages((prev) => [...prev, voiceMsg]);
+      setMessages(prev => [...prev, voiceMsg]);
       setIsRecording(false);
       setRecordingTime(0);
       
@@ -192,7 +186,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           text: 'Прослушал голосовое 👂',
           time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
         };
-        setMessages((prev) => [...prev, reply]);
+        setMessages(prev => [...prev, reply]);
       }, 1500);
     } else {
       setShowHoldHint(true);
@@ -207,10 +201,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   // Проверка, является ли сообщение голосовым
-  const isVoiceMessage = (text: string) => text.startsWith('🎤');
+  const isVoiceMessage = (text: string) => text.startsWith('voice:'); // ✅ Ключевой фикс: теперь проверяем "voice:"
 
   // Получение длительности из голосового сообщения
-  const getVoiceDuration = (text: string) => text.replace('🎤', '');
+  const getVoiceDuration = (text: string) => text.replace('voice:', ''); // ✅ Ключевой фикс: теперь парсим "voice:00:04"
 
   return (
     <div className="flex flex-col h-full">
@@ -237,12 +231,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         <motion.button
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          onClick={() => alert(' Функция звонков скоро будет доступна!')}
+          onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
           className="p-2 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
         >
           <Phone size={20} />
         </motion.button>
+
         {/* Кнопка "три точки" */}
         <div className="relative">
           <motion.button
@@ -254,6 +249,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           >
             <MoreVertical size={20} />
           </motion.button>
+
           {/* Выпадающее меню */}
           <AnimatePresence>
             {showMenu && (
@@ -294,13 +290,14 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     </div>
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Уведомления</span>
                   </motion.button>
+
                   {/* Пункт 2: Выбрать */}
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
                       setShowMenu(false);
-                      alert(' Режим выбора будет добавлен позже');
+                      alert('✅ Режим выбора будет добавлен позже');
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                   >
@@ -315,13 +312,14 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     </div>
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
                   </motion.button>
+
                   {/* Пункт 3: Найти */}
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
                       setShowMenu(false);
-                      alert(' Поиск по переписке будет добавлен позже');
+                      alert('🔍 Поиск по переписке будет добавлен позже');
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                   >
@@ -342,12 +340,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           </AnimatePresence>
         </div>
       </div>
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.map((msg) => {
+        {messages.map(msg => {
           const isMe = msg.senderId === 'me';
-          const isVoice = isVoiceMessage(msg.text);
-          const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
+          const isVoice = isVoiceMessage(msg.text); // ✅ Теперь работает корректно
+          const voiceDuration = isVoice ? getVoiceDuration(msg.text) : ''; // ✅ Теперь работает корректно
 
           return (
             <motion.div
@@ -377,6 +376,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         })}
         <div ref={endRef} />
       </div>
+
       {/* Input Panel */}
       <AnimatePresence mode="wait">
         {isRecording ? (
@@ -398,6 +398,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               >
                 <X size={22} />
               </motion.button>
+
               {/* Анимированный микрофон с волнами */}
               <div className="flex-1 flex items-center justify-center gap-3">
                 {/* Пульсирующие круги вокруг микрофона */}
@@ -449,6 +450,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     <Mic size={20} className="text-white relative z-10" />
                   </motion.div>
                 </div>
+
                 {/* Таймер */}
                 <div className="flex items-center gap-2">
                   <motion.div
@@ -467,6 +469,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   </span>
                 </div>
               </div>
+
               {/* Кнопка отправки */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -496,12 +499,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               <motion.button
                 whileTap={{ scale: 0.9, y: 2 }}
                 whileHover={{ scale: 1.05 }}
-                onClick={() => alert(' Панель вложений будет добавлена позже')}
+                onClick={() => alert('📎 Панель вложений будет добавлена позже')}
                 className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
                 style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
               >
                 <Paperclip size={22} />
               </motion.button>
+
               {/* Поле ввода */}
               <input
                 type="text"
@@ -511,6 +515,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 placeholder="Написать сообщение..."
                 className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
               />
+
               {/* Динамическая кнопка: микрофон или отправка */}
               <AnimatePresence mode="wait">
                 {input.trim() ? (
@@ -569,6 +574,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           </motion.div>
         )}
       </AnimatePresence>
+
       {/* Модальное окно "Уведомления" (шторка снизу) */}
       <AnimatePresence>
         {showNotificationsModal && (
@@ -599,6 +605,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   <X size={20} />
                 </motion.button>
               </div>
+
               {/* Пункты */}
               <div className="space-y-2">
                 {[
@@ -606,7 +613,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   { label: 'На 4 часа', color: '#6546C7' },
                   { label: 'На 24 часа', color: '#6546C7' },
                   { label: 'Навсегда', color: '#EF4444' },
-                ].map((item) => (
+                ].map(item => (
                   <motion.button
                     key={item.label}
                     whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -623,6 +630,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   </motion.button>
                 ))}
               </div>
+
               {/* Кнопка "Отменить" */}
               <motion.button
                 whileTap={{ scale: 0.98 }}
