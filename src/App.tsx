@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TabBar } from '@/components/Navigation';
+import { TabBar, Sidebar } from '@/components/Navigation';
 import { Chats } from '@/screens/Chats';
 import { Conversation } from '@/screens/Conversation';
 import { Friends } from '@/screens/Friends';
@@ -131,7 +131,9 @@ function App() {
 
   return (
     <div className={`h-screen w-screen overflow-hidden ${grayMode ? 'gray-theme' : ''}`}>
-      <div className="h-full w-full flex flex-col bg-[var(--bg-main)]">
+      <div className="h-full w-full flex bg-[var(--bg-main)]">
+        {showTabBar && <Sidebar current={screen} onNavigate={handleTabNavigate} />}
+        <div className="h-full w-full flex flex-col overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={screen}
@@ -185,6 +187,7 @@ function App() {
         </AnimatePresence>
 
         {showTabBar && <TabBar current={screen} onNavigate={handleTabNavigate} />}
+        </div>
       </div>
     </div>
   );
