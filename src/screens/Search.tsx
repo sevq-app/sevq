@@ -78,7 +78,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
                     whileTap={{ scale: 0.98 }}
                     className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${i !== 2 ? 'border-b border-[#F3F4F6]' : ''}`}
                   >
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shrink-0" style={{ background: 'linear-gradient(135deg, #FF9848, #FFB87A)' }}>
+                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shrink-0" style={{ background: '#FF9848' }}>
                       <TrendingUp size={18} />
                     </div>
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">{item}</span>

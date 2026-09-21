@@ -157,7 +157,7 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
             onClick={handleLogout}
             className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base relative overflow-hidden flex items-center justify-center gap-3"
             style={{
-              background: 'linear-gradient(135deg, #FF6B6B 0%, #EF4444 100%)',
+              background: '#EF4444',
               boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)',
             }}
           >

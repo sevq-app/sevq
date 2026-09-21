@@ -497,7 +497,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     transition={{ duration: 0.8, repeat: Infinity, ease: 'easeInOut' }}
                     className="relative w-11 h-11 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
+                      background: '#EF4444',
                       boxShadow: '0 4px 14px rgba(239,68,68,0.25)',
                     }}
                   >
@@ -522,7 +522,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 onClick={handleMicHoldEnd}
                 className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                  background: '#4FD3C8',
                   boxShadow: '0 4px 14px rgba(79,211,200,0.22)',
                 }}
               >
@@ -602,7 +602,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                       onTouchStart={handleMicHoldStart}
                       onTouchEnd={handleMicHoldEnd}
                       className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                      style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
+                      style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
                     >
                       <Mic size={20} className="relative z-10" />
                     </motion.button>

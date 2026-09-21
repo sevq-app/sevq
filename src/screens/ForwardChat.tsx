@@ -128,11 +128,10 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
           disabled={selectedIds.length === 0}
           className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden disabled:opacity-40"
           style={{
-            background: 'linear-gradient(135deg, #8366D9, #6546C7)',
+            background: '#6546C7',
             boxShadow: selectedIds.length > 0 ? '0 4px 14px rgba(101,70,199,0.22)' : 'none',
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
           <Send size={20} className="relative z-10" />
           <span className="relative z-10">
             Отправить{selectedIds.length > 0 ? ` (${selectedIds.length})` : ''}

@@ -61,7 +61,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
               onClick={exitSelectMode}
               className="px-4 py-2 rounded-2xl font-heading font-bold text-sm text-white"
               style={{
-                background: 'linear-gradient(135deg, #8366D9, #6546C7)',
+                background: '#6546C7',
                 boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
               }}
             >
@@ -136,7 +136,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={() => onStartChat?.()}
                 className="w-11 h-11 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #8366D9, #6546C7)',
+                  background: '#6546C7',
                   boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
                 }}
               >
@@ -150,17 +150,17 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         <div className="relative">
           <Search
             size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Люди, группы и сообщения"
-            className="w-full text-[var(--text-main)] placeholder:text-[var(--text-secondary)] rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm relative overflow-hidden bg-[var(--bg-input)]"
+            className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
             style={{
-              background: 'var(--bg-input)',
-              boxShadow: 'none',
+              background: '#FF9848',
+              boxShadow: '0 4px 14px rgba(255,152,72,0.28)',
             }}
           />
         </div>
@@ -252,7 +252,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       <span
                         className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[22px] h-[22px] px-1.5 flex items-center justify-center"
                         style={{
-                          background: 'linear-gradient(135deg, #8366D9, #6546C7)',
+                          background: '#6546C7',
                           boxShadow: '0 3px 10px rgba(101,70,199,0.18)',
                         }}
                       >
@@ -263,7 +263,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       <span
                         className="shrink-0 text-white text-[10px] font-heading font-bold rounded-pill px-2 h-[20px] flex items-center justify-center"
                         style={{
-                          background: 'linear-gradient(135deg, #6BE3D9, #4FD3C8)',
+                          background: '#4FD3C8',
                           boxShadow: '0 3px 10px rgba(79,211,200,0.18)',
                         }}
                       >
@@ -299,7 +299,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={markAllRead}
                 className="flex-1 py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                  background: '#4FD3C8',
                   boxShadow: '0 4px 14px rgba(79,211,200,0.2)',
                 }}
               >
@@ -312,7 +312,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={deleteSelected}
                 className="flex-1 py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
+                  background: '#EF4444',
                   boxShadow: '0 4px 14px rgba(239,68,68,0.2)',
                 }}
               >

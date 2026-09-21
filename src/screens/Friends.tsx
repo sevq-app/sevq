@@ -74,7 +74,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="w-11 h-11 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #8366D9, #6546C7)',
+                  background: '#6546C7',
                   boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
                 }}
               >
@@ -178,7 +178,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               <div
                 className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                 style={{
-                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                  background: '#4FD3C8',
                   boxShadow: '0 4px 12px rgba(79,211,200,0.25)',
                 }}
               >
@@ -257,7 +257,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
                     style={{
-                      background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                      background: '#4FD3C8',
                       boxShadow: '0 8px 24px rgba(79,211,200,0.2)',
                     }}
                   >
@@ -282,7 +282,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                     onClick={handleAllowContacts}
                     className="flex-1 py-3 rounded-2xl text-white font-heading font-bold"
                     style={{
-                      background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                      background: '#4FD3C8',
                       boxShadow: '0 4px 12px rgba(79,211,200,0.2)',
                     }}
                   >
@@ -399,7 +399,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             onClick={() => setCurrentView('createGroup')}
             className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base relative overflow-hidden flex items-center justify-center gap-3"
             style={{
-              background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+              background: '#6546C7',
               boxShadow: '0 4px 14px rgba(101,70,199,0.25)',
             }}
           >
@@ -446,7 +446,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               onClick={() => alert('📷 Здесь откроется выбор фото из галереи или камеры')}
               className="w-28 h-28 rounded-full flex items-center justify-center relative overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, #FFB87A, #FF9848)',
+                background: '#FF9848',
                 boxShadow: '0 8px 24px rgba(255,152,72,0.2)',
               }}
             >
@@ -522,7 +522,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             disabled={!groupName.trim()}
             className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base relative overflow-hidden flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: 'linear-gradient(135deg, #4FD3C8 0%, #38b2ac 100%)',
+              background: '#4FD3C8',
               boxShadow: '0 4px 14px rgba(79,211,200,0.2)',
             }}
           >

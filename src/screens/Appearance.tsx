@@ -12,7 +12,7 @@ interface AppearanceProps {
 }
 
 const themes = [
-  { id: 'spring', name: 'Весна', gradient: 'linear-gradient(135deg, #FFB87A, #FF9848)', primary: '#FF9848', icon: Flower },
+  { id: 'spring', name: 'Весна', gradient: '#FF9848', primary: '#FF9848', icon: Flower },
   { id: 'summer', name: 'Лето', gradient: 'linear-gradient(135deg, #FFD93D, #FFB848)', primary: '#FFB848', icon: Sun },
   { id: 'autumn', name: 'Осень', gradient: 'linear-gradient(135deg, #FF6B6B, #FF9848)', primary: '#FF6B6B', icon: Leaf },
   { id: 'winter', name: 'Зима', gradient: 'linear-gradient(135deg, #A78BFA, #6546C7)', primary: '#6546C7', icon: Snowflake },
@@ -61,7 +61,7 @@ export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSe
             <div
               className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #6546C7, #8366D9)',
+                background: '#6546C7',
                 boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
               }}
             >
@@ -98,7 +98,7 @@ export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSe
             <div
               className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
-                background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
+                background: '#4FD3C8',
                 boxShadow: '0 4px 12px rgba(79,211,200,0.2)',
               }}
             >

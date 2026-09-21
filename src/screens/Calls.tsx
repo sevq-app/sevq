@@ -17,7 +17,7 @@ export function Calls({ onNavigate }: CallsProps) {
             whileHover={{ scale: 1.05 }}
             onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
             className="w-11 h-11 rounded-full flex items-center justify-center text-white"
-            style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
+            style={{ background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
           >
             <Phone size={22} />
           </motion.button>

@@ -105,11 +105,10 @@ export function Login({ onLogin, onRegister }: AuthProps) {
               disabled={loading}
               className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{ 
-                background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+                background: '#6546C7',
                 boxShadow: '0 4px 14px rgba(101, 70, 199, 0.25)'
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
               <span className="relative z-10 flex items-center justify-center gap-2">
                 {loading && <Loader2 className="animate-spin" size={20} />}
                 {loading ? 'Вход...' : 'Войти в Севчик'}
@@ -154,11 +153,10 @@ export function Login({ onLogin, onRegister }: AuthProps) {
                 disabled={loading}
                 className="flex-1 py-3.5 rounded-2xl text-white font-heading font-bold relative overflow-hidden disabled:opacity-70"
                 style={{ 
-                  background: 'linear-gradient(135deg, #FFB87A 0%, #FF9848 100%)',
+                  background: '#FF9848',
                   boxShadow: '0 4px 14px rgba(255, 152, 72, 0.25)'
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {loading && <Loader2 className="animate-spin" size={18} />}
                   {loading ? 'Отправка...' : 'Отправить'}
@@ -226,11 +224,10 @@ export function Register({ onRegister, onLogin }: AuthProps) {
           disabled={loading}
           className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6 disabled:opacity-70"
           style={{ 
-            background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+            background: '#6546C7',
             boxShadow: '0 4px 14px rgba(101, 70, 199, 0.25)'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
           <span className="relative z-10 flex items-center justify-center gap-2">
             {loading && <Loader2 className="animate-spin" size={20} />}
             {loading ? 'Создание...' : 'Зарегистрироваться'}

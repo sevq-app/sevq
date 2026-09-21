@@ -40,7 +40,7 @@
     --text-placeholder: #9CA3AF;
     --border-color: rgba(101, 70, 199, 0.08);
     --theme-primary: #6546C7;
-    --theme-message-gradient: linear-gradient(135deg, #6546C7, #8366D9);
+    --theme-message-gradient: #6546C7;
   }
 
 }
@@ -126,27 +126,27 @@
 /* Цветовые темы: задают --theme-primary и --theme-message-gradient для окраски сообщений */
 html.spring {
   --theme-primary: #FF9848;
-  --theme-message-gradient: linear-gradient(135deg, #FFB87A, #FF9848);
+  --theme-message-gradient: #FF9848;
 }
 html.summer {
   --theme-primary: #FFB848;
-  --theme-message-gradient: linear-gradient(135deg, #FFD93D, #FFB848);
+  --theme-message-gradient: #FFB848;
 }
 html.autumn {
   --theme-primary: #FF6B6B;
-  --theme-message-gradient: linear-gradient(135deg, #FF6B6B, #FF9848);
+  --theme-message-gradient: #FF6B6B;
 }
 html.winter {
   --theme-primary: #6546C7;
-  --theme-message-gradient: linear-gradient(135deg, #A78BFA, #6546C7);
+  --theme-message-gradient: #6546C7;
 }
 html.aurora {
   --theme-primary: #4FD3C8;
-  --theme-message-gradient: linear-gradient(135deg, #4FD3C8, #6546C7);
+  --theme-message-gradient: #4FD3C8;
 }
 html.sea {
   --theme-primary: #38b2ac;
-  --theme-message-gradient: linear-gradient(135deg, #38b2ac, #2c7a7b);
+  --theme-message-gradient: #38b2ac;
 }
 
 /* Глобальная серая тема */
@@ -159,7 +159,7 @@ html.gray-theme {
   --text-placeholder: #aeb4bc;
   --border-color: rgba(255, 255, 255, 0.14);
   --theme-primary: #5967A8;
-  --theme-message-gradient: linear-gradient(135deg, #5967A8, #3F4D88);
+  --theme-message-gradient: #5967A8;
   color-scheme: dark;
 }
 
