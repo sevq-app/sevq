@@ -123,6 +123,32 @@
     radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
 }
 
+/* Цветовые темы: задают --theme-primary и --theme-message-gradient для окраски сообщений */
+html.spring {
+  --theme-primary: #FF9848;
+  --theme-message-gradient: linear-gradient(135deg, #FFB87A, #FF9848);
+}
+html.summer {
+  --theme-primary: #FFB848;
+  --theme-message-gradient: linear-gradient(135deg, #FFD93D, #FFB848);
+}
+html.autumn {
+  --theme-primary: #FF6B6B;
+  --theme-message-gradient: linear-gradient(135deg, #FF6B6B, #FF9848);
+}
+html.winter {
+  --theme-primary: #6546C7;
+  --theme-message-gradient: linear-gradient(135deg, #A78BFA, #6546C7);
+}
+html.aurora {
+  --theme-primary: #4FD3C8;
+  --theme-message-gradient: linear-gradient(135deg, #4FD3C8, #6546C7);
+}
+html.sea {
+  --theme-primary: #38b2ac;
+  --theme-message-gradient: linear-gradient(135deg, #38b2ac, #2c7a7b);
+}
+
 /* Глобальная серая тема */
 html.gray-theme {
   --bg-main: radial-gradient(ellipse at top left, #34383f 0%, #24272b 60%, #1b1e22 100%);
