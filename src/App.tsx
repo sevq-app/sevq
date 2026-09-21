@@ -105,14 +105,8 @@ function App() {
     }
   };
 
-  // Умная навигация по вкладкам
   const handleTabNavigate = (tab: Screen) => {
-    if (tab === 'chats' && activeChat) {
-      // Если есть активная переписка — возвращаемся в неё
-      setScreen('conversation');
-    } else {
-      setScreen(tab);
-    }
+    setScreen(tab);
   };
 
   const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group';
