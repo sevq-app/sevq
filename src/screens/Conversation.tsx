@@ -17,27 +17,32 @@ function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: 
   return (
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl ${isMe ? 'text-white rounded-br-sm' : 'bg-white text-[var(--text-main)] rounded-bl-sm'}`}
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl ${
+          isMe
+            ? 'text-white rounded-br-sm'
+            : 'bg-white text-[var(--text-main)] rounded-bl-sm'
+        }`}
         style={{
           minWidth: '220px',
           maxWidth: '280px',
-          background: isMe ? 'linear-gradient(135deg, #8366D9, #6546C7)' : undefined,
+          background: isMe ? 'var(--theme-message-gradient)' : undefined,
           boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
         }}
       >
-        {/* Кнопка Play/Pause */}
+        {/* Кнопка Play/Pause — белая с цветной иконкой */}
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsPlaying(!isPlaying)}
           className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
           style={{
-            background: isMe ? 'rgba(255,255,255,0.2)' : 'linear-gradient(135deg, #6546C7, #8366D9)',
+            background: '#ffffff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           }}
         >
           {isPlaying ? (
-            <Pause size={18} className="text-white" />
+            <Pause size={18} style={{ color: 'var(--theme-primary)' }} />
           ) : (
-            <Play size={18} className="text-white ml-0.5" />
+            <Play size={18} style={{ color: 'var(--theme-primary)', marginLeft: '2px' }} />
           )}
         </motion.button>
 
@@ -49,14 +54,16 @@ function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: 
               className="w-1 rounded-full"
               style={{
                 height: `${height * 100}%`,
-                background: isMe ? 'rgba(255,255,255,0.5)' : '#6546C7',
+                background: isMe ? 'rgba(255,255,255,0.6)' : 'var(--theme-primary)',
               }}
             />
           ))}
         </div>
 
         {/* Таймер */}
-        <span className={`text-xs font-mono font-bold shrink-0 ${isMe ? 'text-white/90' : 'text-[#6546C7]'}`}>
+        <span className={`text-xs font-mono font-bold shrink-0 ${isMe ? 'text-white/90' : ''}`}
+          style={{ color: isMe ? undefined : 'var(--theme-primary)' }}
+        >
           {duration}
         </span>
       </div>
@@ -75,7 +82,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   
-  // Состояния для записи голосового
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [showHoldHint, setShowHoldHint] = useState(false);
@@ -88,7 +94,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Таймер записи
   useEffect(() => {
     if (isRecording) {
       recordingIntervalRef.current = setInterval(() => {
@@ -134,7 +139,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     setShowMenu(false);
   };
 
-  // Форматирование времени записи (мм:сс,мс) - для таймера во время записи
   const formatRecordingTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -143,7 +147,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')},${milliseconds.toString().padStart(2, '0')}`;
   };
 
-  // Форматирование длительности голосового (только мм:сс) - для отображения
   const formatVoiceDuration = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
@@ -151,7 +154,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  // Начало удержания микрофона
   const handleMicHoldStart = () => {
     setShowHoldHint(false);
     holdTimeoutRef.current = setTimeout(() => {
@@ -160,7 +162,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     }, 300);
   };
 
-  // Конец удержания микрофона
   const handleMicHoldEnd = () => {
     if (holdTimeoutRef.current) {
       clearTimeout(holdTimeoutRef.current);
@@ -172,7 +173,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       const voiceMsg: Message = {
         id: `voice-${Date.now()}`,
         senderId: 'me',
-        text: `voice:${duration}`, // ✅ Ключевой фикс: добавлен маркер "voice:"
+        text: `voice:${duration}`,
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, voiceMsg]);
@@ -194,17 +195,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     }
   };
 
-  // Отмена записи
   const handleCancelRecording = () => {
     setIsRecording(false);
     setRecordingTime(0);
   };
 
-  // Проверка, является ли сообщение голосовым
-  const isVoiceMessage = (text: string) => text.startsWith('voice:'); // ✅ Ключевой фикс: теперь проверяем "voice:"
-
-  // Получение длительности из голосового сообщения
-  const getVoiceDuration = (text: string) => text.replace('voice:', ''); // ✅ Ключевой фикс: теперь парсим "voice:00:04"
+  const isVoiceMessage = (text: string) => text.startsWith('voice:');
+  const getVoiceDuration = (text: string) => text.replace('voice:', '');
 
   return (
     <div className="flex flex-col h-full">
@@ -227,7 +224,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           </p>
         </div>
         
-        {/* Кнопка аудиозвонка */}
         <motion.button
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
@@ -238,7 +234,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           <Phone size={20} />
         </motion.button>
 
-        {/* Кнопка "три точки" */}
         <div className="relative">
           <motion.button
             whileTap={{ scale: 0.9 }}
@@ -250,7 +245,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             <MoreVertical size={20} />
           </motion.button>
 
-          {/* Выпадающее меню */}
           <AnimatePresence>
             {showMenu && (
               <>
@@ -269,7 +263,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   className="absolute right-0 top-14 w-64 bg-white rounded-2xl overflow-hidden z-40"
                   style={{ boxShadow: '0 12px 40px rgba(101,70,199,0.2)' }}
                 >
-                  {/* Пункт 1: Уведомления */}
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
@@ -291,7 +284,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Уведомления</span>
                   </motion.button>
 
-                  {/* Пункт 2: Выбрать */}
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
@@ -313,7 +305,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
                   </motion.button>
 
-                  {/* Пункт 3: Найти */}
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
@@ -345,8 +336,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map(msg => {
           const isMe = msg.senderId === 'me';
-          const isVoice = isVoiceMessage(msg.text); // ✅ Теперь работает корректно
-          const voiceDuration = isVoice ? getVoiceDuration(msg.text) : ''; // ✅ Теперь работает корректно
+          const isVoice = isVoiceMessage(msg.text);
+          const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
 
           return (
             <motion.div
@@ -380,7 +371,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       {/* Input Panel */}
       <AnimatePresence mode="wait">
         {isRecording ? (
-          /* Панель записи голосового с анимацией */
           <motion.div
             key="recording"
             initial={{ y: 20, opacity: 0 }}
@@ -390,7 +380,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
           >
             <div className="flex items-center gap-3">
-              {/* Кнопка отмены */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={handleCancelRecording}
@@ -399,48 +388,24 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <X size={22} />
               </motion.button>
 
-              {/* Анимированный микрофон с волнами */}
               <div className="flex-1 flex items-center justify-center gap-3">
-                {/* Пульсирующие круги вокруг микрофона */}
                 <div className="relative">
                   <motion.div
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      opacity: [0.6, 0, 0.6],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
+                    animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0, 0.6] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
                     className="absolute inset-0 rounded-full bg-red-500/30"
                     style={{ width: '60px', height: '60px', left: '-8px', top: '-8px' }}
                   />
                   <motion.div
-                    animate={{
-                      scale: [1, 1.5, 1],
-                      opacity: [0.4, 0, 0.4],
-                    }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 0.3,
-                    }}
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0, 0.4] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
                     className="absolute inset-0 rounded-full bg-red-500/20"
                     style={{ width: '70px', height: '70px', left: '-13px', top: '-13px' }}
                   />
                   
-                  {/* Центральный микрофон */}
                   <motion.div
-                    animate={{
-                      scale: [1, 1.1, 1],
-                    }}
-                    transition={{
-                      duration: 0.8,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity, ease: 'easeInOut' }}
                     className="relative w-11 h-11 rounded-full flex items-center justify-center"
                     style={{
                       background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
@@ -451,17 +416,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   </motion.div>
                 </div>
 
-                {/* Таймер */}
                 <div className="flex items-center gap-2">
                   <motion.div
-                    animate={{
-                      opacity: [1, 0.3, 1],
-                    }}
-                    transition={{
-                      duration: 1,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
+                    animate={{ opacity: [1, 0.3, 1] }}
+                    transition={{ duration: 1, repeat: Infinity, ease: 'easeInOut' }}
                     className="w-2 h-2 rounded-full bg-red-500"
                   />
                   <span className="font-mono text-sm font-bold text-red-500">
@@ -470,7 +428,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 </div>
               </div>
 
-              {/* Кнопка отправки */}
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={handleMicHoldEnd}
@@ -485,7 +442,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             </div>
           </motion.div>
         ) : (
-          /* Обычная панель ввода */
           <motion.div
             key="input"
             initial={{ y: 20, opacity: 0 }}
@@ -495,7 +451,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
           >
             <div className="flex items-center gap-2">
-              {/* Кнопка вложений (скрепка) */}
               <motion.button
                 whileTap={{ scale: 0.9, y: 2 }}
                 whileHover={{ scale: 1.05 }}
@@ -506,7 +461,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <Paperclip size={22} />
               </motion.button>
 
-              {/* Поле ввода */}
               <input
                 type="text"
                 value={input}
@@ -516,7 +470,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
               />
 
-              {/* Динамическая кнопка: микрофон или отправка */}
               <AnimatePresence mode="wait">
                 {input.trim() ? (
                   <motion.button
@@ -527,14 +480,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={handleSend}
                     className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                    style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 14px rgba(101,70,199,0.35)' }}
+                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.35)' }}
                   >
                     <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
                     <Send size={20} className="relative z-10" />
                   </motion.button>
                 ) : (
                   <div className="relative">
-                    {/* Подсказка "Удерживайте для записи" */}
                     <AnimatePresence>
                       {showHoldHint && (
                         <motion.div
@@ -575,7 +527,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         )}
       </AnimatePresence>
 
-      {/* Модальное окно "Уведомления" (шторка снизу) */}
+      {/* Модальное окно "Уведомления" */}
       <AnimatePresence>
         {showNotificationsModal && (
           <motion.div
@@ -594,7 +546,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               className="w-full max-w-2xl bg-white rounded-t-3xl p-6"
               style={{ boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}
             >
-              {/* Заголовок */}
               <div className="flex items-center justify-between mb-6">
                 <h3 className="font-heading font-extrabold text-xl text-[#1A1A1A]">Отключить уведомления</h3>
                 <motion.button
@@ -606,14 +557,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 </motion.button>
               </div>
 
-              {/* Пункты */}
               <div className="space-y-2">
                 {[
                   { label: 'На 1 час', color: '#6546C7' },
                   { label: 'На 4 часа', color: '#6546C7' },
                   { label: 'На 24 часа', color: '#6546C7' },
                   { label: 'Навсегда', color: '#EF4444' },
-                ].map(item => (
+                ].map((item) => (
                   <motion.button
                     key={item.label}
                     whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -631,7 +581,6 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 ))}
               </div>
 
-              {/* Кнопка "Отменить" */}
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowNotificationsModal(false)}
