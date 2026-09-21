@@ -39,9 +39,9 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
                 active
                   ? { background: '#6546C7', boxShadow: '0 6px 16px rgba(101,70,199,0.2)' }
                   : {
-                      background: 'rgba(255,255,255,0.85)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
+                      background: 'rgba(255,255,255,0.65)',
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
                     }
               }

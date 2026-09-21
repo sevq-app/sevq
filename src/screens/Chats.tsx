@@ -159,9 +159,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
             placeholder="Люди, группы и сообщения"
             className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
             style={{
-              background: 'rgba(255,152,72,0.85)',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
+              background: 'rgba(255,152,72,0.65)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
               boxShadow: '0 4px 14px rgba(255,152,72,0.28)',
             }}
           />
@@ -192,9 +192,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   isSelected ? 'ring-2 ring-[#6546C7]' : ''
                 }`}
                 style={{
-                  background: grayMode ? 'rgba(45,45,58,0.85)' : 'rgba(255,255,255,0.85)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
+                  background: grayMode ? 'rgba(45,45,58,0.65)' : 'rgba(255,255,255,0.65)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
                   boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
                 }}
               >
