@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -85,6 +85,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [menuMessage, setMenuMessage] = useState<Message | null>(null);
   
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -93,6 +94,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const endRef = useRef<HTMLDivElement>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messageHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -147,6 +149,73 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const handleAttach = (label: string) => {
     alert(`${label}: функция будет добавлена позже`);
     setShowAttachMenu(false);
+  };
+
+  const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+
+  const handleMessageHoldStart = (msg: Message) => {
+    messageHoldTimeoutRef.current = setTimeout(() => {
+      setMenuMessage(msg);
+    }, 400);
+  };
+
+  const handleMessageHoldEnd = () => {
+    if (messageHoldTimeoutRef.current) {
+      clearTimeout(messageHoldTimeoutRef.current);
+      messageHoldTimeoutRef.current = null;
+    }
+  };
+
+  const handleMessageContextMenu = (e: MouseEvent, msg: Message) => {
+    e.preventDefault();
+    setMenuMessage(msg);
+  };
+
+  const handleReaction = () => {
+    setMenuMessage(null);
+  };
+
+  const handleReply = () => {
+    alert('↩️ Ответ на сообщение будет добавлен позже');
+    setMenuMessage(null);
+  };
+
+  const handleForward = () => {
+    alert('➡️ Пересылка будет добавлена позже');
+    setMenuMessage(null);
+  };
+
+  const handleMarkUnread = () => {
+    alert('✉️ Отметка "непрочитанным" будет добавлена позже');
+    setMenuMessage(null);
+  };
+
+  const handleCopyText = async () => {
+    if (menuMessage) {
+      try {
+        await navigator.clipboard.writeText(menuMessage.text);
+      } catch {
+        // буфер обмена недоступен — молча игнорируем
+      }
+    }
+    setMenuMessage(null);
+  };
+
+  const handleReport = () => {
+    alert('🚩 Жалоба будет добавлена позже');
+    setMenuMessage(null);
+  };
+
+  const handleDeleteMessage = () => {
+    if (menuMessage) {
+      setMessages(prev => prev.filter(m => m.id !== menuMessage.id));
+    }
+    setMenuMessage(null);
+  };
+
+  const handleSelectMessage = () => {
+    alert('☑️ Режим выбора будет добавлен позже');
+    setMenuMessage(null);
   };
 
   const handleMute = (duration: string) => {
@@ -361,7 +430,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
               animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
               transition={isMe ? { duration: 0.22, ease: 'easeOut' } : { duration: 0.4, type: 'spring', bounce: 0.5 }}
-              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+              className={`flex select-none ${isMe ? 'justify-end' : 'justify-start'}`}
+              onContextMenu={(e) => handleMessageContextMenu(e, msg)}
+              onMouseDown={() => handleMessageHoldStart(msg)}
+              onMouseUp={handleMessageHoldEnd}
+              onMouseLeave={handleMessageHoldEnd}
+              onTouchStart={() => handleMessageHoldStart(msg)}
+              onTouchEnd={handleMessageHoldEnd}
             >
               {isVoice ? (
                 <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} read={msg.read} />
@@ -663,6 +738,118 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     </motion.button>
                   );
                 })}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Контекстное меню сообщения */}
+      <AnimatePresence>
+        {menuMessage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+            onClick={() => setMenuMessage(null)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl bg-white rounded-t-3xl p-6"
+              style={{ boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}
+            >
+              {/* Быстрые реакции */}
+              <div className="flex items-center justify-between gap-2 mb-4">
+                {reactionEmojis.map((emoji) => (
+                  <motion.button
+                    key={emoji}
+                    whileTap={{ scale: 0.8 }}
+                    whileHover={{ scale: 1.2 }}
+                    onClick={handleReaction}
+                    className="text-2xl w-10 h-10 flex items-center justify-center rounded-full"
+                  >
+                    {emoji}
+                  </motion.button>
+                ))}
+              </div>
+
+              <div className="space-y-1">
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReply}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Reply size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Ответить</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleForward}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Forward size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Переслать</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleMarkUnread}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <EyeOff size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
+                </motion.button>
+
+                {!isVoiceMessage(menuMessage.text) && (
+                  <motion.button
+                    whileHover={{ backgroundColor: '#F9FAFB' }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCopyText}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                  >
+                    <Copy size={20} style={{ color: 'var(--theme-primary)' }} />
+                    <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Скопировать текст</span>
+                  </motion.button>
+                )}
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReport}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Flag size={20} className="text-[#EF4444]" />
+                  <span className="font-heading font-semibold text-sm text-[#EF4444]">Пожаловаться</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleDeleteMessage}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Trash2 size={20} className="text-[#EF4444]" />
+                  <span className="font-heading font-semibold text-sm text-[#EF4444]">Удалить</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSelectMessage}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <CheckSquare size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
+                </motion.button>
               </div>
             </motion.div>
           </motion.div>
