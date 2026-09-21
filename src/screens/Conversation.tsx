@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Timer } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Timer, FileText } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -8,6 +8,98 @@ interface ConversationProps {
   chat: Chat;
   onBack: () => void;
   fontSize: number;
+}
+
+// Компонент голосового сообщения
+function VoiceMessage({ duration, time, isMe }: { duration: string; time: string; isMe: boolean }) {
+  const [showTranscript, setShowTranscript] = useState(false);
+
+  return (
+    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+      <div
+        className={`flex items-center gap-3 px-4 py-3 rounded-2xl min-w-[200px] ${
+          isMe
+            ? 'message-outgoing-pattern text-white rounded-br-sm'
+            : 'message-incoming-pattern text-[var(--text-main)] rounded-bl-sm'
+        }`}
+        style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
+      >
+        {/* Иконка микрофона */}
+        <div
+          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+          style={{
+            background: isMe
+              ? 'linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1))'
+              : 'linear-gradient(135deg, #6546C7, #8366D9)',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          }}
+        >
+          <Mic size={20} className="text-white" />
+        </div>
+
+        {/* Волновая форма (визуальная заглушка) */}
+        <div className="flex-1 flex items-center gap-1">
+          {[0.4, 0.7, 1, 0.6, 0.8, 0.5, 0.9, 0.7, 0.6, 0.8].map((height, i) => (
+            <div
+              key={i}
+              className="w-1 rounded-full"
+              style={{
+                height: `${height * 24}px`,
+                background: isMe ? 'rgba(255,255,255,0.6)' : '#6546C7',
+                opacity: 0.7,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Таймер */}
+        <span className={`text-xs font-mono font-bold ${isMe ? 'text-white/80' : 'text-[#6546C7]'}`}>
+          {duration}
+        </span>
+
+        {/* Кнопка расшифровки */}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.1 }}
+          onClick={() => setShowTranscript(!showTranscript)}
+          className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+            isMe ? 'bg-white/20' : 'bg-[#6546C7]/10'
+          }`}
+          title="Расшифровать голосовое"
+        >
+          <FileText size={16} className={isMe ? 'text-white' : 'text-[#6546C7]'} />
+        </motion.button>
+      </div>
+
+      {/* Время под сообщением */}
+      <p className={`text-[10px] mt-1 ${isMe ? 'text-sevchik-textSecondary/60' : 'text-sevchik-textSecondary'}`}>
+        {time}
+      </p>
+
+      {/* Расшифровка (заглушка) */}
+      <AnimatePresence>
+        {showTranscript && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -10, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="mt-2 px-4 py-3 rounded-xl bg-[#F3F4F6] text-sm text-[#6B7280] font-body max-w-[280px]"
+          >
+            <div className="flex items-start gap-2">
+              <FileText size={16} className="shrink-0 mt-0.5 text-[#9CA3AF]" />
+              <div>
+                <p className="font-semibold text-[#4B5563] mb-1">Расшифровка голосового</p>
+                <p className="text-xs text-[#9CA3AF] italic">
+                  Функция расшифровки голосовых сообщений появится в следующем обновлении.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }
 
 export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
@@ -70,18 +162,26 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const handleMute = (duration: string) => {
-    alert(` Уведомления отключены: ${duration}`);
+    alert(`🔕 Уведомления отключены: ${duration}`);
     setShowNotificationsModal(false);
     setShowMenu(false);
   };
 
-  // Форматирование времени записи (мм:сс,мс)
+  // Форматирование времени записи (мм:сс,мс) - для таймера во время записи
   const formatRecordingTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     const milliseconds = Math.floor((ms % 1000) / 10);
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')},${milliseconds.toString().padStart(2, '0')}`;
+  };
+
+  // Форматирование длительности голосового (только мм:сс) - для отображения
+  const formatVoiceDuration = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   // Начало удержания микрофона
@@ -101,10 +201,12 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     }
     
     if (isRecording) {
+      // Создаем голосовое сообщение с длительностью
+      const duration = formatVoiceDuration(recordingTime);
       const voiceMsg: Message = {
         id: `voice-${Date.now()}`,
         senderId: 'me',
-        text: `🎤 Голосовое сообщение (${formatRecordingTime(recordingTime)})`,
+        text: `🎤${duration}`, // Формат: 🎤мм:сс
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, voiceMsg]);
@@ -132,6 +234,12 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     setRecordingTime(0);
   };
 
+  // Проверка, является ли сообщение голосовым
+  const isVoiceMessage = (text: string) => text.startsWith('');
+
+  // Получение длительности из голосового сообщения
+  const getVoiceDuration = (text: string) => text.replace('', '');
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -157,7 +265,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         <motion.button
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
-          onClick={() => alert(' Функция звонков скоро будет доступна!')}
+          onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
           className="p-2 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
         >
@@ -271,6 +379,9 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg) => {
           const isMe = msg.senderId === 'me';
+          const isVoice = isVoiceMessage(msg.text);
+          const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
+
           return (
             <motion.div
               key={msg.id}
@@ -279,17 +390,21 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               transition={isMe ? { duration: 0.22, ease: 'easeOut' } : { duration: 0.4, type: 'spring', bounce: 0.5 }}
               className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
             >
-              <div
-                className={`max-w-[75%] px-4 py-2.5 font-body text-sm relative overflow-hidden ${
-                  isMe
-                    ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
-                    : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
-                }`}
-                style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
-              >
-                <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
-                <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`} style={{ fontSize: `${fontSize}px` }}>{msg.time}</p>
-              </div>
+              {isVoice ? (
+                <VoiceMessage duration={voiceDuration} time={msg.time} isMe={isMe} />
+              ) : (
+                <div
+                  className={`max-w-[75%] px-4 py-2.5 font-body text-sm relative overflow-hidden ${
+                    isMe
+                      ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
+                      : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
+                  }`}
+                  style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
+                >
+                  <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
+                  <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`} style={{ fontSize: `${fontSize}px` }}>{msg.time}</p>
+                </div>
+              )}
             </motion.div>
           );
         })}
