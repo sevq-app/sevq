@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
+import { ForwardChat } from '@/screens/ForwardChat';
+import { chats } from '@/data/mock';
 import type { Chat, Message } from '@/data/mock';
 
 interface ConversationProps {
@@ -86,6 +88,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [menuMessage, setMenuMessage] = useState<Message | null>(null);
+  const [forwardMessage, setForwardMessage] = useState<Message | null>(null);
   
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -181,7 +184,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const handleForward = () => {
-    alert('➡️ Пересылка будет добавлена позже');
+    setForwardMessage(menuMessage);
     setMenuMessage(null);
   };
 
@@ -214,8 +217,24 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const handleSelectMessage = () => {
-    alert('☑️ Режим выбора будет добавлен позже');
+    setForwardMessage(menuMessage);
     setMenuMessage(null);
+  };
+
+  const handleSendForward = (chatIds: string[]) => {
+    if (!forwardMessage) return;
+    chatIds.forEach((chatId) => {
+      const target = chats.find((c) => c.id === chatId);
+      if (target) {
+        target.messages.push({
+          id: `fwd-${Date.now()}-${chatId}`,
+          senderId: 'me',
+          text: forwardMessage.text,
+          time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        });
+      }
+    });
+    setForwardMessage(null);
   };
 
   const handleMute = (duration: string) => {
@@ -853,6 +872,17 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Экран пересылки */}
+      <AnimatePresence>
+        {forwardMessage && (
+          <ForwardChat
+            excludeChatId={chat.id}
+            onClose={() => setForwardMessage(null)}
+            onSend={handleSendForward}
+          />
         )}
       </AnimatePresence>
     </div>
