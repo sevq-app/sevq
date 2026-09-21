@@ -24,8 +24,8 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
           isMe ? 'text-white rounded-br-sm' : 'text-[var(--text-main)] rounded-bl-sm'
         }`}
         style={{
-          minWidth: '220px',
-          maxWidth: '280px',
+          minWidth: 'min(220px, 65vw)',
+          maxWidth: 'min(280px, 75vw)',
           background: isMe ? 'rgba(var(--theme-primary-rgb), 0.55)' : 'rgba(255,255,255,0.55)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
