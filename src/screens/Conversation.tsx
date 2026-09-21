@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Plus, Send, Phone, Bell, Check, Search, X } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Plus, Send, Phone, Bell, Check, Search, X, Mic } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -215,13 +215,17 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       {/* Input */}
       <div className="px-4 py-3 bg-white md:pb-4 pb-20" style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}>
         <div className="flex items-center gap-2">
+          {/* Кнопка вложений (скрепка) */}
           <motion.button
             whileTap={{ scale: 0.9, y: 2 }}
+            onClick={() => alert('📎 Панель вложений будет добавлена позже')}
             className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           >
             <Plus size={22} />
           </motion.button>
+
+          {/* Поле ввода */}
           <input
             type="text"
             value={input}
@@ -230,15 +234,39 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             placeholder="Написать сообщение..."
             className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
           />
-          <motion.button
-            whileTap={{ scale: 0.88, y: 2 }}
-            onClick={handleSend}
-            className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, #FFB87A, #FF9848)', boxShadow: '0 4px 14px rgba(255,152,72,0.35)' }}
-          >
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-            <Send size={20} className="relative z-10" />
-          </motion.button>
+
+          {/* Динамическая кнопка: микрофон или отправка */}
+          <AnimatePresence mode="wait">
+            {input.trim() ? (
+              <motion.button
+                key="send"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                whileTap={{ scale: 0.88, y: 2 }}
+                onClick={handleSend}
+                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 14px rgba(101,70,199,0.35)' }}
+              >
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
+                <Send size={20} className="relative z-10" />
+              </motion.button>
+            ) : (
+              <motion.button
+                key="mic"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                whileTap={{ scale: 0.88, y: 2 }}
+                onClick={() => alert('🎤 Запись голосового будет добавлена позже')}
+                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
+                style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 4px 14px rgba(79,211,200,0.35)' }}
+              >
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
+                <Mic size={20} className="relative z-10" />
+              </motion.button>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
