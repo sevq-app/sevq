@@ -21,6 +21,7 @@ export interface Message {
   senderId: string;
   text: string;
   time: string;
+  read?: boolean;
 }
 
 export interface Chat {

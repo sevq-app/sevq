@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, Search, X, Mic, Paperclip, Play, Pause } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import type { Chat, Message } from '@/data/mock';
 
@@ -11,13 +11,13 @@ interface ConversationProps {
 }
 
 // Компонент голосового сообщения
-function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: string; isMe: boolean }) {
+function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; time: string; isMe: boolean; read?: boolean }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl ${
+        className={`flex flex-col gap-1 px-4 py-3 rounded-2xl ${
           isMe
             ? 'text-white rounded-br-sm'
             : 'bg-white text-[var(--text-main)] rounded-bl-sm'
@@ -29,6 +29,7 @@ function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: 
           boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
         }}
       >
+        <div className="flex items-center gap-3">
         {/* Кнопка Play/Pause — белая с цветной иконкой */}
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -40,9 +41,9 @@ function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: 
           }}
         >
           {isPlaying ? (
-            <Pause size={18} style={{ color: 'var(--theme-primary)' }} />
+            <Pause size={18} fill="currentColor" strokeWidth={0} style={{ color: 'var(--theme-primary)' }} />
           ) : (
-            <Play size={18} style={{ color: 'var(--theme-primary)', marginLeft: '2px' }} />
+            <Play size={18} fill="currentColor" strokeWidth={0} style={{ color: 'var(--theme-primary)', marginLeft: '2px' }} />
           )}
         </motion.button>
 
@@ -66,12 +67,14 @@ function VoiceMessageBubble({ duration, time, isMe }: { duration: string; time: 
         >
           {duration}
         </span>
-      </div>
+        </div>
 
-      {/* Время */}
-      <p className={`text-[10px] mt-1 ${isMe ? 'text-sevchik-textSecondary/60' : 'text-sevchik-textSecondary'}`}>
-        {time}
-      </p>
+        {/* Время и статус прочтения — внутри пузыря, снизу справа */}
+        <div className={`flex items-center justify-end gap-1 ${isMe ? 'text-white/70' : 'text-sevchik-textSecondary'}`}>
+          <span className="text-[10px]">{time}</span>
+          {isMe && (read ? <CheckCheck size={13} /> : <Check size={13} />)}
+        </div>
+      </div>
     </div>
   );
 }
@@ -348,7 +351,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
             >
               {isVoice ? (
-                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} />
+                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} read={msg.read} />
               ) : (
                 <div
                   className={`max-w-[75%] px-4 py-2.5 font-body text-sm relative overflow-hidden ${
@@ -359,7 +362,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
                 >
                   <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
-                  <p className={`text-[10px] mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`} style={{ fontSize: `${fontSize}px` }}>{msg.time}</p>
+                  <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
+                    <span className="text-[10px]">{msg.time}</span>
+                    {isMe && (msg.read ? <CheckCheck size={13} /> : <Check size={13} />)}
+                  </div>
                 </div>
               )}
             </motion.div>
