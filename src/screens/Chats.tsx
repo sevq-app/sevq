@@ -159,7 +159,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
             placeholder="Люди, группы и сообщения"
             className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
             style={{
-              background: '#FF9848',
+              background: 'rgba(255,152,72,0.85)',
+              backdropFilter: 'blur(10px)',
+              WebkitBackdropFilter: 'blur(10px)',
               boxShadow: '0 4px 14px rgba(255,152,72,0.28)',
             }}
           />
@@ -186,12 +188,15 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     onOpenChat(chat);
                   }
                 }}
-                className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 ${
-                  grayMode ? 'bg-[#2d2d3a]' : 'bg-white'
-                } rounded-2xl text-left btn-3d ${
+                className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 rounded-2xl text-left btn-3d ${
                   isSelected ? 'ring-2 ring-[#6546C7]' : ''
                 }`}
-                style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
+                style={{
+                  background: grayMode ? 'rgba(45,45,58,0.85)' : 'rgba(255,255,255,0.85)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
+                }}
               >
                 {/* Кружочек выбора (только в режиме выбора) */}
                 {selectMode && (

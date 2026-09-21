@@ -33,12 +33,17 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
               whileHover={{ y: -2 }}
               onClick={() => onNavigate(key)}
               className={`flex items-center gap-4 px-4 py-3 rounded-btn transition-all relative overflow-hidden ${
-                active ? 'text-white' : 'bg-white text-sevchik-textSecondary'
+                active ? 'text-white' : 'text-sevchik-textSecondary'
               }`}
               style={
                 active
                   ? { background: '#6546C7', boxShadow: '0 6px 16px rgba(101,70,199,0.2)' }
-                  : { boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }
+                  : {
+                      background: 'rgba(255,255,255,0.85)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                    }
               }
             >
               <Icon size={22} className="shrink-0 relative z-10" />
