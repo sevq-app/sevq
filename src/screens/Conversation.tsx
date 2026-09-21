@@ -500,7 +500,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 md:pb-4 pb-20"
+            className="px-4 py-2.5 pb-4"
             style={{
               background: 'rgba(255,255,255,0.65)',
               backdropFilter: 'blur(20px)',
@@ -576,7 +576,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 md:pb-4 pb-20"
+            className="px-4 py-2.5 pb-4"
             style={{
               background: 'rgba(255,255,255,0.65)',
               backdropFilter: 'blur(20px)',
