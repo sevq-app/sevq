@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Palette, Sun, Flower, Leaf, Snowflake, Aurora, Waves } from 'lucide-react';
+import { ArrowLeft, Palette, Sun, Flower, Leaf, Snowflake, Sparkles, Waves } from 'lucide-react';
 
 interface AppearanceProps {
   onBack: () => void;
@@ -16,7 +16,7 @@ const themes = [
   { id: 'summer', name: 'Лето', gradient: 'linear-gradient(135deg, #FFD93D, #FFB848)', primary: '#FFB848', icon: Sun },
   { id: 'autumn', name: 'Осень', gradient: 'linear-gradient(135deg, #FF6B6B, #FF9848)', primary: '#FF6B6B', icon: Leaf },
   { id: 'winter', name: 'Зима', gradient: 'linear-gradient(135deg, #A78BFA, #6546C7)', primary: '#6546C7', icon: Snowflake },
-  { id: 'aurora', name: 'Северное сияние', gradient: 'linear-gradient(135deg, #4FD3C8, #6546C7)', primary: '#4FD3C8', icon: Aurora },
+  { id: 'aurora', name: 'Северное сияние', gradient: 'linear-gradient(135deg, #4FD3C8, #6546C7)', primary: '#4FD3C8', icon: Sparkles },
   { id: 'sea', name: 'Море', gradient: 'linear-gradient(135deg, #38b2ac, #2c7a7b)', primary: '#38b2ac', icon: Waves },
 ];
 
