@@ -37,7 +37,7 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsPlaying(!isPlaying)}
-          className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center"
+          className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
           style={{
             background: '#ffffff',
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
@@ -74,7 +74,7 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
 
         {/* Время и статус прочтения — внутри пузыря, снизу справа */}
         <div className={`flex items-center justify-end gap-1 ${isMe ? 'text-white/70' : 'text-sevchik-textSecondary'}`}>
-          <span className="text-[10px]">{time}</span>
+          <span className="text-[11px]">{time}</span>
           {isMe && (read ? <CheckCheck size={13} /> : <Check size={13} />)}
         </div>
       </div>
@@ -333,15 +333,15 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
           onClick={onBack}
-          className="p-2 rounded-full bg-sevchik-cream text-sevchik-text btn-3d"
+          className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-text btn-3d flex items-center justify-center"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={22} />
         </motion.button>
         <Avatar initials={chat.initials} color={chat.avatarColor} size="sm" online={chat.online} />
         <div className="flex-1 min-w-0">
-          <h2 className="font-heading font-bold text-sevchik-text truncate">{chat.name}</h2>
-          <p className={`text-xs font-body flex items-center gap-1 ${chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
+          <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{chat.name}</h2>
+          <p className={`text-sm font-body flex items-center gap-1 ${chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
             {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
             {chat.online ? 'в сети' : 'не в сети'}
           </p>
@@ -351,10 +351,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           whileTap={{ scale: 0.9 }}
           whileHover={{ scale: 1.05 }}
           onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
-          className="p-2 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d"
+          className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
           style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
         >
-          <Phone size={20} />
+          <Phone size={22} />
         </motion.button>
 
         <div className="relative">
@@ -362,10 +362,10 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={() => setShowMenu(!showMenu)}
-            className="p-2 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d"
+            className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           >
-            <MoreVertical size={20} />
+            <MoreVertical size={22} />
           </motion.button>
 
           <AnimatePresence>
@@ -457,7 +457,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                   <span className="text-6xl leading-none">{getStickerEmoji(msg.text)}</span>
                   <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-sevchik-textSecondary' : 'text-sevchik-textSecondary'}`}>
-                    <span className="text-[10px]">{msg.time}</span>
+                    <span className="text-[11px]">{msg.time}</span>
                     {isMe && (msg.read ? <CheckCheck size={12} /> : <Check size={12} />)}
                   </div>
                 </div>
@@ -465,7 +465,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} read={msg.read} />
               ) : (
                 <div
-                  className={`max-w-[75%] px-4 py-2.5 font-body text-sm relative overflow-hidden ${
+                  className={`max-w-[75%] px-4 py-3 font-body text-sm relative overflow-hidden ${
                     isMe
                       ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
                       : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
@@ -474,7 +474,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 >
                   <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
                   <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
-                    <span className="text-[10px]">{msg.time}</span>
+                    <span className="text-[11px]">{msg.time}</span>
                     {isMe && (msg.read ? <CheckCheck size={13} /> : <Check size={13} />)}
                   </div>
                 </div>
@@ -556,7 +556,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={handleMicHoldEnd}
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-white"
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                   style={{
                     background: 'var(--theme-primary)',
                     boxShadow: '0 4px 14px rgba(101,70,199,0.22)',
@@ -580,7 +580,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 whileTap={{ scale: 0.9, y: 2 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowAttachMenu(true)}
-                className="shrink-0 w-11 h-11 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
+                className="shrink-0 w-12 h-12 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
                 style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
               >
                 <Paperclip size={22} />
@@ -598,7 +598,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowStickerPanel((prev) => !prev)}
-                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center btn-3d"
+                className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center btn-3d"
                 style={{
                   background: showStickerPanel ? '#6546C7' : 'var(--bg-input)',
                   color: showStickerPanel ? '#fff' : 'var(--theme-primary)',
@@ -616,7 +616,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     exit={{ scale: 0.5, opacity: 0 }}
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={handleSend}
-                    className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
+                    className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
                     style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.22)' }}
                   >
                     <Send size={20} className="relative z-10" />
@@ -629,7 +629,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     exit={{ scale: 0.5, opacity: 0 }}
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={() => setShowStickerPanel(false)}
-                    className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d"
+                    className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white btn-3d"
                     style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
                   >
                     <Keyboard size={20} />
@@ -662,7 +662,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                       onMouseLeave={handleMicHoldEnd}
                       onTouchStart={handleMicHoldStart}
                       onTouchEnd={handleMicHoldEnd}
-                      className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
+                      className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
                       style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
                     >
                       <Mic size={20} className="relative z-10" />
@@ -700,7 +700,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowNotificationsModal(false)}
-                  className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
+                  className="w-11 h-11 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
                 >
                   <X size={20} />
                 </motion.button>
@@ -766,7 +766,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setShowAttachMenu(false)}
-                  className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
+                  className="w-11 h-11 rounded-full bg-[#F3F4F6] flex items-center justify-center text-[#6B7280]"
                 >
                   <X size={20} />
                 </motion.button>
@@ -825,7 +825,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     whileTap={{ scale: 0.8 }}
                     whileHover={{ scale: 1.2 }}
                     onClick={handleReaction}
-                    className="text-2xl w-10 h-10 flex items-center justify-center rounded-full"
+                    className="text-2xl w-11 h-11 flex items-center justify-center rounded-full"
                   >
                     {emoji}
                   </motion.button>

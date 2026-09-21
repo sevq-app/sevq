@@ -45,7 +45,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => setShowCloseConfirm(true)}
-            className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-sevchik-textSecondary"
+            className="w-11 h-11 rounded-full bg-white flex items-center justify-center text-sevchik-textSecondary"
             style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
           >
             <X size={20} />

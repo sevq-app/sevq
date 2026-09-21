@@ -70,17 +70,17 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
   ];
 
   return (
-    <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-[var(--bg-main)]">
+    <div className="h-full overflow-y-auto pb-28 md:pb-6 bg-[var(--bg-main)]">
       <div className="px-4 sm:px-6 pt-4 pb-3 flex items-center gap-3 sticky top-0 bg-transparent z-20">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onBack}
-          className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7] transition-colors"
+          className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7] transition-colors"
           style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}
         >
           <ChevronRight size={22} className="rotate-180" />
         </motion.button>
-        <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Настройки</h1>
+        <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Настройки</h1>
       </div>
 
       <div className="px-4 sm:px-6 space-y-6 max-w-2xl mx-auto pt-2">
@@ -107,7 +107,7 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
                   }`}
                 >
                   <div
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
                     style={{
                       background: `linear-gradient(135deg, ${item.color}dd, ${item.color})`,
                       boxShadow: `0 4px 12px ${item.color}26`,

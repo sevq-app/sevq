@@ -26,7 +26,7 @@ function App() {
   const [screen, setScreen] = useState<Screen>('chats');
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
-  const [fontSize, setFontSize] = useState<number>(15);
+  const [fontSize, setFontSize] = useState<number>(16);
   const [grayMode, setGrayMode] = useState<boolean>(() => {
     return localStorage.getItem('grayMode') === 'true';
   });
