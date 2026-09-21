@@ -74,8 +74,8 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="w-11 h-11 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-                  boxShadow: '0 4px 12px rgba(101,70,199,0.3)',
+                  background: '#6546C7',
+                  boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
                 }}
               >
                 <Plus size={22} />
@@ -97,9 +97,9 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                       initial={{ opacity: 0, scale: 0.9, y: -10 }}
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                      className="absolute right-0 top-14 w-64 bg-white rounded-2xl overflow-hidden z-40"
-                      style={{ boxShadow: '0 12px 40px rgba(101,70,199,0.2)' }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute right-0 top-14 w-60 bg-white rounded-2xl overflow-hidden z-40"
+                      style={{ boxShadow: '0 12px 32px rgba(15,23,42,0.12)' }}
                     >
                       {/* Пункт 1: Создать группу */}
                       <motion.button
@@ -111,15 +111,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                         }}
                         className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                       >
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                          style={{
-                            background: 'linear-gradient(135deg, #6546C7, #8366D9)',
-                            boxShadow: '0 3px 10px rgba(101,70,199,0.3)',
-                          }}
-                        >
-                          <Users size={18} className="text-white" />
-                        </div>
+                        <Users size={19} style={{ color: 'var(--text-secondary)' }} />
                         <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Создать группу</span>
                       </motion.button>
                       {/* Пункт 2: Пригласить по ссылке */}
@@ -132,15 +124,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                         }}
                         className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                       >
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                          style={{
-                            background: 'linear-gradient(135deg, #FF9848, #FFB87A)',
-                            boxShadow: '0 3px 10px rgba(255,152,72,0.3)',
-                          }}
-                        >
-                          <Link size={18} className="text-white" />
-                        </div>
+                        <Link size={19} style={{ color: 'var(--text-secondary)' }} />
                         <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Пригласить по ссылке</span>
                       </motion.button>
                       {/* Пункт 3: Найти по номеру */}
@@ -153,15 +137,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                         }}
                         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                       >
-                        <div
-                          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                          style={{
-                            background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                            boxShadow: '0 3px 10px rgba(79,211,200,0.3)',
-                          }}
-                        >
-                          <Phone size={18} className="text-white" />
-                        </div>
+                        <Phone size={19} style={{ color: 'var(--text-secondary)' }} />
                         <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Найти по номеру</span>
                       </motion.button>
                     </motion.div>
@@ -191,7 +167,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="bg-white rounded-3xl p-5"
-            style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+            style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
           >
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -200,14 +176,13 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               className="w-full flex items-center gap-4"
             >
               <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
                 style={{
-                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                  boxShadow: '0 4px 12px rgba(79,211,200,0.4)',
+                  background: '#4FD3C8',
+                  boxShadow: '0 4px 12px rgba(79,211,200,0.25)',
                 }}
               >
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
-                <Users size={24} className="text-white relative z-10" />
+                <Users size={24} className="text-white" />
               </div>
               <div className="flex-1 text-left">
                 <h3 className="font-heading font-bold text-[#1A1A1A] text-sm">Подключите контакты</h3>
@@ -229,16 +204,15 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 + index * 0.05 }}
                   className="bg-white rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg transition-shadow"
-                  style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
+                  style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
                 >
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative overflow-hidden shrink-0"
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative shrink-0"
                     style={{
                       background: `linear-gradient(135deg, ${friend.avatarColor}dd, ${friend.avatarColor})`,
-                      boxShadow: `0 4px 12px ${friend.avatarColor}40`,
+                      boxShadow: `0 4px 12px ${friend.avatarColor}26`,
                     }}
                   >
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
                     <span className="relative z-10">{friend.initials}</span>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -283,8 +257,8 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   <div
                     className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
                     style={{
-                      background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                      boxShadow: '0 8px 24px rgba(79,211,200,0.3)',
+                      background: '#4FD3C8',
+                      boxShadow: '0 8px 24px rgba(79,211,200,0.2)',
                     }}
                   >
                     <Users size={32} className="text-white" />
@@ -308,8 +282,8 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                     onClick={handleAllowContacts}
                     className="flex-1 py-3 rounded-2xl text-white font-heading font-bold"
                     style={{
-                      background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                      boxShadow: '0 4px 12px rgba(79,211,200,0.3)',
+                      background: '#4FD3C8',
+                      boxShadow: '0 4px 12px rgba(79,211,200,0.2)',
                     }}
                   >
                     Разрешить
@@ -336,7 +310,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentView('main')}
               className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
-              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}
+              style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.08)' }}
             >
               <ChevronLeft size={22} />
             </motion.button>
@@ -360,7 +334,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="mt-3 px-4 py-2 bg-[#6546C7] rounded-xl text-white text-sm font-heading font-bold inline-block"
-              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.3)' }}
+              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
             >
               Выбрано: {selectedMembers.length}
             </motion.div>
@@ -384,16 +358,15 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 transition-all ${
                     isSelected ? 'ring-2 ring-[#6546C7]' : ''
                   }`}
-                  style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
+                  style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
                 >
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative overflow-hidden shrink-0"
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative shrink-0"
                     style={{
                       background: `linear-gradient(135deg, ${friend.avatarColor}dd, ${friend.avatarColor})`,
-                      boxShadow: `0 4px 12px ${friend.avatarColor}40`,
+                      boxShadow: `0 4px 12px ${friend.avatarColor}26`,
                     }}
                   >
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
                     <span className="relative z-10">{friend.initials}</span>
                   </div>
                   <div className="flex-1 min-w-0 text-left">
@@ -421,16 +394,15 @@ export function Friends({ onWriteMessage }: FriendsProps) {
         {/* Кнопка "Создать пустую группу" внизу */}
         <div className="fixed bottom-20 md:bottom-6 left-0 right-0 px-4 sm:px-6 max-w-2xl mx-auto">
           <motion.button
-            whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(101,70,199,0.3)' }}
+            whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(101,70,199,0.2)' }}
             whileTap={{ scale: 0.98, y: 2 }}
             onClick={() => setCurrentView('createGroup')}
             className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base relative overflow-hidden flex items-center justify-center gap-3"
             style={{
-              background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+              background: '#6546C7',
               boxShadow: '0 4px 14px rgba(101,70,199,0.25)',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
             <Plus size={20} className="relative z-10" />
             <span className="relative z-10">Создать пустую группу</span>
           </motion.button>
@@ -452,7 +424,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentView('selectMembers')}
               className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
-              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}
+              style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.08)' }}
             >
               <ChevronLeft size={22} />
             </motion.button>
@@ -474,11 +446,10 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               onClick={() => alert('📷 Здесь откроется выбор фото из галереи или камеры')}
               className="w-28 h-28 rounded-full flex items-center justify-center relative overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, #FFB87A, #FF9848)',
-                boxShadow: '0 8px 24px rgba(255,152,72,0.35)',
+                background: '#FF9848',
+                boxShadow: '0 8px 24px rgba(255,152,72,0.2)',
               }}
             >
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
               <div className="relative z-10 flex flex-col items-center gap-1">
                 <Camera size={28} className="text-white" />
                 <Plus size={16} className="text-white" />
@@ -545,17 +516,16 @@ export function Friends({ onWriteMessage }: FriendsProps) {
         {/* Кнопка "Создать группу" внизу */}
         <div className="fixed bottom-20 md:bottom-6 left-0 right-0 px-4 sm:px-6 max-w-2xl mx-auto">
           <motion.button
-            whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(79,211,200,0.4)' }}
+            whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(79,211,200,0.22)' }}
             whileTap={{ scale: 0.98, y: 2 }}
             onClick={handleCreateGroup}
             disabled={!groupName.trim()}
             className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base relative overflow-hidden flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
-              background: 'linear-gradient(135deg, #4FD3C8 0%, #38b2ac 100%)',
-              boxShadow: '0 4px 14px rgba(79,211,200,0.3)',
+              background: '#4FD3C8',
+              boxShadow: '0 4px 14px rgba(79,211,200,0.2)',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
             <Users size={20} className="relative z-10" />
             <span className="relative z-10">Создать группу</span>
           </motion.button>

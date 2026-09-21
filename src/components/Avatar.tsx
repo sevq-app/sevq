@@ -45,17 +45,10 @@ export function Avatar({
         style={{
           background: color,
           boxShadow: ringColor
-            ? `0 0 0 ${ringWidth}px ${ringColor}, 0 4px 12px rgba(101,70,199,0.15)`
-            : '0 4px 12px rgba(101,70,199,0.15)',
+            ? `0 0 0 ${ringWidth}px ${ringColor}, 0 2px 6px rgba(15,23,42,0.12)`
+            : '0 2px 6px rgba(15,23,42,0.12)',
         }}
       >
-        {/* Gloss highlight */}
-        <div
-          className="absolute inset-0 rounded-full pointer-events-none"
-          style={{
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 50%)',
-          }}
-        />
         <span className="relative z-10">{initials}</span>
       </div>
       {online && (

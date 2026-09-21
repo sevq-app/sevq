@@ -105,11 +105,10 @@ export function Login({ onLogin, onRegister }: AuthProps) {
               disabled={loading}
               className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{ 
-                background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+                background: '#6546C7',
                 boxShadow: '0 4px 14px rgba(101, 70, 199, 0.25)'
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
               <span className="relative z-10 flex items-center justify-center gap-2">
                 {loading && <Loader2 className="animate-spin" size={20} />}
                 {loading ? 'Вход...' : 'Войти в Севчик'}
@@ -154,11 +153,10 @@ export function Login({ onLogin, onRegister }: AuthProps) {
                 disabled={loading}
                 className="flex-1 py-3.5 rounded-2xl text-white font-heading font-bold relative overflow-hidden disabled:opacity-70"
                 style={{ 
-                  background: 'linear-gradient(135deg, #FFB87A 0%, #FF9848 100%)',
+                  background: '#FF9848',
                   boxShadow: '0 4px 14px rgba(255, 152, 72, 0.25)'
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {loading && <Loader2 className="animate-spin" size={18} />}
                   {loading ? 'Отправка...' : 'Отправить'}
@@ -226,11 +224,10 @@ export function Register({ onRegister, onLogin }: AuthProps) {
           disabled={loading}
           className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6 disabled:opacity-70"
           style={{ 
-            background: 'linear-gradient(135deg, #8366D9 0%, #6546C7 100%)',
+            background: '#6546C7',
             boxShadow: '0 4px 14px rgba(101, 70, 199, 0.25)'
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
           <span className="relative z-10 flex items-center justify-center gap-2">
             {loading && <Loader2 className="animate-spin" size={20} />}
             {loading ? 'Создание...' : 'Зарегистрироваться'}
@@ -256,7 +253,7 @@ function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; 
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#6546C7]/10 rounded-full blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#FF9848]/10 rounded-full blur-3xl" />
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md relative z-10">
-        <div className="bg-white rounded-[32px] p-8 relative overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(101, 70, 199, 0.12), 0 1px 3px rgba(0,0,0,0.05)', backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 40%)' }}>
+        <div className="bg-white rounded-[32px] p-8 relative overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(15,23,42,0.1), 0 1px 3px rgba(0,0,0,0.05)' }}>
           <div className="flex flex-col items-center mb-8">
             <QLogo size={64} />
             <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A] mt-4 tracking-tight">{title}</h1>

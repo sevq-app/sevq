@@ -1,7 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type MouseEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
+import { ForwardChat } from '@/screens/ForwardChat';
+import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
+import { chats } from '@/data/mock';
 import type { Chat, Message } from '@/data/mock';
 
 interface ConversationProps {
@@ -18,15 +21,15 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
     <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
       <div
         className={`flex flex-col gap-1 px-4 py-3 rounded-2xl ${
-          isMe
-            ? 'text-white rounded-br-sm'
-            : 'bg-white text-[var(--text-main)] rounded-bl-sm'
+          isMe ? 'text-white rounded-br-sm' : 'text-[var(--text-main)] rounded-bl-sm'
         }`}
         style={{
           minWidth: '220px',
           maxWidth: '280px',
-          background: isMe ? 'var(--theme-message-gradient)' : undefined,
-          boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)',
+          background: isMe ? 'rgba(var(--theme-primary-rgb), 0.55)' : 'rgba(255,255,255,0.55)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
         }}
       >
         <div className="flex items-center gap-3">
@@ -85,6 +88,9 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [menuMessage, setMenuMessage] = useState<Message | null>(null);
+  const [forwardMessage, setForwardMessage] = useState<Message | null>(null);
+  const [showStickerPanel, setShowStickerPanel] = useState(false);
   
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -93,6 +99,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   const endRef = useRef<HTMLDivElement>(null);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const messageHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -138,15 +145,98 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
   };
 
   const attachOptions = [
-    { label: 'Галерея', icon: Image, gradient: 'linear-gradient(135deg, #6546C7, #8366D9)', shadow: 'rgba(101,70,199,0.3)' },
-    { label: 'Файл', icon: File, gradient: 'linear-gradient(135deg, #FF9848, #FFB87A)', shadow: 'rgba(255,152,72,0.3)' },
-    { label: 'Опрос', icon: BarChart3, gradient: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', shadow: 'rgba(79,211,200,0.3)' },
-    { label: 'Контакт', icon: Contact, gradient: 'linear-gradient(135deg, #FF6B9D, #FF8FB3)', shadow: 'rgba(255,107,157,0.3)' },
+    { label: 'Галерея', icon: Image },
+    { label: 'Файл', icon: File },
+    { label: 'Опрос', icon: BarChart3 },
+    { label: 'Контакт', icon: Contact },
   ];
 
   const handleAttach = (label: string) => {
     alert(`${label}: функция будет добавлена позже`);
     setShowAttachMenu(false);
+  };
+
+  const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+
+  const handleMessageHoldStart = (msg: Message) => {
+    messageHoldTimeoutRef.current = setTimeout(() => {
+      setMenuMessage(msg);
+    }, 400);
+  };
+
+  const handleMessageHoldEnd = () => {
+    if (messageHoldTimeoutRef.current) {
+      clearTimeout(messageHoldTimeoutRef.current);
+      messageHoldTimeoutRef.current = null;
+    }
+  };
+
+  const handleMessageContextMenu = (e: MouseEvent, msg: Message) => {
+    e.preventDefault();
+    setMenuMessage(msg);
+  };
+
+  const handleReaction = () => {
+    setMenuMessage(null);
+  };
+
+  const handleReply = () => {
+    alert('↩️ Ответ на сообщение будет добавлен позже');
+    setMenuMessage(null);
+  };
+
+  const handleForward = () => {
+    setForwardMessage(menuMessage);
+    setMenuMessage(null);
+  };
+
+  const handleMarkUnread = () => {
+    alert('✉️ Отметка "непрочитанным" будет добавлена позже');
+    setMenuMessage(null);
+  };
+
+  const handleCopyText = async () => {
+    if (menuMessage) {
+      try {
+        await navigator.clipboard.writeText(menuMessage.text);
+      } catch {
+        // буфер обмена недоступен — молча игнорируем
+      }
+    }
+    setMenuMessage(null);
+  };
+
+  const handleReport = () => {
+    alert('🚩 Жалоба будет добавлена позже');
+    setMenuMessage(null);
+  };
+
+  const handleDeleteMessage = () => {
+    if (menuMessage) {
+      setMessages(prev => prev.filter(m => m.id !== menuMessage.id));
+    }
+    setMenuMessage(null);
+  };
+
+  const handleSelectMessage = () => {
+    setForwardMessage(menuMessage);
+    setMenuMessage(null);
+  };
+
+  const handleSendForward = (chatIds: string[]) => {
+    if (!forwardMessage) return;
+    chatIds.forEach((chatId) => {
+      const target = chats.find((c) => c.id === chatId);
+      if (target) {
+        target.messages.push({
+          id: `fwd-${Date.now()}-${chatId}`,
+          senderId: 'me',
+          text: forwardMessage.text,
+          time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        });
+      }
+    });
+    setForwardMessage(null);
   };
 
   const handleMute = (duration: string) => {
@@ -218,9 +308,26 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
 
   const isVoiceMessage = (text: string) => text.startsWith('voice:');
   const getVoiceDuration = (text: string) => text.replace('voice:', '');
+  const isStickerMessage = (text: string) => text.startsWith('sticker:');
+  const getStickerEmoji = (text: string) => text.replace('sticker:', '');
+
+  const handleSelectEmoji = (emoji: string) => {
+    setInput((prev) => prev + emoji);
+  };
+
+  const handleSelectSticker = (emoji: string) => {
+    const msg: Message = {
+      id: `sticker-${Date.now()}`,
+      senderId: 'me',
+      text: `sticker:${emoji}`,
+      time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages((prev) => [...prev, msg]);
+    setShowStickerPanel(false);
+  };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full chat-wallpaper">
       {/* Header */}
       <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent">
         <motion.button
@@ -275,9 +382,9 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   initial={{ opacity: 0, scale: 0.9, y: -10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  className="absolute right-0 top-14 w-64 bg-white rounded-2xl overflow-hidden z-40"
-                  style={{ boxShadow: '0 12px 40px rgba(101,70,199,0.2)' }}
+                  transition={{ duration: 0.15, ease: 'easeOut' }}
+                  className="absolute right-0 top-14 w-60 bg-white rounded-2xl overflow-hidden z-40"
+                  style={{ boxShadow: '0 12px 32px rgba(15,23,42,0.12)' }}
                 >
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -288,15 +395,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                   >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #FF9848, #FFB87A)',
-                        boxShadow: '0 3px 10px rgba(255,152,72,0.3)',
-                      }}
-                    >
-                      <Bell size={18} className="text-white" />
-                    </div>
+                    <Bell size={19} style={{ color: 'var(--text-secondary)' }} />
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Уведомления</span>
                   </motion.button>
 
@@ -309,15 +408,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                   >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #6546C7, #8366D9)',
-                        boxShadow: '0 3px 10px rgba(101,70,199,0.3)',
-                      }}
-                    >
-                      <Check size={18} className="text-white" />
-                    </div>
+                    <Check size={19} style={{ color: 'var(--text-secondary)' }} />
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
                   </motion.button>
 
@@ -330,15 +421,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                   >
-                    <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                      style={{
-                        background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                        boxShadow: '0 3px 10px rgba(79,211,200,0.3)',
-                      }}
-                    >
-                      <Search size={18} className="text-white" />
-                    </div>
+                    <Search size={19} style={{ color: 'var(--text-secondary)' }} />
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Найти</span>
                   </motion.button>
                 </motion.div>
@@ -354,16 +437,31 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
           const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
+          const isSticker = isStickerMessage(msg.text);
 
           return (
             <motion.div
               key={msg.id}
               initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
               animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
-              transition={isMe ? { duration: 0.22, ease: 'easeOut' } : { duration: 0.4, type: 'spring', bounce: 0.5 }}
-              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className={`flex select-none ${isMe ? 'justify-end' : 'justify-start'}`}
+              onContextMenu={(e) => handleMessageContextMenu(e, msg)}
+              onMouseDown={() => handleMessageHoldStart(msg)}
+              onMouseUp={handleMessageHoldEnd}
+              onMouseLeave={handleMessageHoldEnd}
+              onTouchStart={() => handleMessageHoldStart(msg)}
+              onTouchEnd={handleMessageHoldEnd}
             >
-              {isVoice ? (
+              {isSticker ? (
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  <span className="text-6xl leading-none">{getStickerEmoji(msg.text)}</span>
+                  <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-sevchik-textSecondary' : 'text-sevchik-textSecondary'}`}>
+                    <span className="text-[10px]">{msg.time}</span>
+                    {isMe && (msg.read ? <CheckCheck size={12} /> : <Check size={12} />)}
+                  </div>
+                </div>
+              ) : isVoice ? (
                 <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} read={msg.read} />
               ) : (
                 <div
@@ -372,7 +470,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                       ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
                       : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
                   }`}
-                  style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.2)' : '0 4px 16px rgba(101,70,199,0.06)' }}
+                  style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)' }}
                 >
                   <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
                   <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
@@ -387,6 +485,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         <div ref={endRef} />
       </div>
 
+      {/* Панель стикеров и эмодзи */}
+      <AnimatePresence>
+        {showStickerPanel && (
+          <StickerEmojiPanel onSelectEmoji={handleSelectEmoji} onSelectSticker={handleSelectSticker} />
+        )}
+      </AnimatePresence>
+
       {/* Input Panel */}
       <AnimatePresence mode="wait">
         {isRecording ? (
@@ -395,8 +500,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 bg-white md:pb-4 pb-20"
-            style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
+            className="px-4 py-2.5 pb-4"
+            style={{
+              background: 'rgba(255,255,255,0.65)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
+            }}
           >
             <div className="flex items-center gap-3">
               <motion.button
@@ -427,8 +537,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     transition={{ duration: 0.8, repeat: Infinity, ease: 'easeInOut' }}
                     className="relative w-11 h-11 rounded-full flex items-center justify-center"
                     style={{
-                      background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
-                      boxShadow: '0 4px 14px rgba(239,68,68,0.4)',
+                      background: '#EF4444',
+                      boxShadow: '0 4px 14px rgba(239,68,68,0.25)',
                     }}
                   >
                     <Mic size={20} className="text-white relative z-10" />
@@ -452,8 +562,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 onClick={handleMicHoldEnd}
                 className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                  boxShadow: '0 4px 14px rgba(79,211,200,0.35)',
+                  background: '#4FD3C8',
+                  boxShadow: '0 4px 14px rgba(79,211,200,0.22)',
                 }}
               >
                 <Send size={20} />
@@ -466,8 +576,13 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="px-4 py-3 bg-white md:pb-4 pb-20"
-            style={{ boxShadow: '0 -4px 16px rgba(101,70,199,0.04)' }}
+            className="px-4 py-2.5 pb-4"
+            style={{
+              background: 'rgba(255,255,255,0.65)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
+            }}
           >
             <div className="flex items-center gap-2">
               <motion.button
@@ -489,6 +604,18 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                 className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
               />
 
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowStickerPanel((prev) => !prev)}
+                className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center btn-3d"
+                style={{
+                  background: showStickerPanel ? '#6546C7' : 'var(--bg-input)',
+                  color: showStickerPanel ? '#fff' : 'var(--theme-primary)',
+                }}
+              >
+                <Smile size={20} />
+              </motion.button>
+
               <AnimatePresence mode="wait">
                 {input.trim() ? (
                   <motion.button
@@ -499,10 +626,22 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={handleSend}
                     className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.35)' }}
+                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.22)' }}
                   >
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
                     <Send size={20} className="relative z-10" />
+                  </motion.button>
+                ) : showStickerPanel ? (
+                  <motion.button
+                    key="keyboard"
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.5, opacity: 0 }}
+                    whileTap={{ scale: 0.88, y: 2 }}
+                    onClick={() => setShowStickerPanel(false)}
+                    className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d"
+                    style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
+                  >
+                    <Keyboard size={20} />
                   </motion.button>
                 ) : (
                   <div className="relative">
@@ -520,7 +659,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                    
+
                     <motion.button
                       key="mic"
                       initial={{ scale: 0.5, opacity: 0 }}
@@ -533,9 +672,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                       onTouchStart={handleMicHoldStart}
                       onTouchEnd={handleMicHoldEnd}
                       className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                      style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 4px 14px rgba(79,211,200,0.35)' }}
+                      style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
                     >
-                      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
                       <Mic size={20} className="relative z-10" />
                     </motion.button>
                   </div>
@@ -648,16 +786,15 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
                   return (
                     <motion.button
                       key={item.label}
-                      whileTap={{ scale: 0.92 }}
-                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.94 }}
                       onClick={() => handleAttach(item.label)}
                       className="flex flex-col items-center gap-2"
                     >
                       <div
-                        className="w-14 h-14 rounded-2xl flex items-center justify-center"
-                        style={{ background: item.gradient, boxShadow: `0 4px 14px ${item.shadow}` }}
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[var(--bg-input)]"
+                        style={{ boxShadow: '0 2px 8px rgba(15,23,42,0.05)' }}
                       >
-                        <Icon size={24} className="text-white" />
+                        <Icon size={22} style={{ color: 'var(--theme-primary)' }} />
                       </div>
                       <span className="font-heading font-semibold text-xs text-[#1A1A1A] text-center">{item.label}</span>
                     </motion.button>
@@ -666,6 +803,129 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Контекстное меню сообщения */}
+      <AnimatePresence>
+        {menuMessage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
+            onClick={() => setMenuMessage(null)}
+          >
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-2xl bg-white rounded-t-3xl p-6"
+              style={{ boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}
+            >
+              {/* Быстрые реакции */}
+              <div className="flex items-center justify-between gap-2 mb-4">
+                {reactionEmojis.map((emoji) => (
+                  <motion.button
+                    key={emoji}
+                    whileTap={{ scale: 0.8 }}
+                    whileHover={{ scale: 1.2 }}
+                    onClick={handleReaction}
+                    className="text-2xl w-10 h-10 flex items-center justify-center rounded-full"
+                  >
+                    {emoji}
+                  </motion.button>
+                ))}
+              </div>
+
+              <div className="space-y-1">
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReply}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Reply size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Ответить</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleForward}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Forward size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Переслать</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleMarkUnread}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <EyeOff size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
+                </motion.button>
+
+                {!isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && (
+                  <motion.button
+                    whileHover={{ backgroundColor: '#F9FAFB' }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleCopyText}
+                    className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                  >
+                    <Copy size={20} style={{ color: 'var(--theme-primary)' }} />
+                    <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Скопировать текст</span>
+                  </motion.button>
+                )}
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReport}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Flag size={20} className="text-[#EF4444]" />
+                  <span className="font-heading font-semibold text-sm text-[#EF4444]">Пожаловаться</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleDeleteMessage}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <Trash2 size={20} className="text-[#EF4444]" />
+                  <span className="font-heading font-semibold text-sm text-[#EF4444]">Удалить</span>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ backgroundColor: '#F9FAFB' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSelectMessage}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                >
+                  <CheckSquare size={20} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Экран пересылки */}
+      <AnimatePresence>
+        {forwardMessage && (
+          <ForwardChat
+            excludeChatId={chat.id}
+            onClose={() => setForwardMessage(null)}
+            onSend={handleSendForward}
+          />
         )}
       </AnimatePresence>
     </div>

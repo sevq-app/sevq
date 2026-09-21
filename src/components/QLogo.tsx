@@ -134,7 +134,7 @@ export function QLogoShowcase() {
     <div className="flex gap-6 justify-center">
       {variants.map(({ variant, label, desc }) => (
         <div key={variant} className="flex flex-col items-center gap-2">
-          <div className="w-24 h-24 rounded-card bg-white flex items-center justify-center" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.1)' }}>
+          <div className="w-24 h-24 rounded-card bg-white flex items-center justify-center" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.07)' }}>
             <QLogo size={56} variant={variant} />
           </div>
           <span className="font-heading font-bold text-sm text-sevchik-text">{label}</span>

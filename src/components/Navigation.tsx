@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Phone, User } from 'lucide-react';
 import { QLogo } from './QLogo';
@@ -34,17 +33,19 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
               whileHover={{ y: -2 }}
               onClick={() => onNavigate(key)}
               className={`flex items-center gap-4 px-4 py-3 rounded-btn transition-all relative overflow-hidden ${
-                active ? 'text-white' : 'bg-white text-sevchik-textSecondary'
+                active ? 'text-white' : 'text-sevchik-textSecondary'
               }`}
               style={
                 active
-                  ? { background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 8px 20px rgba(101,70,199,0.3)' }
-                  : { boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }
+                  ? { background: '#6546C7', boxShadow: '0 6px 16px rgba(101,70,199,0.2)' }
+                  : {
+                      background: 'rgba(255,255,255,0.65)',
+                      backdropFilter: 'blur(16px)',
+                      WebkitBackdropFilter: 'blur(16px)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                    }
               }
             >
-              {active && (
-                <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 50%)' }} />
-              )}
               <Icon size={22} className="shrink-0 relative z-10" />
               <span className={`hidden lg:block font-heading font-bold text-base relative z-10 ${active ? 'text-white' : ''}`}>{label}</span>
             </motion.button>
@@ -85,7 +86,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
                 className={`p-2.5 rounded-2xl transition-all duration-200 relative overflow-hidden ${active ? 'text-white opacity-100' : 'text-[var(--text-secondary)] opacity-70'}`}
                 style={
                   active
-                    ? { background: 'linear-gradient(135deg, #8366D9, #6546C7)', boxShadow: '0 4px 12px rgba(101,70,199,0.3)' }
+                    ? { background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }
                     : { background: 'var(--bg-input)' }
                 }
               >

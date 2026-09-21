@@ -40,7 +40,8 @@
     --text-placeholder: #9CA3AF;
     --border-color: rgba(101, 70, 199, 0.08);
     --theme-primary: #6546C7;
-    --theme-message-gradient: linear-gradient(135deg, #6546C7, #8366D9);
+    --theme-primary-rgb: 101, 70, 199;
+    --theme-message-gradient: #6546C7;
   }
 
 }
@@ -49,12 +50,16 @@
   * {
     @apply border-border;
   }
+  html {
+    overscroll-behavior-x: none;
+  }
   body {
     @apply text-sevchik-text;
     font-family: 'Golos Text', sans-serif;
     background: var(--bg-main);
     background-attachment: fixed;
     overflow: hidden;
+    overscroll-behavior-x: none;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Nunito', sans-serif;
@@ -96,8 +101,8 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 100%);
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 100%);
   pointer-events: none;
   border-radius: inherit;
   z-index: 0;
@@ -112,41 +117,62 @@
 }
 
 .message-incoming-pattern {
-  background: var(--bg-input);
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: var(--text-main);
 }
 
 .message-outgoing-pattern {
-  background-color: var(--theme-primary);
+  background-color: rgba(var(--theme-primary-rgb), 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   background-image:
     radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 20%),
     radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
 }
 
+/* Цветная «сетка»-подложка для экрана переписки — фон, который красиво
+   просвечивает сквозь стеклянные пузыри сообщений и панели */
+.chat-wallpaper {
+  background:
+    radial-gradient(circle at 12% 12%, rgba(101, 70, 199, 0.35) 0%, transparent 42%),
+    radial-gradient(circle at 88% 8%, rgba(255, 152, 72, 0.32) 0%, transparent 42%),
+    radial-gradient(circle at 15% 88%, rgba(79, 211, 200, 0.3) 0%, transparent 42%),
+    radial-gradient(circle at 92% 80%, rgba(101, 70, 199, 0.22) 0%, transparent 42%),
+    var(--bg-main);
+}
+
 /* Цветовые темы: задают --theme-primary и --theme-message-gradient для окраски сообщений */
 html.spring {
   --theme-primary: #FF9848;
-  --theme-message-gradient: linear-gradient(135deg, #FFB87A, #FF9848);
+  --theme-primary-rgb: 255, 152, 72;
+  --theme-message-gradient: #FF9848;
 }
 html.summer {
   --theme-primary: #FFB848;
-  --theme-message-gradient: linear-gradient(135deg, #FFD93D, #FFB848);
+  --theme-primary-rgb: 255, 184, 72;
+  --theme-message-gradient: #FFB848;
 }
 html.autumn {
   --theme-primary: #FF6B6B;
-  --theme-message-gradient: linear-gradient(135deg, #FF6B6B, #FF9848);
+  --theme-primary-rgb: 255, 107, 107;
+  --theme-message-gradient: #FF6B6B;
 }
 html.winter {
   --theme-primary: #6546C7;
-  --theme-message-gradient: linear-gradient(135deg, #A78BFA, #6546C7);
+  --theme-primary-rgb: 101, 70, 199;
+  --theme-message-gradient: #6546C7;
 }
 html.aurora {
   --theme-primary: #4FD3C8;
-  --theme-message-gradient: linear-gradient(135deg, #4FD3C8, #6546C7);
+  --theme-primary-rgb: 79, 211, 200;
+  --theme-message-gradient: #4FD3C8;
 }
 html.sea {
   --theme-primary: #38b2ac;
-  --theme-message-gradient: linear-gradient(135deg, #38b2ac, #2c7a7b);
+  --theme-primary-rgb: 56, 178, 172;
+  --theme-message-gradient: #38b2ac;
 }
 
 /* Глобальная серая тема */
@@ -159,7 +185,8 @@ html.gray-theme {
   --text-placeholder: #aeb4bc;
   --border-color: rgba(255, 255, 255, 0.14);
   --theme-primary: #5967A8;
-  --theme-message-gradient: linear-gradient(135deg, #5967A8, #3F4D88);
+  --theme-primary-rgb: 89, 103, 168;
+  --theme-message-gradient: #5967A8;
   color-scheme: dark;
 }
 

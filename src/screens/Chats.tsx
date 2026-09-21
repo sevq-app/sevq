@@ -61,8 +61,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
               onClick={exitSelectMode}
               className="px-4 py-2 rounded-2xl font-heading font-bold text-sm text-white"
               style={{
-                background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-                boxShadow: '0 4px 12px rgba(101,70,199,0.3)',
+                background: '#6546C7',
+                boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
               }}
             >
               Готово
@@ -85,7 +85,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setShowMenu(!showMenu)}
                   className="w-11 h-11 rounded-full flex items-center justify-center text-sevchik-textSecondary bg-white"
-                  style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.1)' }}
+                  style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
                 >
                   <MoreVertical size={22} />
                 </motion.button>
@@ -105,9 +105,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                         initial={{ opacity: 0, scale: 0.9, y: -10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
                         className="absolute right-0 top-14 w-56 bg-white rounded-2xl overflow-hidden z-40"
-                        style={{ boxShadow: '0 12px 40px rgba(101,70,199,0.2)' }}
+                        style={{ boxShadow: '0 12px 32px rgba(15,23,42,0.12)' }}
                       >
                         <motion.button
                           whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -116,17 +116,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                             setShowMenu(false);
                             setSelectMode(true);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
+                          className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                         >
-                          <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                            style={{
-                              background: 'linear-gradient(135deg, #6546C7, #8366D9)',
-                              boxShadow: '0 3px 10px rgba(101,70,199,0.3)',
-                            }}
-                          >
-                            <Check size={18} className="text-white" />
-                          </div>
+                          <Check size={19} style={{ color: 'var(--text-secondary)' }} />
                           <span className="font-heading font-semibold text-sm text-[#1A1A1A]">
                             Выбрать
                           </span>
@@ -144,8 +136,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={() => onStartChat?.()}
                 className="w-11 h-11 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-                  boxShadow: '0 4px 12px rgba(101,70,199,0.3)',
+                  background: '#6546C7',
+                  boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
                 }}
               >
                 <Plus size={22} />
@@ -158,17 +150,19 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         <div className="relative">
           <Search
             size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Люди, группы и сообщения"
-            className="w-full text-[var(--text-main)] placeholder:text-[var(--text-secondary)] rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm relative overflow-hidden bg-[var(--bg-input)]"
+            className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
             style={{
-              background: 'var(--bg-input)',
-              boxShadow: 'none',
+              background: 'rgba(255,152,72,0.65)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: '0 4px 14px rgba(255,152,72,0.28)',
             }}
           />
         </div>
@@ -194,12 +188,15 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     onOpenChat(chat);
                   }
                 }}
-                className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 ${
-                  grayMode ? 'bg-[#2d2d3a]' : 'bg-white'
-                } rounded-2xl text-left btn-3d ${
+                className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 rounded-2xl text-left btn-3d ${
                   isSelected ? 'ring-2 ring-[#6546C7]' : ''
                 }`}
-                style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+                style={{
+                  background: grayMode ? 'rgba(45,45,58,0.65)' : 'rgba(255,255,255,0.65)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
+                }}
               >
                 {/* Кружочек выбора (только в режиме выбора) */}
                 {selectMode && (
@@ -260,8 +257,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       <span
                         className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[22px] h-[22px] px-1.5 flex items-center justify-center"
                         style={{
-                          background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-                          boxShadow: '0 3px 10px rgba(101,70,199,0.3)',
+                          background: '#6546C7',
+                          boxShadow: '0 3px 10px rgba(101,70,199,0.18)',
                         }}
                       >
                         <span style={{ fontSize: `${fontSize}px` }}>{chat.unread}</span>
@@ -271,8 +268,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       <span
                         className="shrink-0 text-white text-[10px] font-heading font-bold rounded-pill px-2 h-[20px] flex items-center justify-center"
                         style={{
-                          background: 'linear-gradient(135deg, #6BE3D9, #4FD3C8)',
-                          boxShadow: '0 3px 10px rgba(79,211,200,0.3)',
+                          background: '#4FD3C8',
+                          boxShadow: '0 3px 10px rgba(79,211,200,0.18)',
                         }}
                       >
                         <span style={{ fontSize: `${fontSize}px` }}>Новое</span>
@@ -307,11 +304,10 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={markAllRead}
                 className="flex-1 py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                  boxShadow: '0 4px 14px rgba(79,211,200,0.3)',
+                  background: '#4FD3C8',
+                  boxShadow: '0 4px 14px rgba(79,211,200,0.2)',
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
                 <CheckCheck size={20} className="relative z-10" />
                 <span className="relative z-10">Прочитать всё</span>
               </motion.button>
@@ -321,11 +317,10 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={deleteSelected}
                 className="flex-1 py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
-                  boxShadow: '0 4px 14px rgba(239,68,68,0.3)',
+                  background: '#EF4444',
+                  boxShadow: '0 4px 14px rgba(239,68,68,0.2)',
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
                 <Trash2 size={20} className="relative z-10" />
                 <span className="relative z-10">Удалить</span>
               </motion.button>
