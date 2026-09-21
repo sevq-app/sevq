@@ -34,12 +34,12 @@ function App() {
     }
   });
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // 🎨 Глобальные настройки оформления
   const [fontSize, setFontSize] = useState(() => Number(localStorage.getItem('sevchik-fontSize')) || 16);
   const [selectedTheme, setSelectedTheme] = useState(() => localStorage.getItem('sevchik-theme') || 'calm');
   const [grayMode, setGrayMode] = useState(() => localStorage.getItem('sevchik-grayMode') === 'true');
-  
+
   const updateGrayMode = (enabled: boolean) => {
     const html = document.documentElement;
     html.classList.add('theme-switching');
@@ -114,10 +114,36 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // 🔥 НОВОЕ: Слушаем событие visibilitychange (сворачивание/разворачивание вкладки)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Пользователь вернулся на вкладку — проверяем sessionStorage
+        const savedChat = sessionStorage.getItem('sevchik-active-chat');
+        if (savedChat && currentUser) {
+          try {
+            const chat = JSON.parse(savedChat) as Chat;
+            setActiveChat(chat);
+            setScreen('conversation');
+          } catch {
+            // Если не удалось распарсить — идём в чаты
+            setScreen('chats');
+          }
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentUser]);
+
   const handleOpenChat = (chat: Chat) => {
     setActiveChat(chat);
     setScreen('conversation');
-    // Сохраняем в sessionStorage для восстановления при переключении вкладок
+    // Сохраняем в sessionStorage для восстановления при сворачивании
     sessionStorage.setItem('sevchik-active-chat', JSON.stringify(chat));
   };
 
