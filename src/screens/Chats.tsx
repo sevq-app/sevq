@@ -190,41 +190,54 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     onOpenChat(chat.id);
                   }
                 }}
-                className={`w-full h-24 flex items-center gap-4 px-4 py-4 rounded-2xl text-left btn-3d ${
-                  isSelected ? 'ring-2 ring-[#6546C7]' : ''
-                }`}
+                className="w-full h-24 flex items-center gap-4 px-4 py-4 rounded-2xl text-left btn-3d"
                 style={{
                   background: grayMode ? 'rgba(45,45,58,0.65)' : 'rgba(255,255,255,0.65)',
                   backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
+                  boxShadow: isSelected
+                    ? '0 0 0 2px #6546C7, 0 8px 24px rgba(15,23,42,0.06)'
+                    : '0 8px 24px rgba(15,23,42,0.06)',
                 }}
               >
                 {/* Кружочек выбора (только в режиме выбора) — нейтральный,
                     без выбора — просто тонкое кольцо в тон фона карточки.
-                    У системного чата "Избранное" его нет — он неудаляемый. */}
-                {selectMode && !chat.isFavorites && (
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                      isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
-                    }`}
-                  >
-                    {isSelected && (
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    У системного чата "Избранное" его нет — он неудаляемый.
+                    Появление анимировано (а не мгновенный reflow), иначе
+                    резкий сдвиг контента в паре с backdrop-filter на долю
+                    кадра даёт цветной артефакт-полоску на аватарке. */}
+                <AnimatePresence initial={false}>
+                  {selectMode && !chat.isFavorites && (
+                    <motion.div
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 24, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                      className="shrink-0 overflow-hidden"
+                    >
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
+                        }`}
                       >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </div>
-                )}
+                        {isSelected && (
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <Avatar
                   initials={displayInitials}
