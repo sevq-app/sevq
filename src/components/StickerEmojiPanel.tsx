@@ -95,7 +95,7 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
       animate={{ height: '45vh', opacity: 1 }}
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.22, ease: 'easeOut' }}
-      className="overflow-hidden relative"
+      className="shrink-0 overflow-hidden relative"
       style={{
         background: GLASS_BG,
         backdropFilter: 'blur(20px)',
