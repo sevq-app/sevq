@@ -21,8 +21,10 @@ import { Login } from '@/screens/Login';
 import type { Screen } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
 import { useChatStore } from '@/store/chatStore';
+import { useAutoReloadOnNewVersion } from '@/hooks/useAutoReloadOnNewVersion';
 
 function App() {
+  useAutoReloadOnNewVersion();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [profileData, setProfileData] = useState<any>({});

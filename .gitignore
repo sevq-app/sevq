@@ -13,6 +13,9 @@ dist-ssr
 *.local
 .env
 
+# Генерируется автоматически перед каждой сборкой (scripts/gen-version.mjs)
+public/version.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
