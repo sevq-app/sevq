@@ -33,34 +33,36 @@ function playTone(ctx: AudioContext, freq: number, startTime: number, duration: 
 }
 
 /**
- * Тихий тон с нисходящей частотой и нарастающим приглушением — ощущение,
- * что звук "улетает от нас" (для отправленного сообщения). Частота
- * плавно едет вниз, а lowpass-фильтр закрывается к хвосту, будто звук
- * удаляется и глохнет вдалеке.
+ * Тихий приглушённый тон с лёгким вибрато — мягкий, "войлочный" звук
+ * без резких верхних частот (используется для отправки сообщения).
  */
-function playDepartingTone(
+function playMuffledTone(
   ctx: AudioContext,
   startTime: number,
-  freqStart: number,
-  freqEnd: number,
+  baseFreq: number,
   duration: number,
   attack: number,
   decayTau: number,
   peak: number,
-  filterStart: number,
-  filterEnd: number
+  filterFreq: number
 ) {
   const osc = ctx.createOscillator();
+  const lfo = ctx.createOscillator();
+  const lfoGain = ctx.createGain();
   const filter = ctx.createBiquadFilter();
   const gain = ctx.createGain();
 
   osc.type = 'sine';
-  osc.frequency.setValueAtTime(freqStart, startTime);
-  osc.frequency.linearRampToValueAtTime(freqEnd, startTime + duration);
+  osc.frequency.value = baseFreq;
+
+  lfo.type = 'sine';
+  lfo.frequency.value = 6;
+  lfoGain.gain.value = baseFreq * 0.01;
+  lfo.connect(lfoGain);
+  lfoGain.connect(osc.frequency);
 
   filter.type = 'lowpass';
-  filter.frequency.setValueAtTime(filterStart, startTime);
-  filter.frequency.linearRampToValueAtTime(filterEnd, startTime + duration);
+  filter.frequency.value = filterFreq;
 
   gain.gain.setValueAtTime(0.0001, startTime);
   gain.gain.linearRampToValueAtTime(peak, startTime + attack);
@@ -70,7 +72,9 @@ function playDepartingTone(
   filter.connect(gain);
   gain.connect(ctx.destination);
   osc.start(startTime);
+  lfo.start(startTime);
   osc.stop(startTime + duration + 0.1);
+  lfo.stop(startTime + duration + 0.1);
 }
 
 export type SoundKind = 'send' | 'receive' | 'tap' | 'key';
@@ -83,9 +87,8 @@ export function playSound(kind: SoundKind) {
     const now = ctx.currentTime;
     switch (kind) {
       case 'send':
-        // тихий, тёплый тон, "улетающий" вниз и глохнущий — ощущение,
-        // что сообщение уходит от нас (в отличие от входящего)
-        playDepartingTone(ctx, now, 210, 130, 0.22, 0.02, 0.075, 0.14, 2600, 800);
+        // тихий приглушённый тон с мягкой атакой — вариант G3-a
+        playMuffledTone(ctx, now, 145, 0.22, 0.025, 0.075, 0.13, 1500);
         break;
       case 'receive':
         // мягкий двухтональный "дзынь"
