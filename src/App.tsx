@@ -11,6 +11,7 @@ import { AboutMe } from '@/screens/AboutMe';
 import { Photos } from '@/screens/Photos';
 import { MyGroups } from '@/screens/MyGroups';
 import { Group } from '@/screens/Group';
+import { ContactProfile } from '@/screens/ContactProfile';
 import { Search } from '@/screens/Search';
 import { Settings } from '@/screens/Settings';
 import { Appearance } from '@/screens/Appearance';
@@ -134,7 +135,7 @@ function App() {
     setScreen(tab);
   };
 
-  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group';
+  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group' && screen !== 'contact-profile';
 
   if (authLoading) {
     return (
@@ -173,10 +174,14 @@ function App() {
               <Conversation
                 chat={activeChat}
                 onBack={() => setScreen('chats')}
+                onOpenProfile={() => setScreen('contact-profile')}
                 fontSize={fontSize}
                 soundsEnabled={soundsEnabled}
                 hapticsEnabled={hapticsEnabled}
               />
+            )}
+            {screen === 'contact-profile' && activeChat && (
+              <ContactProfile chat={activeChat} onBack={() => setScreen('conversation')} />
             )}
             {screen === 'contacts' && <Friends onWriteMessage={handleWriteToName} />}
             {screen === 'calls' && <Calls onNavigate={setScreen} />}

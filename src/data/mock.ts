@@ -14,6 +14,7 @@ export type Screen =
   | 'photos'
   | 'my-groups'
   | 'group'
+  | 'contact-profile'
   | 'start-chat';
 
 export type DeliveryStatus = 'sent' | 'delivered' | 'read';

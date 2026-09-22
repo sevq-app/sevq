@@ -11,6 +11,7 @@ import { playSound, triggerHaptic } from '@/lib/feedback';
 interface ConversationProps {
   chat: Chat;
   onBack: () => void;
+  onOpenProfile: () => void;
   fontSize: number;
   soundsEnabled: boolean;
   hapticsEnabled: boolean;
@@ -144,7 +145,7 @@ function TypingDots() {
   );
 }
 
-export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
+export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
   const [messages, setMessages] = useState<Message[]>(chat.messages);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -438,23 +439,25 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         >
           <ArrowLeft size={22} />
         </motion.button>
-        <Avatar initials={chat.initials} color={chat.avatarColor} size="sm" online={chat.online} />
-        <div className="flex-1 min-w-0">
-          <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{chat.name}</h2>
-          <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
-            {isTyping ? (
-              <>
-                печатает
-                <TypingDots />
-              </>
-            ) : (
-              <>
-                {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
-                {chat.online ? 'в сети' : 'не в сети'}
-              </>
-            )}
-          </p>
-        </div>
+        <button onClick={onOpenProfile} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+          <Avatar initials={chat.initials} color={chat.avatarColor} size="sm" online={chat.online} />
+          <div className="flex-1 min-w-0">
+            <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{chat.name}</h2>
+            <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
+              {isTyping ? (
+                <>
+                  печатает
+                  <TypingDots />
+                </>
+              ) : (
+                <>
+                  {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
+                  {chat.online ? 'в сети' : 'не в сети'}
+                </>
+              )}
+            </p>
+          </div>
+        </button>
         
         <motion.button
           whileTap={{ scale: 0.9 }}
