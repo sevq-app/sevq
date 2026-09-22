@@ -16,6 +16,41 @@ interface ConversationProps {
   hapticsEnabled: boolean;
 }
 
+// Разделитель по датам между сообщениями разных дней
+function DateSeparator({ label }: { label: string }) {
+  return (
+    <div className="flex justify-center my-1">
+      <span
+        className="text-xs font-heading font-semibold px-3 py-1 rounded-full"
+        style={{
+          background: 'rgba(255,255,255,0.55)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          color: 'var(--text-secondary)',
+        }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// "Сегодня" / "Вчера" / полная дата — относительно текущего момента
+function formatDateLabel(dateStr: string): string {
+  const msgDate = new Date(`${dateStr}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today.getTime() - msgDate.getTime()) / 86400000);
+  if (diffDays === 0) return 'Сегодня';
+  if (diffDays === 1) return 'Вчера';
+  const sameYear = msgDate.getFullYear() === today.getFullYear();
+  return msgDate.toLocaleDateString('ru', sameYear ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 // Галочки статуса доставки: отправлено (1 галочка) → доставлено (2 галочки,
 // приглушённые) → прочитано (2 галочки, выделены цветом)
 function DeliveryTicks({ status, size = 13 }: { status?: DeliveryStatus; size?: number }) {
@@ -158,6 +193,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       senderId: 'me',
       text: input.trim(),
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      date: todayIso(),
       status: 'sent',
     };
     setMessages(prev => [...prev, msg]);
@@ -176,6 +212,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         senderId: chat.id,
         text: 'Принято! 👍',
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        date: todayIso(),
       };
       setMessages(prev => [...prev, reply]);
       if (soundsEnabled) playSound('receive');
@@ -272,6 +309,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
           senderId: 'me',
           text: forwardMessage.text,
           time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+          date: todayIso(),
           status: 'sent',
         });
       }
@@ -322,6 +360,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         senderId: 'me',
         text: `voice:${duration}`,
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        date: todayIso(),
         status: 'sent',
       };
       setMessages(prev => [...prev, voiceMsg]);
@@ -343,6 +382,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
           senderId: chat.id,
           text: 'Прослушал голосовое 👂',
           time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+          date: todayIso(),
         };
         setMessages(prev => [...prev, reply]);
         if (soundsEnabled) playSound('receive');
@@ -374,6 +414,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       senderId: 'me',
       text: `sticker:${emoji}`,
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      date: todayIso(),
       status: 'sent',
     };
     setMessages((prev) => [...prev, msg]);
@@ -501,15 +542,17 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
 
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.map(msg => {
+        {messages.map((msg, i) => {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
           const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
           const isSticker = isStickerMessage(msg.text);
+          const showDateSeparator = !!msg.date && msg.date !== messages[i - 1]?.date;
 
           return (
+            <div key={msg.id}>
+            {showDateSeparator && <DateSeparator label={formatDateLabel(msg.date!)} />}
             <motion.div
-              key={msg.id}
               initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
               animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
@@ -548,6 +591,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
                 </div>
               )}
             </motion.div>
+            </div>
           );
         })}
         <div ref={endRef} />

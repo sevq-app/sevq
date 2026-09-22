@@ -23,6 +23,7 @@ export interface Message {
   senderId: string;
   text: string;
   time: string;
+  date?: string;
   status?: DeliveryStatus;
 }
 
@@ -62,6 +63,14 @@ export interface SearchResult {
 // ДАННЫЕ
 // ==========================================
 
+/** ISO-дата (YYYY-MM-DD) для N дней назад от текущего момента — используется
+ * для разделителей по датам в переписке ("Сегодня"/"Вчера"/конкретная дата). */
+function isoDaysAgo(daysAgo: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+}
+
 // Истории (оставляем на будущее)
 export const stories: Story[] = [
   { id: 's1', name: 'Алексей', avatarColor: '#6546C7', initials: 'АЛ', ringColor: '#4FD3C8', hasStatusDot: true },
@@ -83,10 +92,10 @@ export const chats: Chat[] = [
     unread: 3,
     online: true,
     messages: [
-      { id: 'm1', senderId: 'c1', text: 'Привет! Как дела?', time: '14:20' },
-      { id: 'm2', senderId: 'me', text: 'Привет! Всё отлично, как у тебя?', time: '14:22', status: 'read' },
-      { id: 'm3', senderId: 'c1', text: 'Тоже хорошо! Ты идёшь завтра на встречу?', time: '14:25' },
-      { id: 'm4', senderId: 'c1', text: 'Привет! Ты идёшь завтра на встречу?', time: '14:32' },
+      { id: 'm1', senderId: 'c1', text: 'Привет! Как дела?', time: '14:20', date: isoDaysAgo(0) },
+      { id: 'm2', senderId: 'me', text: 'Привет! Всё отлично, как у тебя?', time: '14:22', date: isoDaysAgo(0), status: 'read' },
+      { id: 'm3', senderId: 'c1', text: 'Тоже хорошо! Ты идёшь завтра на встречу?', time: '14:25', date: isoDaysAgo(0) },
+      { id: 'm4', senderId: 'c1', text: 'Привет! Ты идёшь завтра на встречу?', time: '14:32', date: isoDaysAgo(0) },
     ],
   },
   {
@@ -99,10 +108,10 @@ export const chats: Chat[] = [
     unread: 0,
     online: true,
     messages: [
-      { id: 'm1', senderId: 'c2', text: 'Можешь скинуть те документы?', time: '12:50' },
-      { id: 'm2', senderId: 'me', text: 'Сейчас, секунду', time: '12:55', status: 'read' },
-      { id: 'm3', senderId: 'me', text: 'Отправил на почту', time: '13:00', status: 'read' },
-      { id: 'm4', senderId: 'c2', text: 'Спасибо за помощь!', time: '13:15' },
+      { id: 'm1', senderId: 'c2', text: 'Можешь скинуть те документы?', time: '12:50', date: isoDaysAgo(0) },
+      { id: 'm2', senderId: 'me', text: 'Сейчас, секунду', time: '12:55', date: isoDaysAgo(0), status: 'read' },
+      { id: 'm3', senderId: 'me', text: 'Отправил на почту', time: '13:00', date: isoDaysAgo(0), status: 'read' },
+      { id: 'm4', senderId: 'c2', text: 'Спасибо за помощь!', time: '13:15', date: isoDaysAgo(0) },
     ],
   },
   {
@@ -116,8 +125,8 @@ export const chats: Chat[] = [
     online: false,
     isNew: true,
     messages: [
-      { id: 'm1', senderId: 'c3', text: 'Лена: Кто-нибудь был в Грузии недавно?', time: '12:40' },
-      { id: 'm2', senderId: 'me', text: 'Я был в прошлом месяце, классно!', time: '12:42', status: 'delivered' },
+      { id: 'm1', senderId: 'c3', text: 'Лена: Кто-нибудь был в Грузии недавно?', time: '12:40', date: isoDaysAgo(0) },
+      { id: 'm2', senderId: 'me', text: 'Я был в прошлом месяце, классно!', time: '12:42', date: isoDaysAgo(0), status: 'delivered' },
     ],
   },
   {
@@ -130,8 +139,8 @@ export const chats: Chat[] = [
     unread: 0,
     online: false,
     messages: [
-      { id: 'm1', senderId: 'me', text: 'Давай встретимся в субботу', time: '20:10', status: 'read' },
-      { id: 'm2', senderId: 'c4', text: 'Ок, договорились', time: '20:15' },
+      { id: 'm1', senderId: 'me', text: 'Давай встретимся в субботу', time: '20:10', date: isoDaysAgo(1), status: 'read' },
+      { id: 'm2', senderId: 'c4', text: 'Ок, договорились', time: '20:15', date: isoDaysAgo(1) },
     ],
   },
   {
@@ -145,7 +154,7 @@ export const chats: Chat[] = [
     online: true,
     isNew: true,
     messages: [
-      { id: 'm1', senderId: 'c5', text: 'Глянул проект, огонь!', time: '19:30' },
+      { id: 'm1', senderId: 'c5', text: 'Глянул проект, огонь!', time: '19:30', date: isoDaysAgo(1) },
     ],
   },
   {
@@ -158,8 +167,8 @@ export const chats: Chat[] = [
     unread: 0,
     online: false,
     messages: [
-      { id: 'm1', senderId: 'c6', text: 'С днём рождения!', time: '10:00' },
-      { id: 'm2', senderId: 'me', text: 'Спасибо большое!', time: '10:05', status: 'delivered' },
+      { id: 'm1', senderId: 'c6', text: 'С днём рождения!', time: '10:00', date: isoDaysAgo(3) },
+      { id: 'm2', senderId: 'me', text: 'Спасибо большое!', time: '10:05', date: isoDaysAgo(3), status: 'delivered' },
     ],
   },
   {
@@ -172,7 +181,7 @@ export const chats: Chat[] = [
     unread: 2,
     online: true,
     messages: [
-      { id: 'm1', senderId: 'c7', text: 'Давай созвонимся вечером', time: '18:00' },
+      { id: 'm1', senderId: 'c7', text: 'Давай созвонимся вечером', time: '18:00', date: isoDaysAgo(3) },
     ],
   },
 ];
