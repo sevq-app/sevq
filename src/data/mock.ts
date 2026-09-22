@@ -218,6 +218,7 @@ export const searchResults: SearchResult[] = [
   { id: 'r5', name: 'Даша Морозова', handle: '@dasha_m', avatarColor: '#FFD93D', initials: 'ДМ', status: 'Был(а) вчера', online: false },
   { id: 'r6', name: 'Никита Волков', handle: '@nikita_v', avatarColor: '#A78BFA', initials: 'НВ', status: 'В сети', online: true },
   { id: 'r7', name: 'Оля Зайцева', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
+  { id: 'r8', name: 'Ульяна', handle: '@ulanae83', avatarColor: '#FF6B6B', initials: 'УЛ', status: 'В сети', online: true },
 ];
 
 // Данные друзей/контактов (для экрана "Начать общение" и Contacts)
@@ -228,4 +229,5 @@ export const friendsData = [
   { id: 'f4', name: 'Никита Волков', handle: '@nikita_v', avatarColor: '#A78BFA', initials: 'НВ', status: 'В сети', online: true },
   { id: 'f5', name: 'Оля Зайцева', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
   { id: 'f6', name: 'Катя Сидорова', handle: '@kate_sid', avatarColor: '#FF6B6B', initials: 'КС', status: 'Был(а) 2 ч назад', online: false },
+  { id: 'f7', name: 'Ульяна', handle: '@ulanae83', avatarColor: '#FF6B6B', initials: 'УЛ', status: 'В сети', online: true },
 ];
