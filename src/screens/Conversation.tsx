@@ -752,7 +752,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       )}
 
       {/* Messages */}
-      <div className={`messages-list flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3 ${messageSelectMode ? 'pb-20' : ''}`}>
+      <div
+        className={`messages-list flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3 ${messageSelectMode ? 'pb-20' : ''}`}
+        style={{ touchAction: 'pan-y' }}
+      >
         {messages.map((msg, i) => {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
@@ -769,6 +772,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
               className={`relative flex select-none ${isMe ? 'justify-end' : 'justify-start'}`}
+              style={{ touchAction: 'pan-y' }}
               onContextMenu={(e) => handleMessageContextMenu(e, msg)}
               onMouseDown={() => handleMessageHoldStart(msg)}
               onMouseUp={handleMessageHoldEnd}
