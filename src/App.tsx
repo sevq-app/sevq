@@ -213,7 +213,7 @@ function App() {
             {screen === 'my-groups' && <MyGroups groups={[]} onBack={() => setScreen('profile')} onOpenGroup={handleOpenGroup} />}
             {screen === 'group' && activeGroup && <Group name={activeGroup} onBack={() => setScreen('my-groups')} />}
             {screen === 'search' && (
-              <Search onBack={() => setScreen('chats')} onWriteMessage={handleWriteToName} />
+              <Search onBack={() => setScreen('chats')} onWriteMessage={handleWriteToName} onOpenChat={handleOpenChat} />
             )}
             {screen === 'settings' && (
               <Settings

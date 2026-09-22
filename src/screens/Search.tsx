@@ -1,15 +1,65 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Search as SearchIcon, Clock, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Search as SearchIcon, Clock, TrendingUp, Loader2, UserPlus } from 'lucide-react';
+import { findProfileByEmail, getOrCreateDirectChat } from '@/lib/messagingService';
+import { useChatStore } from '@/store/chatStore';
+import type { Chat } from '@/data/mock';
 
 interface SearchProps {
   onBack: () => void;
   onWriteMessage: (name: string) => void;
+  onOpenChat: (chatId: string) => void;
 }
 
-export function Search({ onBack, onWriteMessage }: SearchProps) {
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+export function Search({ onBack, onWriteMessage, onOpenChat }: SearchProps) {
   const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const upsertRealChat = useChatStore((s) => s.upsertRealChat);
   const recentSearches = ['Анна', 'Клуб путешественников', 'Дизайн'];
+  const looksLikeEmail = query.includes('@') && query.includes('.');
+
+  const handleFindByEmail = async () => {
+    setSearching(true);
+    setSearchError('');
+    try {
+      const profile = await findProfileByEmail(query.trim());
+      if (!profile) {
+        setSearchError('Пользователь с таким email не найден');
+        return;
+      }
+      const remoteChatId = await getOrCreateDirectChat(profile.id);
+      const name = profile.full_name?.trim() || profile.email;
+      const chat: Chat = {
+        id: `real-${remoteChatId}`,
+        name,
+        avatarColor: '#6546C7',
+        initials: initialsOf(name),
+        lastMessage: '',
+        time: '',
+        unread: 0,
+        online: false,
+        isReal: true,
+        remoteChatId,
+        remoteUserId: profile.id,
+        messages: [],
+      };
+      upsertRealChat(chat);
+      onOpenChat(chat.id);
+    } catch (e) {
+      setSearchError('Не удалось найти пользователя. Попробуйте ещё раз.');
+      console.error(e);
+    } finally {
+      setSearching(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-main)]">
@@ -39,8 +89,29 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
         {query ? (
-          <div className="text-center py-12">
-            <p className="text-sevchik-textSecondary font-body">Ничего не найдено по запросу "{query}"</p>
+          <div className="space-y-4">
+            {looksLikeEmail && (
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                onClick={handleFindByEmail}
+                disabled={searching}
+                className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left disabled:opacity-60"
+                style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
+              >
+                <div className="w-11 h-11 rounded-2xl bg-sevchik-cream flex items-center justify-center text-sevchik-purple shrink-0">
+                  {searching ? <Loader2 size={18} className="animate-spin" /> : <UserPlus size={18} />}
+                </div>
+                <span className="font-heading font-semibold text-sm text-[#1A1A1A]">
+                  {searching ? 'Ищем пользователя…' : `Найти по email «${query.trim()}»`}
+                </span>
+              </motion.button>
+            )}
+            {searchError && <p className="text-center text-sevchik-textSecondary font-body text-sm">{searchError}</p>}
+            {!looksLikeEmail && (
+              <div className="text-center py-12">
+                <p className="text-sevchik-textSecondary font-body">Ничего не найдено по запросу "{query}"</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-6">

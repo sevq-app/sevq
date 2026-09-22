@@ -23,6 +23,12 @@ interface ChatStore {
   markChatUnread: (chatId: string) => void;
   deleteChats: (chatIds: string[]) => void;
   forwardMessageToChats: (chatIds: string[], text: string) => void;
+  /** Добавляет реальный чат (Supabase) в список, если такого ещё нет. */
+  upsertRealChat: (chat: Chat) => void;
+  /** Полностью заменяет историю сообщений чата (загрузка истории с сервера). */
+  setChatMessages: (chatId: string, messages: Message[]) => void;
+  /** Добавляет входящее сообщение из realtime-подписки, игнорируя дубликаты по id. */
+  appendIncomingMessage: (chatId: string, message: Message) => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -123,6 +129,23 @@ export const useChatStore = create<ChatStore>((set) => ({
                 },
               ],
             }
+          : c
+      ),
+    })),
+
+  upsertRealChat: (chat) =>
+    set((state) => (state.chats.some((c) => c.id === chat.id) ? state : { chats: [...state.chats, chat] })),
+
+  setChatMessages: (chatId, messages) =>
+    set((state) => ({
+      chats: state.chats.map((c) => (c.id === chatId ? { ...c, messages } : c)),
+    })),
+
+  appendIncomingMessage: (chatId, message) =>
+    set((state) => ({
+      chats: state.chats.map((c) =>
+        c.id === chatId && !c.messages.some((m) => m.id === message.id)
+          ? { ...c, messages: [...c.messages, message] }
           : c
       ),
     })),

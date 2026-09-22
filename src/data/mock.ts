@@ -46,6 +46,13 @@ export interface Chat {
   /** Системный чат "Избранное" (свои сохранённые сообщения) — не человек,
    * без статуса "в сети"/"печатает", всегда закреплён первым в списке. */
   isFavorites?: boolean;
+  /** Настоящий чат с зарегистрированным пользователем (хранится в Supabase),
+   * в отличие от остальных чатов, которые целиком собраны из моковых данных. */
+  isReal?: boolean;
+  /** id чата в таблице public.chats — нужен для отправки/подписки на сообщения. */
+  remoteChatId?: string;
+  /** id собеседника в таблице public.profiles. */
+  remoteUserId?: string;
   messages: Message[];
 }
 
@@ -207,19 +214,6 @@ export const chats: Chat[] = [
       { id: 'm1', senderId: 'c7', text: 'Давай созвонимся вечером', time: '18:00', date: isoDaysAgo(3) },
     ],
   },
-  {
-    id: 'c8',
-    name: 'Ульяна',
-    avatarColor: '#FF6B6B',
-    initials: 'УЛ',
-    lastMessage: 'Привет! Тестирую приложение 🙂',
-    time: '12:00',
-    unread: 1,
-    online: true,
-    messages: [
-      { id: 'm1', senderId: 'c8', text: 'Привет! Тестирую приложение 🙂', time: '12:00', date: isoDaysAgo(0) },
-    ],
-  },
 ];
 
 // Результаты поиска (для экрана Search)
@@ -231,7 +225,6 @@ export const searchResults: SearchResult[] = [
   { id: 'r5', name: 'Даша Морозова', handle: '@dasha_m', avatarColor: '#FFD93D', initials: 'ДМ', status: 'Был(а) вчера', online: false },
   { id: 'r6', name: 'Никита Волков', handle: '@nikita_v', avatarColor: '#A78BFA', initials: 'НВ', status: 'В сети', online: true },
   { id: 'r7', name: 'Оля Зайцева', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
-  { id: 'r8', name: 'Ульяна', handle: '@ulanae83', avatarColor: '#FF6B6B', initials: 'УЛ', status: 'В сети', online: true },
 ];
 
 // Данные друзей/контактов (для экрана "Начать общение" и Contacts)
@@ -242,5 +235,4 @@ export const friendsData = [
   { id: 'f4', name: 'Никита Волков', handle: '@nikita_v', avatarColor: '#A78BFA', initials: 'НВ', status: 'В сети', online: true },
   { id: 'f5', name: 'Оля Зайцева', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
   { id: 'f6', name: 'Катя Сидорова', handle: '@kate_sid', avatarColor: '#FF6B6B', initials: 'КС', status: 'Был(а) 2 ч назад', online: false },
-  { id: 'f7', name: 'Ульяна', handle: '@ulanae83', avatarColor: '#FF6B6B', initials: 'УЛ', status: 'В сети', online: true },
 ];
