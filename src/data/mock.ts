@@ -16,12 +16,14 @@ export type Screen =
   | 'group'
   | 'start-chat';
 
+export type DeliveryStatus = 'sent' | 'delivered' | 'read';
+
 export interface Message {
   id: string;
   senderId: string;
   text: string;
   time: string;
-  read?: boolean;
+  status?: DeliveryStatus;
 }
 
 export interface Chat {
@@ -82,7 +84,7 @@ export const chats: Chat[] = [
     online: true,
     messages: [
       { id: 'm1', senderId: 'c1', text: 'Привет! Как дела?', time: '14:20' },
-      { id: 'm2', senderId: 'me', text: 'Привет! Всё отлично, как у тебя?', time: '14:22' },
+      { id: 'm2', senderId: 'me', text: 'Привет! Всё отлично, как у тебя?', time: '14:22', status: 'read' },
       { id: 'm3', senderId: 'c1', text: 'Тоже хорошо! Ты идёшь завтра на встречу?', time: '14:25' },
       { id: 'm4', senderId: 'c1', text: 'Привет! Ты идёшь завтра на встречу?', time: '14:32' },
     ],
@@ -98,8 +100,8 @@ export const chats: Chat[] = [
     online: true,
     messages: [
       { id: 'm1', senderId: 'c2', text: 'Можешь скинуть те документы?', time: '12:50' },
-      { id: 'm2', senderId: 'me', text: 'Сейчас, секунду', time: '12:55' },
-      { id: 'm3', senderId: 'me', text: 'Отправил на почту', time: '13:00' },
+      { id: 'm2', senderId: 'me', text: 'Сейчас, секунду', time: '12:55', status: 'read' },
+      { id: 'm3', senderId: 'me', text: 'Отправил на почту', time: '13:00', status: 'read' },
       { id: 'm4', senderId: 'c2', text: 'Спасибо за помощь!', time: '13:15' },
     ],
   },
@@ -115,7 +117,7 @@ export const chats: Chat[] = [
     isNew: true,
     messages: [
       { id: 'm1', senderId: 'c3', text: 'Лена: Кто-нибудь был в Грузии недавно?', time: '12:40' },
-      { id: 'm2', senderId: 'me', text: 'Я был в прошлом месяце, классно!', time: '12:42' },
+      { id: 'm2', senderId: 'me', text: 'Я был в прошлом месяце, классно!', time: '12:42', status: 'delivered' },
     ],
   },
   {
@@ -128,7 +130,7 @@ export const chats: Chat[] = [
     unread: 0,
     online: false,
     messages: [
-      { id: 'm1', senderId: 'me', text: 'Давай встретимся в субботу', time: '20:10' },
+      { id: 'm1', senderId: 'me', text: 'Давай встретимся в субботу', time: '20:10', status: 'read' },
       { id: 'm2', senderId: 'c4', text: 'Ок, договорились', time: '20:15' },
     ],
   },
@@ -157,7 +159,7 @@ export const chats: Chat[] = [
     online: false,
     messages: [
       { id: 'm1', senderId: 'c6', text: 'С днём рождения!', time: '10:00' },
-      { id: 'm2', senderId: 'me', text: 'Спасибо большое!', time: '10:05' },
+      { id: 'm2', senderId: 'me', text: 'Спасибо большое!', time: '10:05', status: 'delivered' },
     ],
   },
   {

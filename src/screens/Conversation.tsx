@@ -5,7 +5,7 @@ import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
 import { chats } from '@/data/mock';
-import type { Chat, Message } from '@/data/mock';
+import type { Chat, Message, DeliveryStatus } from '@/data/mock';
 import { playSound, triggerHaptic } from '@/lib/feedback';
 
 interface ConversationProps {
@@ -16,8 +16,16 @@ interface ConversationProps {
   hapticsEnabled: boolean;
 }
 
+// Галочки статуса доставки: отправлено (1 галочка) → доставлено (2 галочки,
+// приглушённые) → прочитано (2 галочки, выделены цветом)
+function DeliveryTicks({ status, size = 13 }: { status?: DeliveryStatus; size?: number }) {
+  if (status === 'read') return <CheckCheck size={size} className="text-sevchik-mint" />;
+  if (status === 'delivered') return <CheckCheck size={size} />;
+  return <Check size={size} />;
+}
+
 // Компонент голосового сообщения
-function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; time: string; isMe: boolean; read?: boolean }) {
+function VoiceMessageBubble({ duration, time, isMe, status }: { duration: string; time: string; isMe: boolean; status?: DeliveryStatus }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
@@ -78,7 +86,7 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
         {/* Время и статус прочтения — внутри пузыря, снизу справа */}
         <div className={`flex items-center justify-end gap-1 ${isMe ? 'text-white/70' : 'text-sevchik-textSecondary'}`}>
           <span className="text-[11px]">{time}</span>
-          {isMe && (read ? <CheckCheck size={13} /> : <Check size={13} />)}
+          {isMe && <DeliveryTicks status={status} size={13} />}
         </div>
       </div>
     </div>
@@ -150,14 +158,19 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       senderId: 'me',
       text: input.trim(),
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      status: 'sent',
     };
     setMessages(prev => [...prev, msg]);
     setInput('');
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
+    setTimeout(() => {
+      setMessages(prev => prev.map(m => (m.id === msg.id ? { ...m, status: 'delivered' } : m)));
+    }, 500);
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
+      setMessages(prev => prev.map(m => (m.senderId === 'me' ? { ...m, status: 'read' } : m)));
       const reply: Message = {
         id: `m-${Date.now()}-r`,
         senderId: chat.id,
@@ -259,6 +272,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
           senderId: 'me',
           text: forwardMessage.text,
           time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+          status: 'sent',
         });
       }
     });
@@ -308,6 +322,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         senderId: 'me',
         text: `voice:${duration}`,
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        status: 'sent',
       };
       setMessages(prev => [...prev, voiceMsg]);
       setIsRecording(false);
@@ -315,9 +330,14 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       if (soundsEnabled) playSound('send');
       if (hapticsEnabled) triggerHaptic(12);
 
+      setTimeout(() => {
+        setMessages(prev => prev.map(m => (m.id === voiceMsg.id ? { ...m, status: 'delivered' } : m)));
+      }, 500);
+
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
+        setMessages(prev => prev.map(m => (m.senderId === 'me' ? { ...m, status: 'read' } : m)));
         const reply: Message = {
           id: `voice-${Date.now()}-r`,
           senderId: chat.id,
@@ -354,11 +374,15 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       senderId: 'me',
       text: `sticker:${emoji}`,
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      status: 'sent',
     };
     setMessages((prev) => [...prev, msg]);
     setShowStickerPanel(false);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
+    setTimeout(() => {
+      setMessages(prev => prev.map(m => (m.id === msg.id ? { ...m, status: 'delivered' } : m)));
+    }, 500);
   };
 
   return (
@@ -502,11 +526,11 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
                   <span className="text-6xl leading-none">{getStickerEmoji(msg.text)}</span>
                   <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-sevchik-textSecondary' : 'text-sevchik-textSecondary'}`}>
                     <span className="text-[11px]">{msg.time}</span>
-                    {isMe && (msg.read ? <CheckCheck size={12} /> : <Check size={12} />)}
+                    {isMe && <DeliveryTicks status={msg.status} size={12} />}
                   </div>
                 </div>
               ) : isVoice ? (
-                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} read={msg.read} />
+                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} status={msg.status} />
               ) : (
                 <div
                   className={`max-w-[75%] px-4 py-3 font-body text-sm relative overflow-hidden ${
@@ -519,7 +543,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
                   <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
                   <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
                     <span className="text-[11px]">{msg.time}</span>
-                    {isMe && (msg.read ? <CheckCheck size={13} /> : <Check size={13} />)}
+                    {isMe && <DeliveryTicks status={msg.status} size={13} />}
                   </div>
                 </div>
               )}
