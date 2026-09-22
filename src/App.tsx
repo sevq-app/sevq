@@ -17,7 +17,7 @@ import { MediaGallery } from '@/screens/MediaGallery';
 import { Search } from '@/screens/Search';
 import { Settings } from '@/screens/Settings';
 import { Appearance } from '@/screens/Appearance';
-import { Login } from '@/screens/Login';
+import { Login, Register } from '@/screens/Login';
 import type { Screen } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
 import { useChatStore } from '@/store/chatStore';
@@ -27,6 +27,7 @@ function App() {
   useAutoReloadOnNewVersion();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
+  const [authView, setAuthView] = useState<'login' | 'register'>('login');
   const [profileData, setProfileData] = useState<any>({});
   const [screen, setScreen] = useState<Screen>('chats');
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
@@ -151,7 +152,11 @@ function App() {
   }
 
   if (!currentUser) {
-    return <Login onLogin={() => {}} onRegister={() => {}} />;
+    return authView === 'login' ? (
+      <Login onLogin={() => {}} onRegister={() => setAuthView('register')} />
+    ) : (
+      <Register onRegister={() => setAuthView('login')} onLogin={() => setAuthView('login')} />
+    );
   }
 
   return (
