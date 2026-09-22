@@ -211,6 +211,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const [reportSent, setReportSent] = useState(false);
   const [messageSelectMode, setMessageSelectMode] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
+  // Эмодзи, который сейчас "выстреливает" крупной пружинной анимацией при
+  // выборе реакции — меню закрывается чуть позже, чтобы анимация успела
+  // доиграть (как в iMessage/Telegram).
+  const [poppingEmoji, setPoppingEmoji] = useState<string | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -378,7 +382,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     e.target.value = '';
   };
 
-  const reactionEmojis = ['👍', '❤️', '😆', '🔥', '😭', '😍', '🤟'];
+  const reactionEmojis = ['👍', '👎', '❤️', '🔥', '😂', '😮', '😢', '🙏', '🎉', '👏', '😍', '🤯'];
 
   // Снимок положения сообщения на экране в момент открытия меню — по нему
   // меню "вырастает" из самого сообщения, а не выезжает с низа экрана.
@@ -429,7 +433,11 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const handleSelectReaction = (emoji: string) => {
     menuHaptic();
     if (menuMessage) toggleReaction(chat.id, menuMessage.id, emoji);
-    closeMenu();
+    setPoppingEmoji(emoji);
+    setTimeout(() => {
+      setPoppingEmoji(null);
+      closeMenu();
+    }, 220);
   };
 
   const handleReply = () => {
@@ -1325,10 +1333,25 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           const actionRowClass = 'w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left';
 
           const reactionsBar = (
-            <div key="reactions" className="flex items-center justify-between gap-0.5 px-2 py-1.5 rounded-full" style={glass}>
-              {reactionEmojis.map((emoji) => (
+            <div
+              key="reactions"
+              className="flex items-center gap-0.5 px-2 py-1.5 rounded-full overflow-x-auto no-scrollbar"
+              style={glass}
+            >
+              {reactionEmojis.map((emoji, i) => (
                 <motion.button
                   key={emoji}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{
+                    scale: poppingEmoji === emoji ? 1.7 : 1,
+                    opacity: 1,
+                    rotate: poppingEmoji === emoji ? [0, -12, 10, 0] : 0,
+                  }}
+                  transition={
+                    poppingEmoji === emoji
+                      ? { type: 'spring', damping: 9, stiffness: 420 }
+                      : { type: 'spring', damping: 14, stiffness: 380, delay: 0.04 + i * 0.025 }
+                  }
                   whileTap={{ scale: 0.8 }}
                   onClick={() => handleSelectReaction(emoji)}
                   className="text-lg w-7 h-7 shrink-0 flex items-center justify-center rounded-full"
