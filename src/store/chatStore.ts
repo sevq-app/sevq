@@ -19,6 +19,7 @@ interface ChatStore {
   markChatsRead: (chatIds: string[]) => void;
   deleteChats: (chatIds: string[]) => void;
   forwardMessageToChats: (chatIds: string[], text: string) => void;
+  toggleFavorite: (chatId: string) => void;
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -84,5 +85,10 @@ export const useChatStore = create<ChatStore>((set) => ({
             }
           : c
       ),
+    })),
+
+  toggleFavorite: (chatId) =>
+    set((state) => ({
+      chats: state.chats.map((c) => (c.id === chatId ? { ...c, favorite: !c.favorite } : c)),
     })),
 }));

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Star, Smartphone, Bell, Shield, HardDrive, Battery,
+  Smartphone, Bell, Shield, HardDrive, Battery,
   UserPlus, Palette, Languages, HelpCircle, Info,
   LogOut, ChevronRight
 } from 'lucide-react';
@@ -38,7 +38,6 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
     {
       title: 'Основное',
       items: [
-        { icon: Star, label: 'Избранное', color: '#FF9848', hasChevron: true },
         { icon: Smartphone, label: 'Устройства', color: '#6546C7', hasChevron: true, value: '1 активно' },
       ],
     },

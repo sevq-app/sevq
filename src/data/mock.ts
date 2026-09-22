@@ -40,6 +40,7 @@ export interface Chat {
   unread: number;
   online: boolean;
   isNew?: boolean;
+  favorite?: boolean;
   messages: Message[];
 }
 

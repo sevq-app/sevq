@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck } from 'lucide-react';
+import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
@@ -17,13 +17,18 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
   const chats = useChatStore((s) => s.chats);
   const markChatsRead = useChatStore((s) => s.markChatsRead);
   const deleteChats = useChatStore((s) => s.deleteChats);
+  const toggleFavorite = useChatStore((s) => s.toggleFavorite);
   const [showMenu, setShowMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
 
-  const filtered = chats.filter((c) =>
+  const searched = chats.filter((c) =>
     c.name.toLowerCase().includes(query.toLowerCase())
   );
+  const filtered = (activeTab === 'favorites' ? searched.filter((c) => c.favorite) : searched)
+    .slice()
+    .sort((a, b) => Number(!!b.favorite) - Number(!!a.favorite));
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -164,6 +169,29 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
             }}
           />
         </div>
+
+        {/* Вкладки: Все / Избранное */}
+        {!selectMode && (
+          <div className="flex items-center gap-2 mt-3">
+            {([
+              { key: 'all', label: 'Все' },
+              { key: 'favorites', label: 'Избранное' },
+            ] as const).map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="px-4 py-2 rounded-pill font-heading font-semibold text-sm transition-colors"
+                style={
+                  activeTab === tab.key
+                    ? { background: 'var(--theme-primary)', color: '#fff', boxShadow: '0 3px 10px rgba(101,70,199,0.2)' }
+                    : { background: grayMode ? 'rgba(45,45,58,0.65)' : 'rgba(255,255,255,0.65)', color: 'var(--text-secondary)' }
+                }
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Список чатов */}
@@ -197,13 +225,12 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
                 }}
               >
-                {/* Кружочек выбора (только в режиме выбора) */}
+                {/* Кружочек выбора (только в режиме выбора) — нейтральный,
+                    без выбора — просто тонкое кольцо в тон фона карточки */}
                 {selectMode && (
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                      isSelected
-                        ? 'bg-[#6546C7]'
-                        : 'bg-[#E5E7EB]'
+                      isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
                     }`}
                   >
                     {isSelected && (
@@ -238,12 +265,31 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     >
                       {displayName}
                     </h3>
-                    <span
-                      className="text-xs text-sevchik-textSecondary font-body shrink-0"
-                      style={{ fontSize: `${fontSize}px` }}
-                    >
-                      {chat.time}
-                    </span>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span
+                        className="text-xs text-sevchik-textSecondary font-body"
+                        style={{ fontSize: `${fontSize}px` }}
+                      >
+                        {chat.time}
+                      </span>
+                      {!selectMode && (
+                        <motion.button
+                          whileTap={{ scale: 0.8 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleFavorite(chat.id);
+                          }}
+                          className="-mr-1 p-1"
+                          aria-label={chat.favorite ? 'Убрать из избранного' : 'Добавить в избранное'}
+                        >
+                          <Star
+                            size={16}
+                            fill={chat.favorite ? '#FF9848' : 'none'}
+                            style={{ color: chat.favorite ? '#FF9848' : 'var(--text-secondary)', opacity: chat.favorite ? 1 : 0.4 }}
+                          />
+                        </motion.button>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center justify-between gap-2 mt-1.5">
                     <p
@@ -281,7 +327,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
           })}
           {filtered.length === 0 && (
             <div className="text-center py-12 text-sevchik-textSecondary font-body">
-              Ничего не найдено
+              {activeTab === 'favorites' && !query
+                ? 'Пока нет избранных чатов — нажмите на звёздочку у чата, чтобы закрепить его здесь'
+                : 'Ничего не найдено'}
             </div>
           )}
         </div>

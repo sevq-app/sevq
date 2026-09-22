@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, Lock, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
@@ -594,7 +594,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       </div>
 
       {/* Messages */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
+      <div className="messages-list flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
         {messages.map((msg, i) => {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
@@ -721,12 +721,6 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               </div>
 
               <div className="relative shrink-0">
-                <div
-                  className="absolute -top-12 right-0 w-8 h-8 rounded-full flex items-center justify-center"
-                  style={{ background: 'var(--bg-input)', color: 'var(--text-secondary)', boxShadow: '0 2px 8px rgba(15,23,42,0.08)' }}
-                >
-                  <Lock size={14} />
-                </div>
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={handleMicHoldEnd}
@@ -990,8 +984,13 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl bg-white rounded-t-3xl p-6"
-              style={{ boxShadow: '0 -20px 60px rgba(0,0,0,0.2)' }}
+              className="w-full max-w-2xl rounded-t-3xl p-6"
+              style={{
+                background: 'rgba(255,255,255,0.75)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                boxShadow: '0 -20px 60px rgba(0,0,0,0.2)',
+              }}
             >
               {/* Быстрые реакции */}
               <div className="flex items-center justify-between gap-2 mb-4">
