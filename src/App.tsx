@@ -13,6 +13,7 @@ import { MyGroups } from '@/screens/MyGroups';
 import { Group } from '@/screens/Group';
 import { ContactProfile } from '@/screens/ContactProfile';
 import { ContactEdit } from '@/screens/ContactEdit';
+import { MediaGallery } from '@/screens/MediaGallery';
 import { Search } from '@/screens/Search';
 import { Settings } from '@/screens/Settings';
 import { Appearance } from '@/screens/Appearance';
@@ -136,7 +137,7 @@ function App() {
     setScreen(tab);
   };
 
-  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group' && screen !== 'contact-profile' && screen !== 'contact-edit';
+  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group' && screen !== 'contact-profile' && screen !== 'contact-edit' && screen !== 'media-gallery';
 
   if (authLoading) {
     return (
@@ -186,10 +187,14 @@ function App() {
                 chat={activeChat}
                 onBack={() => setScreen('conversation')}
                 onEdit={() => setScreen('contact-edit')}
+                onOpenMedia={() => setScreen('media-gallery')}
               />
             )}
             {screen === 'contact-edit' && activeChat && (
               <ContactEdit chat={activeChat} onBack={() => setScreen('contact-profile')} />
+            )}
+            {screen === 'media-gallery' && activeChat && (
+              <MediaGallery chat={activeChat} onBack={() => setScreen('contact-profile')} />
             )}
             {screen === 'contacts' && <Friends onWriteMessage={handleWriteToName} />}
             {screen === 'calls' && <Calls onNavigate={setScreen} />}

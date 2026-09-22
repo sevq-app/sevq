@@ -10,6 +10,7 @@ interface ContactProfileProps {
   chat: Chat;
   onBack: () => void;
   onEdit: () => void;
+  onOpenMedia: () => void;
 }
 
 function findContactMeta(name: string) {
@@ -17,12 +18,13 @@ function findContactMeta(name: string) {
   return all.find((c) => c.name === name);
 }
 
-export function ContactProfile({ chat, onBack, onEdit }: ContactProfileProps) {
+export function ContactProfile({ chat, onBack, onEdit, onOpenMedia }: ContactProfileProps) {
   const [isMuted, setIsMuted] = useState(false);
   const override = getContactOverride(chat.id);
   const { name: displayName, initials: displayInitials } = getDisplayContact(chat, override);
   const meta = findContactMeta(chat.name);
   const statusText = meta?.status || (chat.online ? 'В сети' : 'Не в сети');
+  const mediaCount = chat.messages.filter((m) => m.text.startsWith('image:')).length;
 
   return (
     <div className="h-full overflow-y-auto pb-8" style={{ background: 'var(--bg-main)' }}>
@@ -77,16 +79,19 @@ export function ContactProfile({ chat, onBack, onEdit }: ContactProfileProps) {
           </section>
         )}
 
-        <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(101,70,199,0.08)]">
+        <button
+          onClick={onOpenMedia}
+          className="w-full text-left bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(101,70,199,0.08)]"
+        >
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-heading font-bold text-[var(--text-main)]">Медиафайлы</h3>
             <ChevronRight size={20} className="text-sevchik-textSecondary" />
           </div>
           <div className="flex items-center gap-2 text-sevchik-textSecondary">
             <Image size={18} />
-            <p className="text-sm font-body">Общих медиафайлов пока нет</p>
+            <p className="text-sm font-body">{mediaCount > 0 ? `${mediaCount} фото` : 'Общих медиафайлов пока нет'}</p>
           </div>
-        </section>
+        </button>
 
         <section className="bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-[0_8px_24px_rgba(101,70,199,0.08)]">
           <button

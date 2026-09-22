@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type MouseEvent } from 'react';
+import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, Lock, ChevronLeft } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
@@ -148,7 +148,7 @@ function TypingDots() {
 
 export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
   const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
-  const [messages, setMessages] = useState<Message[]>(chat.messages);
+  const [messages, setMessages] = useState<Message[]>(() => [...chat.messages]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -166,10 +166,18 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messageHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Синхронизируем историю обратно в общий объект чата (переприсваиванием
+  // ссылки, а не мутацией), чтобы другие экраны (профиль контакта,
+  // медиафайлы) видели актуальные сообщения этой сессии
+  useEffect(() => {
+    chat.messages = messages;
+  }, [messages, chat]);
 
   useEffect(() => {
     if (isRecording) {
@@ -231,8 +239,56 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
   ];
 
   const handleAttach = (label: string) => {
+    if (label === 'Галерея') {
+      setShowAttachMenu(false);
+      galleryInputRef.current?.click();
+      return;
+    }
     alert(`${label}: функция будет добавлена позже`);
     setShowAttachMenu(false);
+  };
+
+  const handleSendImage = (dataUrl: string) => {
+    const msg: Message = {
+      id: `img-${Date.now()}`,
+      senderId: 'me',
+      text: `image:${dataUrl}`,
+      time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      date: todayIso(),
+      status: 'sent',
+    };
+    setMessages(prev => [...prev, msg]);
+    if (soundsEnabled) playSound('send');
+    if (hapticsEnabled) triggerHaptic(12);
+    setTimeout(() => {
+      setMessages(prev => prev.map(m => (m.id === msg.id ? { ...m, status: 'delivered' } : m)));
+    }, 500);
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages(prev => prev.map(m => (m.senderId === 'me' ? { ...m, status: 'read' } : m)));
+      const reply: Message = {
+        id: `img-${Date.now()}-r`,
+        senderId: chat.id,
+        text: 'Красиво! 😍',
+        time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        date: todayIso(),
+      };
+      setMessages(prev => [...prev, reply]);
+      if (soundsEnabled) playSound('receive');
+      if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
+    }, 1500);
+  };
+
+  const handleGalleryFileSelected = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') handleSendImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
@@ -406,6 +462,8 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
   const getVoiceDuration = (text: string) => text.replace('voice:', '');
   const isStickerMessage = (text: string) => text.startsWith('sticker:');
   const getStickerEmoji = (text: string) => text.replace('sticker:', '');
+  const isImageMessage = (text: string) => text.startsWith('image:');
+  const getImageSrc = (text: string) => text.replace('image:', '');
 
   const handleSelectEmoji = (emoji: string) => {
     setInput((prev) => prev + emoji);
@@ -552,6 +610,7 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
           const isVoice = isVoiceMessage(msg.text);
           const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
           const isSticker = isStickerMessage(msg.text);
+          const isImage = isImageMessage(msg.text);
           const showDateSeparator = !!msg.date && msg.date !== messages[i - 1]?.date;
 
           return (
@@ -579,6 +638,14 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
                 </div>
               ) : isVoice ? (
                 <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} status={msg.status} />
+              ) : isImage ? (
+                <div className="relative max-w-[75%] rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.1)' }}>
+                  <img src={getImageSrc(msg.text)} alt="" className="block max-h-[320px] w-auto object-cover" />
+                  <div className="absolute bottom-1.5 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-[11px]" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}>
+                    <span>{msg.time}</span>
+                    {isMe && <DeliveryTicks status={msg.status} size={12} />}
+                  </div>
+                </div>
               ) : (
                 <div
                   className={`max-w-[75%] px-4 py-3 font-body text-sm relative overflow-hidden ${
@@ -859,6 +926,8 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
         )}
       </AnimatePresence>
 
+      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={handleGalleryFileSelected} />
+
       {/* Модальное окно "Вложения" */}
       <AnimatePresence>
         {showAttachMenu && (
@@ -980,7 +1049,7 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
                   <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
                 </motion.button>
 
-                {!isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && (
+                {!isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && !isImageMessage(menuMessage.text) && (
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
