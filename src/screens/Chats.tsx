@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
@@ -21,6 +21,20 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
   const [showMenu, setShowMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // Стекло (backdrop-filter) карточек отключается сразу при входе в режим
+  // выбора и включается обратно только после того, как чекбоксы закончат
+  // анимированно скрываться — иначе blur и reflow совпадают по кадру и
+  // Chromium/WebKit оставляет на аватарке цветной артефакт, который не
+  // смывается сам.
+  const [cardsBlurred, setCardsBlurred] = useState(true);
+  useEffect(() => {
+    if (selectMode) {
+      setCardsBlurred(false);
+      return;
+    }
+    const t = setTimeout(() => setCardsBlurred(true), 200);
+    return () => clearTimeout(t);
+  }, [selectMode]);
 
   // Чат "Избранное" всегда закреплён первым, независимо от порядка в сторе
   const filtered = chats
@@ -192,9 +206,19 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 }}
                 className="w-full h-24 flex items-center gap-4 px-4 py-4 rounded-2xl text-left btn-3d"
                 style={{
-                  background: grayMode ? 'rgba(45,45,58,0.65)' : 'rgba(255,255,255,0.65)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
+                  // В режиме выбора карточка без backdrop-filter (сплошной,
+                  // более непрозрачный фон вместо стекла): сочетание
+                  // blur-эффекта с reflow при появлении/исчезновении
+                  // чекбокса давало устойчивый цветной артефакт на
+                  // аватарке, который не смывался даже после завершения
+                  // анимации — баг компоновки в Chromium/WebKit, а не
+                  // тайминга. Без блюра источнику артефакта просто
+                  // неоткуда взяться.
+                  background: cardsBlurred
+                    ? (grayMode ? 'rgba(45,45,58,0.65)' : 'rgba(255,255,255,0.65)')
+                    : (grayMode ? 'rgba(45,45,58,0.92)' : 'rgba(255,255,255,0.92)'),
+                  backdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
+                  WebkitBackdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
                   boxShadow: isSelected
                     ? '0 0 0 2px #6546C7, 0 8px 24px rgba(15,23,42,0.06)'
                     : '0 8px 24px rgba(15,23,42,0.06)',
