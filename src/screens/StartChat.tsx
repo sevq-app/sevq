@@ -41,12 +41,12 @@ export function StartChat({ onBack }: StartChatProps) {
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onBack}
-            className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
-            style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}
+            className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
+            style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
           >
             <ArrowLeft size={22} />
           </motion.button>
-          <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Начать общение</h1>
+          <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Начать общение</h1>
         </div>
 
         {/* Search */}
@@ -64,17 +64,17 @@ export function StartChat({ onBack }: StartChatProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0 relative">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0 relative">
         <div className="max-w-2xl mx-auto pt-2">
           {/* Action buttons */}
           <div className="space-y-2 mb-6">
             <motion.button
               whileTap={{ scale: 0.98 }}
               className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left"
-              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
+              style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #6546C7, #8366D9)', boxShadow: '0 3px 10px rgba(101,70,199,0.3)' }}>
-                <Users size={18} className="text-white" />
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
+                <Users size={18} style={{ color: 'var(--theme-primary)' }} />
               </div>
               <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Создать группу</span>
             </motion.button>
@@ -82,10 +82,10 @@ export function StartChat({ onBack }: StartChatProps) {
             <motion.button
               whileTap={{ scale: 0.98 }}
               className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left"
-              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
+              style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)', boxShadow: '0 3px 10px rgba(79,211,200,0.3)' }}>
-                <Phone size={18} className="text-white" />
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
+                <Phone size={18} style={{ color: 'var(--theme-primary)' }} />
               </div>
               <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Найти по номеру</span>
             </motion.button>
@@ -93,10 +93,10 @@ export function StartChat({ onBack }: StartChatProps) {
             <motion.button
               whileTap={{ scale: 0.98 }}
               className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left"
-              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
+              style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #FF9848, #FFB87A)', boxShadow: '0 3px 10px rgba(255,152,72,0.3)' }}>
-                <Link size={18} className="text-white" />
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 bg-[var(--bg-input)]">
+                <Link size={18} style={{ color: 'var(--theme-primary)' }} />
               </div>
               <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Пригласить по ссылке</span>
             </motion.button>
@@ -116,7 +116,7 @@ export function StartChat({ onBack }: StartChatProps) {
                         key={friend.id}
                         whileTap={{ scale: 0.98 }}
                         className="w-full bg-white rounded-2xl p-4 flex items-center gap-4 text-left"
-                        style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.06)' }}
+                        style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
                       >
                         <Avatar
                           initials={friend.initials}
@@ -149,7 +149,7 @@ export function StartChat({ onBack }: StartChatProps) {
                 key={letter}
                 onClick={() => scrollToLetter(letter)}
                 className="w-6 h-6 flex items-center justify-center text-xs font-heading font-bold text-[#6546C7] bg-white/80 rounded-full backdrop-blur-sm"
-                style={{ boxShadow: '0 2px 8px rgba(101,70,199,0.15)' }}
+                style={{ boxShadow: '0 2px 8px rgba(15,23,42,0.08)' }}
               >
                 {letter}
               </button>

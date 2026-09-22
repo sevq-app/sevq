@@ -11,28 +11,45 @@ import { AboutMe } from '@/screens/AboutMe';
 import { Photos } from '@/screens/Photos';
 import { MyGroups } from '@/screens/MyGroups';
 import { Group } from '@/screens/Group';
+import { ContactProfile } from '@/screens/ContactProfile';
+import { ContactEdit } from '@/screens/ContactEdit';
+import { MediaGallery } from '@/screens/MediaGallery';
 import { Search } from '@/screens/Search';
 import { Settings } from '@/screens/Settings';
 import { Appearance } from '@/screens/Appearance';
 import { Login } from '@/screens/Login';
-import type { Chat, Screen } from '@/data/mock';
-import { chats } from '@/data/mock';
+import type { Screen } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
+import { useChatStore } from '@/store/chatStore';
+import { useAutoReloadOnNewVersion } from '@/hooks/useAutoReloadOnNewVersion';
 
 function App() {
+  useAutoReloadOnNewVersion();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [profileData, setProfileData] = useState<any>({});
   const [screen, setScreen] = useState<Screen>('chats');
-  const [activeChat, setActiveChat] = useState<Chat | null>(null);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
-  const [fontSize, setFontSize] = useState<number>(15);
-  const [grayMode, setGrayMode] = useState<boolean>(() => {
-    return localStorage.getItem('grayMode') === 'true';
+  const chats = useChatStore((s) => s.chats);
+  const [fontSize, setFontSize] = useState<number>(16);
+  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('sevchik_themeMode');
+    return saved === 'light' || saved === 'dark' ? saved : 'system';
   });
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+  const grayMode = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark);
   const [selectedTheme, setSelectedTheme] = useState<string>(() => {
     const saved = localStorage.getItem('selectedTheme');
     return saved || 'spring';
+  });
+  const [soundsEnabled, setSoundsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('sevchik_sounds') !== 'false';
+  });
+  const [hapticsEnabled, setHapticsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('sevchik_haptics') !== 'false';
   });
 
   // Проверка текущей сессии Supabase при загрузке приложения
@@ -58,11 +75,17 @@ function App() {
     setSelectedTheme(savedTheme);
   }, []);
 
-  // Восстановление серого режима при загрузке
+  // Применение тёмного/серого режима при изменении вычисленного значения
   useEffect(() => {
-    if (grayMode) {
-      document.documentElement.classList.add('gray-theme');
-    }
+    document.documentElement.classList.toggle('gray-theme', grayMode);
+  }, [grayMode]);
+
+  // Слежение за системной темой (для режима "Системная")
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, []);
 
   // Сохранение темы при изменении
@@ -70,20 +93,29 @@ function App() {
     localStorage.setItem('selectedTheme', selectedTheme);
   }, [selectedTheme]);
 
-  // Сохранение серого режима при изменении
+  // Сохранение режима оформления (системная/светлая/тёмная) при изменении
   useEffect(() => {
-    localStorage.setItem('grayMode', String(grayMode));
-  }, [grayMode]);
+    localStorage.setItem('sevchik_themeMode', themeMode);
+  }, [themeMode]);
 
-  const handleOpenChat = (chat: Chat) => {
-    setActiveChat(chat);
+  // Сохранение настроек звука и вибрации при изменении
+  useEffect(() => {
+    localStorage.setItem('sevchik_sounds', String(soundsEnabled));
+  }, [soundsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('sevchik_haptics', String(hapticsEnabled));
+  }, [hapticsEnabled]);
+
+  const handleOpenChat = (chatId: string) => {
+    setActiveChatId(chatId);
     setScreen('conversation');
   };
 
   const handleWriteToName = (name: string) => {
     const chat = chats.find((c) => c.name === name);
     if (chat) {
-      setActiveChat(chat);
+      setActiveChatId(chat.id);
       setScreen('conversation');
     }
   };
@@ -101,23 +133,14 @@ function App() {
     setCurrentUser(null);
     setProfileData({});
     setScreen('chats');
-    setActiveChat(null);
-  };
-
-  const updateGrayMode = (value: boolean) => {
-    setGrayMode(value);
-    if (value) {
-      document.documentElement.classList.add('gray-theme');
-    } else {
-      document.documentElement.classList.remove('gray-theme');
-    }
+    setActiveChatId(null);
   };
 
   const handleTabNavigate = (tab: Screen) => {
     setScreen(tab);
   };
 
-  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group';
+  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group' && screen !== 'contact-profile' && screen !== 'contact-edit' && screen !== 'media-gallery';
 
   if (authLoading) {
     return (
@@ -143,7 +166,7 @@ function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex-1 overflow-hidden"
+            className="flex-1 min-h-0 overflow-hidden"
           >
             {screen === 'chats' && (
               <Chats
@@ -152,8 +175,29 @@ function App() {
                 fontSize={fontSize}
               />
             )}
-            {screen === 'conversation' && activeChat && (
-              <Conversation chat={activeChat} onBack={() => setScreen('chats')} fontSize={fontSize} />
+            {screen === 'conversation' && activeChatId && (
+              <Conversation
+                chatId={activeChatId}
+                onBack={() => setScreen('chats')}
+                onOpenProfile={() => setScreen('contact-profile')}
+                fontSize={fontSize}
+                soundsEnabled={soundsEnabled}
+                hapticsEnabled={hapticsEnabled}
+              />
+            )}
+            {screen === 'contact-profile' && activeChatId && (
+              <ContactProfile
+                chatId={activeChatId}
+                onBack={() => setScreen('conversation')}
+                onEdit={() => setScreen('contact-edit')}
+                onOpenMedia={() => setScreen('media-gallery')}
+              />
+            )}
+            {screen === 'contact-edit' && activeChatId && (
+              <ContactEdit chatId={activeChatId} onBack={() => setScreen('contact-profile')} />
+            )}
+            {screen === 'media-gallery' && activeChatId && (
+              <MediaGallery chatId={activeChatId} onBack={() => setScreen('contact-profile')} />
             )}
             {screen === 'contacts' && <Friends onWriteMessage={handleWriteToName} />}
             {screen === 'calls' && <Calls onNavigate={setScreen} />}
@@ -181,8 +225,12 @@ function App() {
                 setFontSize={setFontSize}
                 selectedTheme={selectedTheme}
                 setSelectedTheme={setSelectedTheme}
-                grayMode={grayMode}
-                setGrayMode={updateGrayMode}
+                themeMode={themeMode}
+                setThemeMode={setThemeMode}
+                soundsEnabled={soundsEnabled}
+                setSoundsEnabled={setSoundsEnabled}
+                hapticsEnabled={hapticsEnabled}
+                setHapticsEnabled={setHapticsEnabled}
               />
             )}
           </motion.div>

@@ -77,16 +77,16 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const referralUrl = `${inviteUrl}?ref=${user?.id || 'user'}`;
 
   return (
-    <div className="h-full overflow-y-auto pb-24 md:pb-0">
+    <div className="h-full overflow-y-auto pb-28 md:pb-0">
       <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center justify-between">
-        <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Мой Севчик</h1>
-        <button onClick={() => onNavigate?.('settings')} className="w-11 h-11 rounded-card bg-[var(--bg-card)] flex items-center justify-center text-sevchik-textSecondary hover:text-sevchik-purple transition-colors" aria-label="Настройки"><Settings size={20} /></button>
+        <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Мой Севчик</h1>
+        <button onClick={() => onNavigate?.('settings')} className="w-12 h-12 rounded-card bg-[var(--bg-card)] flex items-center justify-center text-sevchik-textSecondary hover:text-sevchik-purple transition-colors" aria-label="Настройки"><Settings size={20} /></button>
       </div>
 
       <div className="flex flex-col items-center px-4 sm:px-6 mb-6 mt-2">
         <div className="relative">
           <button onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : setPhotoAccessOpen(true)} className="block rounded-full" aria-label={profilePhoto ? 'Открыть фото профиля' : 'Добавить фото профиля'}>
-            <div className="p-1 rounded-full bg-sevchik-orange shadow-[0_8px_24px_rgba(255,152,72,0.35)]"><div className="p-[3px] rounded-full bg-[var(--bg-card)]">{profilePhoto ? <span className="relative block"><img src={profilePhoto} alt="Фото профиля" className="w-[120px] h-[120px] rounded-full object-cover" /><span className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-[3px] border-[var(--bg-card)] ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/50'}`} /></span> : <Avatar initials="+" color="#6546C7" size="xxl" online={online} />}</div></div>
+            <div className="p-1 rounded-full bg-sevchik-orange shadow-[0_8px_24px_rgba(255,152,72,0.2)]"><div className="p-[3px] rounded-full bg-[var(--bg-card)]">{profilePhoto ? <span className="relative block"><img src={profilePhoto} alt="Фото профиля" className="w-[120px] h-[120px] rounded-full object-cover" /><span className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-[3px] border-[var(--bg-card)] ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/50'}`} /></span> : <Avatar initials="+" color="#6546C7" size="xxl" online={online} />}</div></div>
           </button>
           <div className="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-[var(--bg-card)] flex items-center justify-center text-lg shadow-[0_4px_12px_rgba(101,70,199,0.2)]">⭐</div>
         </div>

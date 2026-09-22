@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck } from 'lucide-react';
+import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
-import { chats as initialChats } from '@/data/mock';
-import type { Chat } from '@/data/mock';
+import { getDisplayContact } from '@/lib/contactOverrides';
+import { useChatStore } from '@/store/chatStore';
+import { previewText } from '@/lib/messagePreview';
 
 interface ChatsProps {
-  onOpenChat: (chat: Chat) => void;
+  onOpenChat: (chatId: string) => void;
   onStartChat?: () => void;
   grayMode: boolean;
   fontSize: number;
@@ -14,14 +15,32 @@ interface ChatsProps {
 
 export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProps) {
   const [query, setQuery] = useState('');
-  const [chats, setChats] = useState(initialChats);
+  const chats = useChatStore((s) => s.chats);
+  const markChatsRead = useChatStore((s) => s.markChatsRead);
+  const deleteChats = useChatStore((s) => s.deleteChats);
   const [showMenu, setShowMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  // Стекло (backdrop-filter) карточек отключается сразу при входе в режим
+  // выбора и включается обратно только после того, как чекбоксы закончат
+  // анимированно скрываться — иначе blur и reflow совпадают по кадру и
+  // Chromium/WebKit оставляет на аватарке цветной артефакт, который не
+  // смывается сам.
+  const [cardsBlurred, setCardsBlurred] = useState(true);
+  useEffect(() => {
+    if (selectMode) {
+      setCardsBlurred(false);
+      return;
+    }
+    const t = setTimeout(() => setCardsBlurred(true), 200);
+    return () => clearTimeout(t);
+  }, [selectMode]);
 
-  const filtered = chats.filter((c) =>
-    c.name.toLowerCase().includes(query.toLowerCase())
-  );
+  // Чат "Избранное" всегда закреплён первым, независимо от порядка в сторе
+  const filtered = chats
+    .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()))
+    .slice()
+    .sort((a, b) => Number(!!b.isFavorites) - Number(!!a.isFavorites));
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -36,16 +55,12 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
   };
 
   const markAllRead = () => {
-    setChats((prev) =>
-      prev.map((c) =>
-        selectedIds.includes(c.id) ? { ...c, unread: 0 } : c
-      )
-    );
+    markChatsRead(selectedIds);
     exitSelectMode();
   };
 
   const deleteSelected = () => {
-    setChats((prev) => prev.filter((c) => !selectedIds.includes(c.id)));
+    deleteChats(selectedIds);
     exitSelectMode();
   };
 
@@ -61,8 +76,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
               onClick={exitSelectMode}
               className="px-4 py-2 rounded-2xl font-heading font-bold text-sm text-white"
               style={{
-                background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-                boxShadow: '0 4px 12px rgba(101,70,199,0.3)',
+                background: '#6546C7',
+                boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
               }}
             >
               Готово
@@ -74,7 +89,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         ) : (
           /* Обычная шапка */
           <div className="flex items-center justify-between mb-4">
-            <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">
+            <h1 className="font-heading font-extrabold text-xl text-sevchik-text">
               Чаты
             </h1>
             <div className="flex items-center gap-2">
@@ -84,10 +99,10 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   whileTap={{ scale: 0.9 }}
                   whileHover={{ scale: 1.05 }}
                   onClick={() => setShowMenu(!showMenu)}
-                  className="w-11 h-11 rounded-full flex items-center justify-center text-sevchik-textSecondary bg-white"
-                  style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.1)' }}
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-sevchik-textSecondary bg-white"
+                  style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
                 >
-                  <MoreVertical size={22} />
+                  <MoreVertical size={24} />
                 </motion.button>
 
                 {/* Выпадающее меню */}
@@ -105,9 +120,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                         initial={{ opacity: 0, scale: 0.9, y: -10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: -10 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+                        transition={{ duration: 0.15, ease: 'easeOut' }}
                         className="absolute right-0 top-14 w-56 bg-white rounded-2xl overflow-hidden z-40"
-                        style={{ boxShadow: '0 12px 40px rgba(101,70,199,0.2)' }}
+                        style={{ boxShadow: '0 12px 32px rgba(15,23,42,0.12)' }}
                       >
                         <motion.button
                           whileHover={{ backgroundColor: '#F9FAFB' }}
@@ -116,17 +131,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                             setShowMenu(false);
                             setSelectMode(true);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
+                          className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
                         >
-                          <div
-                            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                            style={{
-                              background: 'linear-gradient(135deg, #6546C7, #8366D9)',
-                              boxShadow: '0 3px 10px rgba(101,70,199,0.3)',
-                            }}
-                          >
-                            <Check size={18} className="text-white" />
-                          </div>
+                          <Check size={19} style={{ color: 'var(--text-secondary)' }} />
                           <span className="font-heading font-semibold text-sm text-[#1A1A1A]">
                             Выбрать
                           </span>
@@ -142,13 +149,13 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 whileTap={{ scale: 0.9 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={() => onStartChat?.()}
-                className="w-11 h-11 rounded-full flex items-center justify-center text-white"
+                className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-                  boxShadow: '0 4px 12px rgba(101,70,199,0.3)',
+                  background: '#6546C7',
+                  boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
                 }}
               >
-                <Plus size={22} />
+                <Plus size={24} />
               </motion.button>
             </div>
           </div>
@@ -158,27 +165,30 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         <div className="relative">
           <Search
             size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Люди, группы и сообщения"
-            className="w-full text-[var(--text-main)] placeholder:text-[var(--text-secondary)] rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm relative overflow-hidden bg-[var(--bg-input)]"
+            className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
             style={{
-              background: 'var(--bg-input)',
-              boxShadow: 'none',
+              background: 'rgba(255,152,72,0.65)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: '0 4px 14px rgba(255,152,72,0.28)',
             }}
           />
         </div>
       </div>
 
       {/* Список чатов */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0">
-        <div className="space-y-2">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
+        <div className="space-y-3">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);
+            const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
             return (
               <motion.button
                 key={chat.id}
@@ -188,59 +198,86 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
-                  if (selectMode) {
+                  if (selectMode && !chat.isFavorites) {
                     toggleSelect(chat.id);
                   } else {
-                    onOpenChat(chat);
+                    onOpenChat(chat.id);
                   }
                 }}
-                className={`w-full h-[72px] flex items-center gap-3 px-4 py-3 ${
-                  grayMode ? 'bg-[#2d2d3a]' : 'bg-white'
-                } rounded-2xl text-left btn-3d ${
-                  isSelected ? 'ring-2 ring-[#6546C7]' : ''
-                }`}
-                style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}
+                className="w-full h-24 flex items-center gap-4 px-4 py-4 rounded-2xl text-left btn-3d"
+                style={{
+                  // В режиме выбора карточка без backdrop-filter (сплошной,
+                  // более непрозрачный фон вместо стекла): сочетание
+                  // blur-эффекта с reflow при появлении/исчезновении
+                  // чекбокса давало устойчивый цветной артефакт на
+                  // аватарке, который не смывался даже после завершения
+                  // анимации — баг компоновки в Chromium/WebKit, а не
+                  // тайминга. Без блюра источнику артефакта просто
+                  // неоткуда взяться.
+                  background: cardsBlurred
+                    ? (grayMode ? 'rgba(45,45,58,0.65)' : 'rgba(255,255,255,0.65)')
+                    : (grayMode ? 'rgba(45,45,58,0.92)' : 'rgba(255,255,255,0.92)'),
+                  backdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
+                  WebkitBackdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
+                  boxShadow: isSelected
+                    ? '0 0 0 2px #6546C7, 0 8px 24px rgba(15,23,42,0.06)'
+                    : '0 8px 24px rgba(15,23,42,0.06)',
+                }}
               >
-                {/* Кружочек выбора (только в режиме выбора) */}
-                {selectMode && (
-                  <div
-                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                      isSelected
-                        ? 'bg-[#6546C7]'
-                        : 'bg-[#E5E7EB]'
-                    }`}
-                  >
-                    {isSelected && (
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="white"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                {/* Кружочек выбора (только в режиме выбора) — нейтральный,
+                    без выбора — просто тонкое кольцо в тон фона карточки.
+                    У системного чата "Избранное" его нет — он неудаляемый.
+                    Появление анимировано (а не мгновенный reflow), иначе
+                    резкий сдвиг контента в паре с backdrop-filter на долю
+                    кадра даёт цветной артефакт-полоску на аватарке. */}
+                <AnimatePresence initial={false}>
+                  {selectMode && !chat.isFavorites && (
+                    <motion.div
+                      initial={{ width: 0, opacity: 0 }}
+                      animate={{ width: 24, opacity: 1 }}
+                      exit={{ width: 0, opacity: 0 }}
+                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                      className="shrink-0 overflow-hidden"
+                    >
+                      <div
+                        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
+                        }`}
                       >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    )}
-                  </div>
-                )}
+                        {isSelected && (
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="white"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <Avatar
-                  initials={chat.initials}
+                  initials={displayInitials}
                   color={chat.avatarColor}
-                  size="md"
+                  size="lg"
                   online={chat.online}
                   ringColor={chat.online ? '#4FD3C8' : undefined}
+                  icon={chat.isFavorites ? <Star size={28} fill="white" strokeWidth={0} /> : undefined}
                 />
                 <div className="flex-1 min-w-0 relative z-10">
                   <div className="flex items-center justify-between gap-2">
                     <h3
                       className="font-heading font-bold text-sevchik-text truncate"
-                      style={{ fontSize: `${fontSize}px` }}
+                      style={{ fontSize: `${fontSize + 2}px` }}
                     >
-                      {chat.name}
+                      {displayName}
                     </h3>
                     <span
                       className="text-xs text-sevchik-textSecondary font-body shrink-0"
@@ -249,19 +286,19 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       {chat.time}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between gap-2 mt-1">
+                  <div className="flex items-center justify-between gap-2 mt-1.5">
                     <p
                       className="text-sm text-sevchik-textSecondary font-body truncate"
                       style={{ fontSize: `${fontSize}px` }}
                     >
-                      {chat.lastMessage}
+                      {chat.isFavorites ? previewText(chat.messages[chat.messages.length - 1]?.text, chat.lastMessage) : chat.lastMessage}
                     </p>
                     {chat.unread > 0 && (
                       <span
-                        className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[22px] h-[22px] px-1.5 flex items-center justify-center"
+                        className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[26px] h-[26px] px-2 flex items-center justify-center"
                         style={{
-                          background: 'linear-gradient(135deg, #8366D9, #6546C7)',
-                          boxShadow: '0 3px 10px rgba(101,70,199,0.3)',
+                          background: '#6546C7',
+                          boxShadow: '0 3px 10px rgba(101,70,199,0.18)',
                         }}
                       >
                         <span style={{ fontSize: `${fontSize}px` }}>{chat.unread}</span>
@@ -271,8 +308,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       <span
                         className="shrink-0 text-white text-[10px] font-heading font-bold rounded-pill px-2 h-[20px] flex items-center justify-center"
                         style={{
-                          background: 'linear-gradient(135deg, #6BE3D9, #4FD3C8)',
-                          boxShadow: '0 3px 10px rgba(79,211,200,0.3)',
+                          background: '#4FD3C8',
+                          boxShadow: '0 3px 10px rgba(79,211,200,0.18)',
                         }}
                       >
                         <span style={{ fontSize: `${fontSize}px` }}>Новое</span>
@@ -307,11 +344,10 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={markAllRead}
                 className="flex-1 py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #4FD3C8, #38b2ac)',
-                  boxShadow: '0 4px 14px rgba(79,211,200,0.3)',
+                  background: '#4FD3C8',
+                  boxShadow: '0 4px 14px rgba(79,211,200,0.2)',
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
                 <CheckCheck size={20} className="relative z-10" />
                 <span className="relative z-10">Прочитать всё</span>
               </motion.button>
@@ -321,11 +357,10 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={deleteSelected}
                 className="flex-1 py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden"
                 style={{
-                  background: 'linear-gradient(135deg, #FF6B6B, #EF4444)',
-                  boxShadow: '0 4px 14px rgba(239,68,68,0.3)',
+                  background: '#EF4444',
+                  boxShadow: '0 4px 14px rgba(239,68,68,0.2)',
                 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
                 <Trash2 size={20} className="relative z-10" />
                 <span className="relative z-10">Удалить</span>
               </motion.button>

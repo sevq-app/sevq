@@ -15,10 +15,10 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
     <div className="flex flex-col h-full bg-[var(--bg-main)]">
       {/* Header */}
       <div className="px-4 sm:px-6 pt-4 pb-3 flex items-center gap-3 sticky top-0 z-20 bg-transparent">
-        <motion.button whileTap={{ scale: 0.9 }} onClick={onBack} className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-sevchik-purple" style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}>
+        <motion.button whileTap={{ scale: 0.9 }} onClick={onBack} className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-sevchik-purple" style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}>
           <ArrowLeft size={22} />
         </motion.button>
-        <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Поиск</h1>
+        <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Поиск</h1>
       </div>
 
       {/* Search Input */}
@@ -37,7 +37,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-24 md:pb-0">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
         {query ? (
           <div className="text-center py-12">
             <p className="text-sevchik-textSecondary font-body">Ничего не найдено по запросу "{query}"</p>
@@ -48,7 +48,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
               <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1 flex items-center gap-2">
                 <Clock size={14} /> Недавние
               </h2>
-              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
                 {recentSearches.map((item, i) => (
                   <motion.button
                     key={i}
@@ -57,7 +57,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
                     onClick={() => onWriteMessage(item)}
                     className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${i !== recentSearches.length - 1 ? 'border-b border-[#F3F4F6]' : ''}`}
                   >
-                    <div className="w-10 h-10 rounded-2xl bg-sevchik-cream flex items-center justify-center text-sevchik-purple shrink-0">
+                    <div className="w-11 h-11 rounded-2xl bg-sevchik-cream flex items-center justify-center text-sevchik-purple shrink-0">
                       <SearchIcon size={18} />
                     </div>
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">{item}</span>
@@ -70,7 +70,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
               <h2 className="text-xs font-bold text-[#6B7280] uppercase tracking-wider mb-3 ml-1 flex items-center gap-2">
                 <TrendingUp size={14} /> Популярное в Севчик
               </h2>
-              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+              <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
                 {['Новости дизайна', 'IT сообщество', 'Музыка 24/7'].map((item, i) => (
                   <motion.button
                     key={i}
@@ -78,7 +78,7 @@ export function Search({ onBack, onWriteMessage }: SearchProps) {
                     whileTap={{ scale: 0.98 }}
                     className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors ${i !== 2 ? 'border-b border-[#F3F4F6]' : ''}`}
                   >
-                    <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shrink-0" style={{ background: 'linear-gradient(135deg, #FF9848, #FFB87A)' }}>
+                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shrink-0" style={{ background: '#FF9848' }}>
                       <TrendingUp size={18} />
                     </div>
                     <span className="font-heading font-semibold text-sm text-[#1A1A1A]">{item}</span>

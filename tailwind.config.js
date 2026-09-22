@@ -16,9 +16,9 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-        card: '24px',
-        btn: '16px',
-        pill: '12px',
+        card: '28px',
+        btn: '18px',
+        pill: '14px',
       },
       colors: {
         background: 'hsl(var(--background))',

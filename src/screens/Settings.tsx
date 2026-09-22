@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Star, Smartphone, Bell, Shield, HardDrive, Battery,
+  Smartphone, Bell, Shield, HardDrive, Battery,
   UserPlus, Palette, Languages, HelpCircle, Info,
   LogOut, ChevronRight
 } from 'lucide-react';
@@ -38,7 +38,6 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
     {
       title: 'Основное',
       items: [
-        { icon: Star, label: 'Избранное', color: '#FF9848', hasChevron: true },
         { icon: Smartphone, label: 'Устройства', color: '#6546C7', hasChevron: true, value: '1 активно' },
       ],
     },
@@ -70,17 +69,17 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
   ];
 
   return (
-    <div className="h-full overflow-y-auto pb-24 md:pb-6 bg-[var(--bg-main)]">
+    <div className="h-full overflow-y-auto pb-28 md:pb-6 bg-[var(--bg-main)]">
       <div className="px-4 sm:px-6 pt-4 pb-3 flex items-center gap-3 sticky top-0 bg-transparent z-20">
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onBack}
-          className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-[#6546C7] transition-colors"
+          className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7] transition-colors"
           style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}
         >
           <ChevronRight size={22} className="rotate-180" />
         </motion.button>
-        <h1 className="font-heading font-semibold text-sm text-sevchik-textSecondary">Настройки</h1>
+        <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Настройки</h1>
       </div>
 
       <div className="px-4 sm:px-6 space-y-6 max-w-2xl mx-auto pt-2">
@@ -95,7 +94,7 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
               {section.title}
             </h2>
             
-            <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(101,70,199,0.08)' }}>
+            <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
               {section.items.map((item, itemIdx) => (
                 <motion.button
                   key={item.label}
@@ -107,13 +106,12 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
                   }`}
                 >
                   <div
-                    className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 relative overflow-hidden"
                     style={{
                       background: `linear-gradient(135deg, ${item.color}dd, ${item.color})`,
-                      boxShadow: `0 4px 12px ${item.color}40`,
+                      boxShadow: `0 4px 12px ${item.color}26`,
                     }}
                   >
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 50%)' }} />
                     <item.icon size={20} className="text-white relative z-10" />
                   </div>
                   
@@ -158,11 +156,10 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
             onClick={handleLogout}
             className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base relative overflow-hidden flex items-center justify-center gap-3"
             style={{
-              background: 'linear-gradient(135deg, #FF6B6B 0%, #EF4444 100%)',
+              background: '#EF4444',
               boxShadow: '0 4px 14px rgba(239, 68, 68, 0.25)',
             }}
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
             <LogOut size={20} className="relative z-10" />
             <span className="relative z-10">Выйти из аккаунта</span>
           </motion.button>
