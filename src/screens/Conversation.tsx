@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent } from 'react';
+import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft, Star, Pencil, Download } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
@@ -178,6 +178,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [menuMessage, setMenuMessage] = useState<Message | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<{ top: number; bottom: number; left: number; right: number; isMe: boolean } | null>(null);
   const [forwardMessage, setForwardMessage] = useState<Message | null>(null);
   const [bulkForwardTexts, setBulkForwardTexts] = useState<string[] | null>(null);
   const [showStickerPanel, setShowStickerPanel] = useState(false);
@@ -197,6 +198,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messageHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const pressedMessageElRef = useRef<HTMLDivElement | null>(null);
 
   const messages = chat?.messages ?? [];
 
@@ -355,9 +357,23 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
 
   const reactionEmojis = ['👍', '❤️', '😆', '🔥', '😭', '😍', '🤟'];
 
-  const handleMessageHoldStart = (msg: Message) => {
+  // Снимок положения сообщения на экране в момент открытия меню — по нему
+  // меню "вырастает" из самого сообщения, а не выезжает с низа экрана.
+  const captureAnchor = (el: HTMLDivElement, msg: Message) => {
+    const rect = el.getBoundingClientRect();
+    setMenuAnchor({ top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, isMe: msg.senderId === 'me' });
+  };
+
+  const closeMenu = () => {
+    setMenuMessage(null);
+    setMenuAnchor(null);
+  };
+
+  const handleMessageHoldStart = (msg: Message, el: HTMLDivElement) => {
     if (messageSelectMode) return;
+    pressedMessageElRef.current = el;
     messageHoldTimeoutRef.current = setTimeout(() => {
+      if (pressedMessageElRef.current) captureAnchor(pressedMessageElRef.current, msg);
       setMenuMessage(msg);
     }, 400);
   };
@@ -372,6 +388,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const handleMessageContextMenu = (e: MouseEvent, msg: Message) => {
     e.preventDefault();
     if (messageSelectMode) return;
+    captureAnchor(e.currentTarget as HTMLDivElement, msg);
     setMenuMessage(msg);
   };
 
@@ -380,17 +397,17 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleReaction = () => {
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleReply = () => {
     setReplyTo(menuMessage);
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleForward = () => {
     setForwardMessage(menuMessage);
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleEditMessage = () => {
@@ -398,12 +415,12 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       setEditingMessageId(menuMessage.id);
       setInput(menuMessage.text);
     }
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleMarkUnread = () => {
     markChatUnread(chat.id);
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleCopyText = async () => {
@@ -414,7 +431,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         // буфер обмена недоступен — молча игнорируем
       }
     }
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleSaveToGallery = () => {
@@ -424,13 +441,13 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       a.download = `sevchik-photo-${Date.now()}.png`;
       a.click();
     }
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleReport = () => {
     setReportingMessage(menuMessage);
     setReportSent(false);
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const handleSubmitReport = () => {
@@ -445,7 +462,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     if (menuMessage) {
       deleteMessage(chat.id, menuMessage.id);
     }
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const toggleMessageSelect = (id: string) => {
@@ -455,7 +472,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const handleSelectMessage = () => {
     setMessageSelectMode(true);
     setSelectedMessageIds(menuMessage ? [menuMessage.id] : []);
-    setMenuMessage(null);
+    closeMenu();
   };
 
   const exitMessageSelectMode = () => {
@@ -774,10 +791,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               className={`relative flex select-none ${isMe ? 'justify-end' : 'justify-start'}`}
               style={{ touchAction: 'pan-y' }}
               onContextMenu={(e) => handleMessageContextMenu(e, msg)}
-              onMouseDown={() => handleMessageHoldStart(msg)}
+              onMouseDown={(e) => handleMessageHoldStart(msg, e.currentTarget)}
               onMouseUp={handleMessageHoldEnd}
               onMouseLeave={handleMessageHoldEnd}
-              onTouchStart={() => handleMessageHoldStart(msg)}
+              onTouchStart={(e) => handleMessageHoldStart(msg, e.currentTarget)}
               onTouchEnd={handleMessageHoldEnd}
               onClick={() => handleMessageClick(msg)}
             >
@@ -1214,156 +1231,194 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         )}
       </AnimatePresence>
 
-      {/* Контекстное меню сообщения */}
+      {/* Контекстное меню сообщения — компактное, "вырастает" прямо из
+          сообщения (позиционируется по снимку его координат на экране,
+          см. menuAnchor), а не выезжает бланком на весь низ экрана. */}
       <AnimatePresence>
-        {menuMessage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm"
-            onClick={() => setMenuMessage(null)}
-          >
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-2xl rounded-t-3xl p-6"
-              style={{
-                background: 'rgba(255,255,255,0.75)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                boxShadow: '0 -20px 60px rgba(0,0,0,0.2)',
-              }}
-            >
-              {/* Быстрые реакции */}
-              <div className="flex items-center justify-between gap-2 mb-4">
-                {reactionEmojis.map((emoji) => (
-                  <motion.button
-                    key={emoji}
-                    whileTap={{ scale: 0.8 }}
-                    whileHover={{ scale: 1.2 }}
-                    onClick={handleReaction}
-                    className="text-2xl w-11 h-11 flex items-center justify-center rounded-full"
-                  >
-                    {emoji}
-                  </motion.button>
-                ))}
-              </div>
+        {menuMessage && menuAnchor && (() => {
+          const MENU_WIDTH = 244;
+          const MENU_MARGIN = 10;
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const openBelow = menuAnchor.top < vh / 2;
+          const left = menuAnchor.isMe
+            ? Math.max(MENU_MARGIN, Math.min(menuAnchor.right - MENU_WIDTH, vw - MENU_WIDTH - MENU_MARGIN))
+            : Math.max(MENU_MARGIN, Math.min(menuAnchor.left, vw - MENU_WIDTH - MENU_MARGIN));
+          const noSelect: CSSProperties = {
+            WebkitUserSelect: 'none',
+            userSelect: 'none',
+            WebkitTouchCallout: 'none',
+          };
+          const glass: CSSProperties = {
+            background: 'rgba(255,255,255,0.68)',
+            backdropFilter: 'blur(26px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(26px) saturate(180%)',
+            boxShadow: '0 10px 30px rgba(15,23,42,0.2)',
+          };
 
-              <div className="space-y-1">
-                {(() => {
-                  const isText = !isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && !isImageMessage(menuMessage.text);
-                  const isImg = isImageMessage(menuMessage.text);
-                  const isMine = menuMessage.senderId === 'me';
-                  return (
-                    <>
-                      {isMine && isText && (
-                        <motion.button
-                          whileHover={{ backgroundColor: '#F9FAFB' }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleEditMessage}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                        >
-                          <Pencil size={20} style={{ color: 'var(--theme-primary)' }} />
-                          <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Редактировать</span>
-                        </motion.button>
-                      )}
+          const isText = !isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && !isImageMessage(menuMessage.text);
+          const isImg = isImageMessage(menuMessage.text);
+          const isMine = menuMessage.senderId === 'me';
 
-                      <motion.button
-                        whileHover={{ backgroundColor: '#F9FAFB' }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleReply}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                      >
-                        <Reply size={20} style={{ color: 'var(--theme-primary)' }} />
-                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Ответить</span>
-                      </motion.button>
+          const reactionsBar = (
+            <div key="reactions" className="flex items-center justify-between gap-0.5 px-2 py-1.5 rounded-full" style={glass}>
+              {reactionEmojis.map((emoji) => (
+                <motion.button
+                  key={emoji}
+                  whileTap={{ scale: 0.8 }}
+                  whileHover={{ scale: 1.25 }}
+                  onClick={handleReaction}
+                  className="text-lg w-7 h-7 shrink-0 flex items-center justify-center rounded-full"
+                >
+                  {emoji}
+                </motion.button>
+              ))}
+            </div>
+          );
 
-                      <motion.button
-                        whileHover={{ backgroundColor: '#F9FAFB' }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleForward}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                      >
-                        <Forward size={20} style={{ color: 'var(--theme-primary)' }} />
-                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Переслать</span>
-                      </motion.button>
+          const actionsCard = (
+            <div key="actions" className="rounded-2xl overflow-hidden divide-y divide-black/5" style={glass}>
+              {isMine && isText && (
+                <motion.button
+                  whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleEditMessage}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+                >
+                  <Pencil size={17} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Редактировать</span>
+                </motion.button>
+              )}
 
-                      {isImg && (
-                        <motion.button
-                          whileHover={{ backgroundColor: '#F9FAFB' }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleSaveToGallery}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                        >
-                          <Download size={20} style={{ color: 'var(--theme-primary)' }} />
-                          <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Сохранить в галерею</span>
-                        </motion.button>
-                      )}
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleReply}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+              >
+                <Reply size={17} style={{ color: 'var(--theme-primary)' }} />
+                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Ответить</span>
+              </motion.button>
 
-                      <motion.button
-                        whileHover={{ backgroundColor: '#F9FAFB' }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleMarkUnread}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                      >
-                        <EyeOff size={20} style={{ color: 'var(--theme-primary)' }} />
-                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
-                      </motion.button>
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleForward}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+              >
+                <Forward size={17} style={{ color: 'var(--theme-primary)' }} />
+                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Переслать</span>
+              </motion.button>
 
-                      {isText && (
-                        <motion.button
-                          whileHover={{ backgroundColor: '#F9FAFB' }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleCopyText}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                        >
-                          <Copy size={20} style={{ color: 'var(--theme-primary)' }} />
-                          <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Скопировать текст</span>
-                        </motion.button>
-                      )}
+              {isImg && (
+                <motion.button
+                  whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSaveToGallery}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+                >
+                  <Download size={17} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Сохранить в галерею</span>
+                </motion.button>
+              )}
 
-                      {!isMine && (
-                        <motion.button
-                          whileHover={{ backgroundColor: '#F9FAFB' }}
-                          whileTap={{ scale: 0.98 }}
-                          onClick={handleReport}
-                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                        >
-                          <Flag size={20} className="text-[#EF4444]" />
-                          <span className="font-heading font-semibold text-sm text-[#EF4444]">Пожаловаться</span>
-                        </motion.button>
-                      )}
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleMarkUnread}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+              >
+                <EyeOff size={17} style={{ color: 'var(--theme-primary)' }} />
+                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Отметить непрочитанным</span>
+              </motion.button>
 
-                      <motion.button
-                        whileHover={{ backgroundColor: '#F9FAFB' }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleDeleteMessage}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                      >
-                        <Trash2 size={20} className="text-[#EF4444]" />
-                        <span className="font-heading font-semibold text-sm text-[#EF4444]">Удалить</span>
-                      </motion.button>
+              {isText && (
+                <motion.button
+                  whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCopyText}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+                >
+                  <Copy size={17} style={{ color: 'var(--theme-primary)' }} />
+                  <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Скопировать текст</span>
+                </motion.button>
+              )}
 
-                      <motion.button
-                        whileHover={{ backgroundColor: '#F9FAFB' }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleSelectMessage}
-                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                      >
-                        <CheckSquare size={20} style={{ color: 'var(--theme-primary)' }} />
-                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
-                      </motion.button>
-                    </>
-                  );
-                })()}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+              {!isMine && (
+                <motion.button
+                  whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleReport}
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+                >
+                  <Flag size={17} className="text-[#EF4444]" />
+                  <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Пожаловаться</span>
+                </motion.button>
+              )}
+
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleDeleteMessage}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+              >
+                <Trash2 size={17} className="text-[#EF4444]" />
+                <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Удалить</span>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ backgroundColor: 'rgba(0,0,0,0.03)' }}
+                whileTap={{ scale: 0.98 }}
+                onClick={handleSelectMessage}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left"
+              >
+                <CheckSquare size={17} style={{ color: 'var(--theme-primary)' }} />
+                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Выбрать</span>
+              </motion.button>
+            </div>
+          );
+
+          return (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]"
+                onClick={closeMenu}
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.35 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.35 }}
+                transition={{ type: 'spring', damping: 22, stiffness: 380 }}
+                onClick={(e) => e.stopPropagation()}
+                className="fixed z-50 flex flex-col gap-2"
+                style={{
+                  width: MENU_WIDTH,
+                  left,
+                  top: openBelow ? menuAnchor.bottom + 8 : undefined,
+                  bottom: !openBelow ? vh - menuAnchor.top + 8 : undefined,
+                  maxHeight: vh - MENU_MARGIN * 2,
+                  transformOrigin: `${openBelow ? 'top' : 'bottom'} ${menuAnchor.isMe ? 'right' : 'left'}`,
+                  ...noSelect,
+                }}
+              >
+                {openBelow ? (
+                  <>
+                    {reactionsBar}
+                    <div className="overflow-y-auto" style={{ maxHeight: vh - menuAnchor.bottom - MENU_MARGIN * 3 }}>{actionsCard}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="overflow-y-auto" style={{ maxHeight: menuAnchor.top - MENU_MARGIN * 3 }}>{actionsCard}</div>
+                    {reactionsBar}
+                  </>
+                )}
+              </motion.div>
+            </>
+          );
+        })()}
       </AnimatePresence>
 
       {/* Экран пересылки */}
