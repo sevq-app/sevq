@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft, Star, Pencil, Download } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
@@ -211,9 +211,6 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const [reportSent, setReportSent] = useState(false);
   const [messageSelectMode, setMessageSelectMode] = useState(false);
   const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
-  // Подсвеченный пункт всплывающего меню сообщения при скольжении пальцем
-  // по нему без отрыва — как выбор клавиши на клавиатуре смахиванием.
-  const [hoveredMenuKey, setHoveredMenuKey] = useState<string | null>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -225,9 +222,6 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const messageHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const pressedMessageElRef = useRef<HTMLDivElement | null>(null);
-  const hoveredMenuKeyRef = useRef<string | null>(null);
-  const menuDraggingRef = useRef(false);
-  const menuActionsRef = useRef<Record<string, () => void>>({});
 
   const messages = chat?.messages ?? [];
 
@@ -425,72 +419,33 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     if (messageSelectMode) toggleMessageSelect(msg.id);
   };
 
+  // Лёгкая, короткая тактильная вибрация на тап по пункту меню — без звука,
+  // как в iOS. Каждый пункт меню выбирается одним обычным тапом (onClick),
+  // как в Telegram/WhatsApp/MAX — никакой отдельной системы жестов не нужно.
+  const menuHaptic = () => {
+    if (hapticsEnabled) triggerHaptic(10);
+  };
+
   const handleSelectReaction = (emoji: string) => {
+    menuHaptic();
     if (menuMessage) toggleReaction(chat.id, menuMessage.id, emoji);
     closeMenu();
   };
 
-  // Скольжение пальцем по всплывающему меню без отрыва — каждый пункт под
-  // пальцем подсвечивается и слегка вибрирует/щёлкает, как клавиша на
-  // клавиатуре; отпускание над пунктом выполняет его действие. Работает
-  // одинаково и для простого тапа (down+up на одном и том же пункте), и
-  // для скольжения через несколько пунктов подряд.
-  const updateMenuHover = (x: number, y: number) => {
-    const el = document.elementFromPoint(x, y) as HTMLElement | null;
-    const item = el?.closest('[data-menu-key]') as HTMLElement | null;
-    const key = item?.getAttribute('data-menu-key') ?? null;
-    if (hoveredMenuKeyRef.current !== key) {
-      hoveredMenuKeyRef.current = key;
-      setHoveredMenuKey(key);
-      if (key) {
-        if (hapticsEnabled) triggerHaptic(6);
-        if (soundsEnabled) playSound('key');
-      }
-    }
-  };
-
-  // handleMenuPointerMove/Up ниже пересоздаются при каждом рендере, но это
-  // безопасно: за одно "нажатие-скольжение-отпускание" на window вешается
-  // и снимается одна и та же пара функций (обе объявлены в одном и том же
-  // рендере внутри handleMenuPointerDown), а изменяемое состояние живёт в
-  // рефах (hoveredMenuKeyRef, menuActionsRef), которые не зависят от рендера.
-  const handleMenuPointerMove = (e: PointerEvent) => {
-    if (!menuDraggingRef.current) return;
-    updateMenuHover(e.clientX, e.clientY);
-  };
-
-  const handleMenuPointerUp = () => {
-    if (!menuDraggingRef.current) return;
-    menuDraggingRef.current = false;
-    window.removeEventListener('pointermove', handleMenuPointerMove);
-    window.removeEventListener('pointerup', handleMenuPointerUp);
-    const key = hoveredMenuKeyRef.current;
-    hoveredMenuKeyRef.current = null;
-    setHoveredMenuKey(null);
-    if (key) {
-      const action = menuActionsRef.current[key];
-      if (action) action();
-    }
-  };
-
-  const handleMenuPointerDown = (e: ReactPointerEvent) => {
-    menuDraggingRef.current = true;
-    updateMenuHover(e.clientX, e.clientY);
-    window.addEventListener('pointermove', handleMenuPointerMove);
-    window.addEventListener('pointerup', handleMenuPointerUp);
-  };
-
   const handleReply = () => {
+    menuHaptic();
     setReplyTo(menuMessage);
     closeMenu();
   };
 
   const handleForward = () => {
+    menuHaptic();
     setForwardMessage(menuMessage);
     closeMenu();
   };
 
   const handleEditMessage = () => {
+    menuHaptic();
     if (menuMessage) {
       setEditingMessageId(menuMessage.id);
       setInput(menuMessage.text);
@@ -499,11 +454,13 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleMarkUnread = () => {
+    menuHaptic();
     markChatUnread(chat.id);
     closeMenu();
   };
 
   const handleCopyText = async () => {
+    menuHaptic();
     if (menuMessage) {
       try {
         await navigator.clipboard.writeText(menuMessage.text);
@@ -515,6 +472,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleSaveToGallery = () => {
+    menuHaptic();
     if (menuMessage && isImageMessage(menuMessage.text)) {
       const a = document.createElement('a');
       a.href = getImageSrc(menuMessage.text);
@@ -525,6 +483,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleReport = () => {
+    menuHaptic();
     setReportingMessage(menuMessage);
     setReportSent(false);
     closeMenu();
@@ -539,6 +498,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleDeleteMessage = () => {
+    menuHaptic();
     if (menuMessage) {
       deleteMessage(chat.id, menuMessage.id);
     }
@@ -550,6 +510,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleSelectMessage = () => {
+    menuHaptic();
     setMessageSelectMode(true);
     setSelectedMessageIds(menuMessage ? [menuMessage.id] : []);
     closeMenu();
@@ -1359,36 +1320,21 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           const isImg = isImageMessage(menuMessage.text);
           const isMine = menuMessage.senderId === 'me';
 
-          // Карта "ключ пункта меню → действие" — читается на pointerup
-          // унифицированной системой скольжения (см. handleMenuPointerDown).
-          menuActionsRef.current = {
-            edit: handleEditMessage,
-            reply: handleReply,
-            forward: handleForward,
-            save: handleSaveToGallery,
-            markUnread: handleMarkUnread,
-            copy: handleCopyText,
-            report: handleReport,
-            delete: handleDeleteMessage,
-            select: handleSelectMessage,
-            ...Object.fromEntries(reactionEmojis.map((emoji) => [`reaction-${emoji}`, () => handleSelectReaction(emoji)])),
-          };
-
-          const actionRowClass = (key: string) =>
-            `w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left transition-colors ${hoveredMenuKey === key ? 'bg-black/[0.06]' : ''}`;
+          // Каждый пункт — обычная кнопка с onClick, выбирается одним тапом
+          // (как в Telegram/WhatsApp/MAX). Никакой отдельной системы жестов.
+          const actionRowClass = 'w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left';
 
           const reactionsBar = (
             <div key="reactions" className="flex items-center justify-between gap-0.5 px-2 py-1.5 rounded-full" style={glass}>
               {reactionEmojis.map((emoji) => (
-                <motion.div
+                <motion.button
                   key={emoji}
-                  data-menu-key={`reaction-${emoji}`}
-                  animate={{ scale: hoveredMenuKey === `reaction-${emoji}` ? 1.35 : 1 }}
-                  transition={{ type: 'spring', damping: 15, stiffness: 500 }}
+                  whileTap={{ scale: 0.8 }}
+                  onClick={() => handleSelectReaction(emoji)}
                   className="text-lg w-7 h-7 shrink-0 flex items-center justify-center rounded-full"
                 >
                   {emoji}
-                </motion.div>
+                </motion.button>
               ))}
             </div>
           );
@@ -1396,57 +1342,57 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           const actionsCard = (
             <div key="actions" className="rounded-2xl overflow-hidden divide-y divide-black/5" style={glass}>
               {isMine && isText && (
-                <div data-menu-key="edit" className={actionRowClass('edit')}>
+                <motion.button whileTap={{ scale: 0.97 }} onClick={handleEditMessage} className={actionRowClass}>
                   <Pencil size={17} style={{ color: 'var(--theme-primary)' }} />
                   <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Редактировать</span>
-                </div>
+                </motion.button>
               )}
 
-              <div data-menu-key="reply" className={actionRowClass('reply')}>
+              <motion.button whileTap={{ scale: 0.97 }} onClick={handleReply} className={actionRowClass}>
                 <Reply size={17} style={{ color: 'var(--theme-primary)' }} />
                 <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Ответить</span>
-              </div>
+              </motion.button>
 
-              <div data-menu-key="forward" className={actionRowClass('forward')}>
+              <motion.button whileTap={{ scale: 0.97 }} onClick={handleForward} className={actionRowClass}>
                 <Forward size={17} style={{ color: 'var(--theme-primary)' }} />
                 <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Переслать</span>
-              </div>
+              </motion.button>
 
               {isImg && (
-                <div data-menu-key="save" className={actionRowClass('save')}>
+                <motion.button whileTap={{ scale: 0.97 }} onClick={handleSaveToGallery} className={actionRowClass}>
                   <Download size={17} style={{ color: 'var(--theme-primary)' }} />
                   <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Сохранить в галерею</span>
-                </div>
+                </motion.button>
               )}
 
-              <div data-menu-key="markUnread" className={actionRowClass('markUnread')}>
+              <motion.button whileTap={{ scale: 0.97 }} onClick={handleMarkUnread} className={actionRowClass}>
                 <EyeOff size={17} style={{ color: 'var(--theme-primary)' }} />
                 <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Отметить непрочитанным</span>
-              </div>
+              </motion.button>
 
               {isText && (
-                <div data-menu-key="copy" className={actionRowClass('copy')}>
+                <motion.button whileTap={{ scale: 0.97 }} onClick={handleCopyText} className={actionRowClass}>
                   <Copy size={17} style={{ color: 'var(--theme-primary)' }} />
                   <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Скопировать текст</span>
-                </div>
+                </motion.button>
               )}
 
               {!isMine && (
-                <div data-menu-key="report" className={actionRowClass('report')}>
+                <motion.button whileTap={{ scale: 0.97 }} onClick={handleReport} className={actionRowClass}>
                   <Flag size={17} className="text-[#EF4444]" />
                   <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Пожаловаться</span>
-                </div>
+                </motion.button>
               )}
 
-              <div data-menu-key="delete" className={actionRowClass('delete')}>
+              <motion.button whileTap={{ scale: 0.97 }} onClick={handleDeleteMessage} className={actionRowClass}>
                 <Trash2 size={17} className="text-[#EF4444]" />
                 <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Удалить</span>
-              </div>
+              </motion.button>
 
-              <div data-menu-key="select" className={actionRowClass('select')}>
+              <motion.button whileTap={{ scale: 0.97 }} onClick={handleSelectMessage} className={actionRowClass}>
                 <CheckSquare size={17} style={{ color: 'var(--theme-primary)' }} />
                 <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Выбрать</span>
-              </div>
+              </motion.button>
             </div>
           );
 
@@ -1465,7 +1411,6 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 exit={{ opacity: 0, scale: 0.35 }}
                 transition={{ type: 'spring', damping: 22, stiffness: 380 }}
                 onClick={(e) => e.stopPropagation()}
-                onPointerDown={handleMenuPointerDown}
                 className="fixed z-50 flex flex-col gap-2"
                 style={{
                   width: MENU_WIDTH,
@@ -1474,7 +1419,6 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                   bottom: !openBelow ? vh - menuAnchor.top + 8 : undefined,
                   maxHeight: vh - MENU_MARGIN * 2,
                   transformOrigin: `${openBelow ? 'top' : 'bottom'} ${menuAnchor.isMe ? 'right' : 'left'}`,
-                  touchAction: 'none',
                   ...noSelect,
                 }}
               >
