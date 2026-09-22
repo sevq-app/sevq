@@ -40,7 +40,9 @@ export interface Chat {
   unread: number;
   online: boolean;
   isNew?: boolean;
-  favorite?: boolean;
+  /** Системный чат "Избранное" (свои сохранённые сообщения) — не человек,
+   * без статуса "в сети"/"печатает", всегда закреплён первым в списке. */
+  isFavorites?: boolean;
   messages: Message[];
 }
 
@@ -85,7 +87,21 @@ export const stories: Story[] = [
 ];
 
 // Чаты (основа для экранов Chats и Conversation)
+export const FAVORITES_CHAT_ID = 'favorites';
+
 export const chats: Chat[] = [
+  {
+    id: FAVORITES_CHAT_ID,
+    name: 'Избранное',
+    avatarColor: '#6546C7',
+    initials: '',
+    isFavorites: true,
+    lastMessage: 'Сохраняйте сюда важные сообщения',
+    time: '',
+    unread: 0,
+    online: false,
+    messages: [],
+  },
   {
     id: 'c1',
     name: 'Анна Петрова',

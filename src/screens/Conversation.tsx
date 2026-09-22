@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft, Star } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
@@ -197,6 +197,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   }, [isRecording]);
 
   if (!chat) return null;
+  const isFavoritesChat = !!chat.isFavorites;
   const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
 
   const handleSend = () => {
@@ -213,6 +214,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     setInput('');
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
+    if (isFavoritesChat) {
+      setTimeout(() => updateMessageStatus(chat.id, msg.id, 'read'), 300);
+      return;
+    }
     setTimeout(() => {
       updateMessageStatus(chat.id, msg.id, 'delivered');
     }, 500);
@@ -262,6 +267,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     sendMessage(chat.id, msg);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
+    if (isFavoritesChat) {
+      setTimeout(() => updateMessageStatus(chat.id, msg.id, 'read'), 300);
+      return;
+    }
     setTimeout(() => {
       updateMessageStatus(chat.id, msg.id, 'delivered');
     }, 500);
@@ -418,6 +427,11 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       if (soundsEnabled) playSound('send');
       if (hapticsEnabled) triggerHaptic(12);
 
+      if (isFavoritesChat) {
+        setTimeout(() => updateMessageStatus(chat.id, voiceMsg.id, 'read'), 300);
+        return;
+      }
+
       setTimeout(() => {
         updateMessageStatus(chat.id, voiceMsg.id, 'delivered');
       }, 500);
@@ -473,7 +487,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
     setTimeout(() => {
-      updateMessageStatus(chat.id, msg.id, 'delivered');
+      updateMessageStatus(chat.id, msg.id, isFavoritesChat ? 'read' : 'delivered');
     }, 500);
   };
 
@@ -489,35 +503,47 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         >
           <ArrowLeft size={22} />
         </motion.button>
-        <button onClick={onOpenProfile} className="flex items-center gap-3 flex-1 min-w-0 text-left">
-          <Avatar initials={displayInitials} color={chat.avatarColor} size="sm" online={chat.online} />
-          <div className="flex-1 min-w-0">
-            <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
-            <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
-              {isTyping ? (
-                <>
-                  печатает
-                  <TypingDots />
-                </>
-              ) : (
-                <>
-                  {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
-                  {chat.online ? 'в сети' : 'не в сети'}
-                </>
-              )}
-            </p>
+        {isFavoritesChat ? (
+          <div className="flex items-center gap-3 flex-1 min-w-0 text-left">
+            <Avatar initials="" color={chat.avatarColor} size="sm" icon={<Star size={16} fill="white" strokeWidth={0} />} />
+            <div className="flex-1 min-w-0">
+              <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
+              <p className="text-sm font-body text-sevchik-textSecondary">Сохранённые сообщения</p>
+            </div>
           </div>
-        </button>
-        
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          whileHover={{ scale: 1.05 }}
-          onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
-          className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
-          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
-        >
-          <Phone size={22} />
-        </motion.button>
+        ) : (
+          <button onClick={onOpenProfile} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+            <Avatar initials={displayInitials} color={chat.avatarColor} size="sm" online={chat.online} />
+            <div className="flex-1 min-w-0">
+              <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
+              <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
+                {isTyping ? (
+                  <>
+                    печатает
+                    <TypingDots />
+                  </>
+                ) : (
+                  <>
+                    {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
+                    {chat.online ? 'в сети' : 'не в сети'}
+                  </>
+                )}
+              </p>
+            </div>
+          </button>
+        )}
+
+        {!isFavoritesChat && (
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.05 }}
+            onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
+            className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+          >
+            <Phone size={22} />
+          </motion.button>
+        )}
 
         <div className="relative">
           <motion.button

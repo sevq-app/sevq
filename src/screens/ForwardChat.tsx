@@ -1,14 +1,31 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Send, Check } from 'lucide-react';
+import { Search, X, Send, Check, Star } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { useChatStore } from '@/store/chatStore';
 import { getDisplayContact } from '@/lib/contactOverrides';
+import type { Chat } from '@/data/mock';
 
 interface ForwardChatProps {
   excludeChatId: string;
   onClose: () => void;
   onSend: (chatIds: string[]) => void;
+}
+
+function groupAlphabetically(list: Chat[]) {
+  const withNames = list.map((chat) => ({ chat, name: getDisplayContact(chat).name }));
+  withNames.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  const groups: { letter: string; chats: Chat[] }[] = [];
+  for (const { chat, name } of withNames) {
+    const letter = (name[0] || '#').toUpperCase();
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup?.letter === letter) {
+      lastGroup.chats.push(chat);
+    } else {
+      groups.push({ letter, chats: [chat] });
+    }
+  }
+  return groups;
 }
 
 export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps) {
@@ -17,12 +34,21 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
-  const candidates = chats.filter((c) => c.id !== excludeChatId);
-  const topFive = candidates
+  const favoritesChat = chats.find((c) => c.isFavorites && c.id !== excludeChatId);
+  const candidates = chats.filter((c) => c.id !== excludeChatId && !c.isFavorites);
+  const recentFive = candidates
     .slice()
     .sort((a, b) => b.messages.length - a.messages.length)
     .slice(0, 5);
-  const filtered = candidates.filter((c) => c.name.toLowerCase().includes(query.toLowerCase()));
+  const recentIds = new Set(recentFive.map((c) => c.id));
+  const alphabeticalGroups = groupAlphabetically(candidates.filter((c) => !recentIds.has(c.id)));
+
+  const searchPool = chats.filter((c) => c.id !== excludeChatId);
+  const filtered = query
+    ? searchPool
+        .filter((c) => getDisplayContact(c).name.toLowerCase().includes(query.toLowerCase()))
+        .sort((a, b) => getDisplayContact(a).name.localeCompare(getDisplayContact(b).name, 'ru'))
+    : [];
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -88,97 +114,104 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
 
       {/* Список чатов */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28">
-        {/* Быстрый доступ: часто отправляете */}
-        {!query && topFive.length > 0 && (
-          <div className="mb-4">
-            <h2 className="text-xs font-bold text-white/70 uppercase tracking-wider mb-3 ml-1">
-              Часто отправляете
-            </h2>
-            <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
-              {topFive.map((chat) => {
-                const isSelected = selectedIds.includes(chat.id);
-                const { name, initials } = getDisplayContact(chat);
-                return (
-                  <button
-                    key={chat.id}
-                    onClick={() => toggleSelect(chat.id)}
-                    className="flex flex-col items-center gap-1.5 shrink-0 w-16"
-                  >
-                    <div className="relative">
-                      <Avatar initials={initials} color={chat.avatarColor} size="lg" online={chat.online} />
-                      {isSelected && (
-                        <div
-                          className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white"
-                          style={{ background: '#6546C7' }}
-                        >
-                          <Check size={12} className="text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-xs font-body text-white/90 truncate w-full text-center">
-                      {name.split(' ')[0]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        <div className="space-y-2">
-          {filtered.map((chat, i) => {
-            const isSelected = selectedIds.includes(chat.id);
-            const { name, initials } = getDisplayContact(chat);
-            return (
-              <motion.button
+        {query ? (
+          <div className="space-y-2">
+            {filtered.map((chat, i) => (
+              <ChatRow
                 key={chat.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => toggleSelect(chat.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left btn-3d ${
-                  isSelected ? 'ring-2 ring-[#6546C7]' : ''
-                }`}
-                style={{
-                  background: 'rgba(255,255,255,0.65)',
-                  backdropFilter: 'blur(16px)',
-                  WebkitBackdropFilter: 'blur(16px)',
-                  boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
-                }}
-              >
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                    isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
-                  }`}
-                >
-                  {isSelected && (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </div>
+                chat={chat}
+                index={i}
+                isSelected={selectedIds.includes(chat.id)}
+                onToggle={toggleSelect}
+              />
+            ))}
+            {filtered.length === 0 && (
+              <div className="text-center py-12 text-white/80 font-body">
+                Ничего не найдено
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Избранное — закреплено сверху, для быстрого сохранения себе */}
+            {favoritesChat && (
+              <div className="mb-4 space-y-2">
+                <ChatRow
+                  chat={favoritesChat}
+                  index={0}
+                  isSelected={selectedIds.includes(favoritesChat.id)}
+                  onToggle={toggleSelect}
+                />
+              </div>
+            )}
 
-                <Avatar initials={initials} color={chat.avatarColor} size="md" online={chat.online} />
-                <span className="font-heading font-bold text-sevchik-text truncate">{name}</span>
-              </motion.button>
-            );
-          })}
-          {filtered.length === 0 && (
-            <div className="text-center py-12 text-white/80 font-body">
-              Ничего не найдено
-            </div>
-          )}
-        </div>
+            {/* Быстрый доступ: последние контакты */}
+            {recentFive.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-xs font-bold text-white/70 uppercase tracking-wider mb-3 ml-1">
+                  Последние
+                </h2>
+                <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+                  {recentFive.map((chat) => {
+                    const isSelected = selectedIds.includes(chat.id);
+                    const { name, initials } = getDisplayContact(chat);
+                    return (
+                      <button
+                        key={chat.id}
+                        onClick={() => toggleSelect(chat.id)}
+                        className="flex flex-col items-center gap-1.5 shrink-0 w-16"
+                      >
+                        <div className="relative">
+                          <Avatar initials={initials} color={chat.avatarColor} size="lg" online={chat.online} />
+                          {isSelected && (
+                            <div
+                              className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white"
+                              style={{ background: '#6546C7' }}
+                            >
+                              <Check size={12} className="text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs font-body text-white/90 truncate w-full text-center">
+                          {name.split(' ')[0]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Все контакты по алфавиту */}
+            {alphabeticalGroups.length > 0 && (
+              <div>
+                <h2 className="text-xs font-bold text-white/70 uppercase tracking-wider mb-3 ml-1">
+                  Все контакты
+                </h2>
+                <div className="space-y-3">
+                  {alphabeticalGroups.map((group) => (
+                    <div key={group.letter}>
+                      <div className="text-xs font-heading font-bold text-white/60 mb-1.5 ml-1">
+                        {group.letter}
+                      </div>
+                      <div className="space-y-2">
+                        {group.chats.map((chat, i) => (
+                          <ChatRow
+                            key={chat.id}
+                            chat={chat}
+                            index={i}
+                            isSelected={selectedIds.includes(chat.id)}
+                            onToggle={toggleSelect}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Нижняя плашка отправки */}
@@ -250,5 +283,67 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+function ChatRow({
+  chat,
+  index,
+  isSelected,
+  onToggle,
+}: {
+  chat: Chat;
+  index: number;
+  isSelected: boolean;
+  onToggle: (id: string) => void;
+}) {
+  const { name, initials } = getDisplayContact(chat);
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.03 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => onToggle(chat.id)}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left btn-3d ${
+        isSelected ? 'ring-2 ring-[#6546C7]' : ''
+      }`}
+      style={{
+        background: 'rgba(255,255,255,0.65)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
+      }}
+    >
+      <div
+        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
+          isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
+        }`}
+      >
+        {isSelected && (
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </div>
+
+      <Avatar
+        initials={initials}
+        color={chat.avatarColor}
+        size="md"
+        online={chat.online}
+        icon={chat.isFavorites ? <Star size={20} fill="white" strokeWidth={0} /> : undefined}
+      />
+      <span className="font-heading font-bold text-sevchik-text truncate">{name}</span>
+    </motion.button>
   );
 }
