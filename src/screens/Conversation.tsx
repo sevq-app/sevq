@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft, Star } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft, Star, Pencil, Download } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
@@ -61,8 +61,23 @@ function DeliveryTicks({ status, size = 13 }: { status?: DeliveryStatus; size?: 
   return <Check size={size} />;
 }
 
+// Цитата отвечаемого сообщения — показывается внутри пузыря над контентом
+function ReplyQuotePreview({ replyTo, isMe }: { replyTo: NonNullable<Message['replyTo']>; isMe: boolean }) {
+  return (
+    <div
+      className={`mb-1.5 px-2.5 py-1.5 rounded-lg border-l-2 text-xs max-w-full ${isMe ? 'border-white/60 bg-white/10' : 'bg-black/5'}`}
+      style={!isMe ? { borderColor: 'var(--theme-primary)' } : undefined}
+    >
+      <div className="font-heading font-bold truncate" style={{ color: isMe ? 'rgba(255,255,255,0.9)' : 'var(--theme-primary)' }}>
+        {replyTo.senderName}
+      </div>
+      <div className={`truncate ${isMe ? 'text-white/70' : 'text-[var(--text-secondary)]'}`}>{replyTo.text}</div>
+    </div>
+  );
+}
+
 // Компонент голосового сообщения
-function VoiceMessageBubble({ duration, time, isMe, status }: { duration: string; time: string; isMe: boolean; status?: DeliveryStatus }) {
+function VoiceMessageBubble({ duration, time, isMe, status, replyTo }: { duration: string; time: string; isMe: boolean; status?: DeliveryStatus; replyTo?: Message['replyTo'] }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
@@ -80,6 +95,7 @@ function VoiceMessageBubble({ duration, time, isMe, status }: { duration: string
           boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
         }}
       >
+        {replyTo && <ReplyQuotePreview replyTo={replyTo} isMe={isMe} />}
         <div className="flex items-center gap-3">
         {/* Кнопка Play/Pause — белая с цветной иконкой */}
         <motion.button
@@ -152,6 +168,9 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const updateMessageStatus = useChatStore((s) => s.updateMessageStatus);
   const markAllMineRead = useChatStore((s) => s.markAllMineRead);
   const deleteMessage = useChatStore((s) => s.deleteMessage);
+  const deleteMessages = useChatStore((s) => s.deleteMessages);
+  const editMessage = useChatStore((s) => s.editMessage);
+  const markChatUnread = useChatStore((s) => s.markChatUnread);
   const forwardMessageToChats = useChatStore((s) => s.forwardMessageToChats);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -160,8 +179,15 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [menuMessage, setMenuMessage] = useState<Message | null>(null);
   const [forwardMessage, setForwardMessage] = useState<Message | null>(null);
+  const [bulkForwardTexts, setBulkForwardTexts] = useState<string[] | null>(null);
   const [showStickerPanel, setShowStickerPanel] = useState(false);
-  
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [reportingMessage, setReportingMessage] = useState<Message | null>(null);
+  const [reportSent, setReportSent] = useState(false);
+  const [messageSelectMode, setMessageSelectMode] = useState(false);
+  const [selectedMessageIds, setSelectedMessageIds] = useState<string[]>([]);
+
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [showHoldHint, setShowHoldHint] = useState(false);
@@ -200,8 +226,29 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const isFavoritesChat = !!chat.isFavorites;
   const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
 
+  // Снимок цитируемого сообщения на момент отправки — хранится прямо в
+  // новом сообщении (а не по ссылке на id), чтобы цитата не терялась,
+  // если оригинал потом удалят
+  const getReplySnapshot = (): Message['replyTo'] | undefined => {
+    if (!replyTo) return undefined;
+    const senderName = replyTo.senderId === 'me' ? 'Вы' : displayName;
+    let text = replyTo.text;
+    if (isImageMessage(text)) text = '📷 Фото';
+    else if (isVoiceMessage(text)) text = '🎤 Голосовое сообщение';
+    else if (isStickerMessage(text)) text = `${getStickerEmoji(text)} Стикер`;
+    return { text, senderName };
+  };
+
   const handleSend = () => {
     if (!input.trim()) return;
+
+    if (editingMessageId) {
+      editMessage(chat.id, editingMessageId, input.trim());
+      setEditingMessageId(null);
+      setInput('');
+      return;
+    }
+
     const msg: Message = {
       id: `m-${Date.now()}`,
       senderId: 'me',
@@ -209,9 +256,11 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       date: todayIso(),
       status: 'sent',
+      replyTo: getReplySnapshot(),
     };
     sendMessage(chat.id, msg);
     setInput('');
+    setReplyTo(null);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
     if (isFavoritesChat) {
@@ -263,8 +312,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       date: todayIso(),
       status: 'sent',
+      replyTo: getReplySnapshot(),
     };
     sendMessage(chat.id, msg);
+    setReplyTo(null);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
     if (isFavoritesChat) {
@@ -302,9 +353,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     e.target.value = '';
   };
 
-  const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
+  const reactionEmojis = ['👍', '❤️', '😆', '🔥', '😭', '😍', '🤟'];
 
   const handleMessageHoldStart = (msg: Message) => {
+    if (messageSelectMode) return;
     messageHoldTimeoutRef.current = setTimeout(() => {
       setMenuMessage(msg);
     }, 400);
@@ -319,7 +371,12 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
 
   const handleMessageContextMenu = (e: MouseEvent, msg: Message) => {
     e.preventDefault();
+    if (messageSelectMode) return;
     setMenuMessage(msg);
+  };
+
+  const handleMessageClick = (msg: Message) => {
+    if (messageSelectMode) toggleMessageSelect(msg.id);
   };
 
   const handleReaction = () => {
@@ -327,7 +384,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleReply = () => {
-    alert('↩️ Ответ на сообщение будет добавлен позже');
+    setReplyTo(menuMessage);
     setMenuMessage(null);
   };
 
@@ -336,8 +393,16 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     setMenuMessage(null);
   };
 
+  const handleEditMessage = () => {
+    if (menuMessage) {
+      setEditingMessageId(menuMessage.id);
+      setInput(menuMessage.text);
+    }
+    setMenuMessage(null);
+  };
+
   const handleMarkUnread = () => {
-    alert('✉️ Отметка "непрочитанным" будет добавлена позже');
+    markChatUnread(chat.id);
     setMenuMessage(null);
   };
 
@@ -352,9 +417,28 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     setMenuMessage(null);
   };
 
-  const handleReport = () => {
-    alert('🚩 Жалоба будет добавлена позже');
+  const handleSaveToGallery = () => {
+    if (menuMessage && isImageMessage(menuMessage.text)) {
+      const a = document.createElement('a');
+      a.href = getImageSrc(menuMessage.text);
+      a.download = `sevchik-photo-${Date.now()}.png`;
+      a.click();
+    }
     setMenuMessage(null);
+  };
+
+  const handleReport = () => {
+    setReportingMessage(menuMessage);
+    setReportSent(false);
+    setMenuMessage(null);
+  };
+
+  const handleSubmitReport = () => {
+    setReportSent(true);
+    setTimeout(() => {
+      setReportingMessage(null);
+      setReportSent(false);
+    }, 1200);
   };
 
   const handleDeleteMessage = () => {
@@ -364,15 +448,42 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     setMenuMessage(null);
   };
 
+  const toggleMessageSelect = (id: string) => {
+    setSelectedMessageIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+  };
+
   const handleSelectMessage = () => {
-    setForwardMessage(menuMessage);
+    setMessageSelectMode(true);
+    setSelectedMessageIds(menuMessage ? [menuMessage.id] : []);
     setMenuMessage(null);
+  };
+
+  const exitMessageSelectMode = () => {
+    setMessageSelectMode(false);
+    setSelectedMessageIds([]);
+  };
+
+  const handleBulkDelete = () => {
+    deleteMessages(chat.id, selectedMessageIds);
+    exitMessageSelectMode();
+  };
+
+  const handleBulkForward = () => {
+    const texts = messages.filter((m) => selectedMessageIds.includes(m.id)).map((m) => m.text);
+    setBulkForwardTexts(texts);
   };
 
   const handleSendForward = (chatIds: string[]) => {
     if (!forwardMessage) return;
     forwardMessageToChats(chatIds, forwardMessage.text);
     setForwardMessage(null);
+  };
+
+  const handleSendBulkForward = (chatIds: string[]) => {
+    if (!bulkForwardTexts) return;
+    bulkForwardTexts.forEach((text) => forwardMessageToChats(chatIds, text));
+    setBulkForwardTexts(null);
+    exitMessageSelectMode();
   };
 
   const handleMute = (duration: string) => {
@@ -420,8 +531,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
         date: todayIso(),
         status: 'sent',
+        replyTo: getReplySnapshot(),
       };
       sendMessage(chat.id, voiceMsg);
+      setReplyTo(null);
       setIsRecording(false);
       setRecordingTime(0);
       if (soundsEnabled) playSound('send');
@@ -481,8 +594,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       date: todayIso(),
       status: 'sent',
+      replyTo: getReplySnapshot(),
     };
     sendMessage(chat.id, msg);
+    setReplyTo(null);
     setShowStickerPanel(false);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
@@ -494,6 +609,21 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   return (
     <div className="flex flex-col h-full overflow-hidden chat-wallpaper">
       {/* Header */}
+      {messageSelectMode ? (
+        <div className="shrink-0 sticky top-0 z-10 px-4 py-3 flex items-center justify-between gap-3 bg-transparent">
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={exitMessageSelectMode}
+            className="px-4 py-2 rounded-2xl font-heading font-bold text-sm text-white"
+            style={{ background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
+          >
+            Готово
+          </motion.button>
+          <span className="font-heading font-bold text-sm text-sevchik-textSecondary">
+            Выбрано: {selectedMessageIds.length}
+          </span>
+        </div>
+      ) : (
       <div className="shrink-0 sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent">
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
@@ -592,7 +722,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                     whileTap={{ scale: 0.98 }}
                     onClick={() => {
                       setShowMenu(false);
-                      alert('✅ Режим выбора будет добавлен позже');
+                      setMessageSelectMode(true);
+                      setSelectedMessageIds([]);
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3.5 text-left border-b border-[#F3F4F6]"
                   >
@@ -618,9 +749,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           </AnimatePresence>
         </div>
       </div>
+      )}
 
       {/* Messages */}
-      <div className="messages-list flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
+      <div className={`messages-list flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3 ${messageSelectMode ? 'pb-20' : ''}`}>
         {messages.map((msg, i) => {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
@@ -636,16 +768,39 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
               animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
-              className={`flex select-none ${isMe ? 'justify-end' : 'justify-start'}`}
+              className={`relative flex select-none ${isMe ? 'justify-end' : 'justify-start'}`}
               onContextMenu={(e) => handleMessageContextMenu(e, msg)}
               onMouseDown={() => handleMessageHoldStart(msg)}
               onMouseUp={handleMessageHoldEnd}
               onMouseLeave={handleMessageHoldEnd}
               onTouchStart={() => handleMessageHoldStart(msg)}
               onTouchEnd={handleMessageHoldEnd}
+              onClick={() => handleMessageClick(msg)}
             >
+              <AnimatePresence>
+                {messageSelectMode && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className={`absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center border-2 ${isMe ? 'left-0' : 'right-0'}`}
+                    style={{
+                      borderColor: selectedMessageIds.includes(msg.id) ? '#6546C7' : 'rgba(107,114,128,0.4)',
+                      background: selectedMessageIds.includes(msg.id) ? '#6546C7' : 'transparent',
+                    }}
+                  >
+                    {selectedMessageIds.includes(msg.id) && <Check size={14} className="text-white" />}
+                  </motion.div>
+                )}
+              </AnimatePresence>
               {isSticker ? (
                 <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  {msg.replyTo && (
+                    <div className="mb-1 max-w-[75%]">
+                      <ReplyQuotePreview replyTo={msg.replyTo} isMe={false} />
+                    </div>
+                  )}
                   <span className="text-6xl leading-none">{getStickerEmoji(msg.text)}</span>
                   <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-sevchik-textSecondary' : 'text-sevchik-textSecondary'}`}>
                     <span className="text-[11px]">{msg.time}</span>
@@ -653,13 +808,20 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                   </div>
                 </div>
               ) : isVoice ? (
-                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} status={msg.status} />
+                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} status={msg.status} replyTo={msg.replyTo} />
               ) : isImage ? (
-                <div className="relative max-w-[75%] rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.1)' }}>
-                  <img src={getImageSrc(msg.text)} alt="" className="block max-h-[320px] w-auto object-cover" />
-                  <div className="absolute bottom-1.5 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-[11px]" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}>
-                    <span>{msg.time}</span>
-                    {isMe && <DeliveryTicks status={msg.status} size={12} />}
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  {msg.replyTo && (
+                    <div className="mb-1 max-w-[75%] w-full">
+                      <ReplyQuotePreview replyTo={msg.replyTo} isMe={isMe} />
+                    </div>
+                  )}
+                  <div className="relative max-w-[75%] rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.1)' }}>
+                    <img src={getImageSrc(msg.text)} alt="" className="block max-h-[320px] w-auto object-cover" />
+                    <div className="absolute bottom-1.5 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-[11px]" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}>
+                      <span>{msg.time}</span>
+                      {isMe && <DeliveryTicks status={msg.status} size={12} />}
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -671,8 +833,14 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                   }`}
                   style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)' }}
                 >
+                  {msg.replyTo && (
+                    <div className="relative z-10">
+                      <ReplyQuotePreview replyTo={msg.replyTo} isMe={isMe} />
+                    </div>
+                  )}
                   <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
                   <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
+                    {msg.edited && <span className="text-[11px] italic">изменено</span>}
                     <span className="text-[11px]">{msg.time}</span>
                     {isMe && <DeliveryTicks status={msg.status} size={13} />}
                   </div>
@@ -692,12 +860,60 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         )}
       </AnimatePresence>
 
+      {/* Панель ответа/редактирования — над полем ввода */}
+      <AnimatePresence>
+        {!messageSelectMode && (replyTo || editingMessageId) && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="shrink-0 px-4 overflow-hidden"
+            style={{ background: 'rgba(255,255,255,0.65)' }}
+          >
+            <div className="flex items-center gap-2 py-2 border-t border-black/5">
+              {editingMessageId ? (
+                <Pencil size={18} style={{ color: 'var(--theme-primary)' }} className="shrink-0" />
+              ) : (
+                <Reply size={18} style={{ color: 'var(--theme-primary)' }} className="shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-heading font-bold" style={{ color: 'var(--theme-primary)' }}>
+                  {editingMessageId ? 'Редактирование' : (replyTo?.senderId === 'me' ? 'Вы' : displayName)}
+                </div>
+                <div className="text-xs truncate text-sevchik-textSecondary">
+                  {editingMessageId
+                    ? messages.find((m) => m.id === editingMessageId)?.text
+                    : replyTo && (isImageMessage(replyTo.text) ? '📷 Фото' : isVoiceMessage(replyTo.text) ? '🎤 Голосовое сообщение' : isStickerMessage(replyTo.text) ? `${getStickerEmoji(replyTo.text)} Стикер` : replyTo.text)}
+                </div>
+              </div>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  setReplyTo(null);
+                  if (editingMessageId) {
+                    setEditingMessageId(null);
+                    setInput('');
+                  }
+                }}
+                className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sevchik-textSecondary"
+              >
+                <X size={16} />
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Input Panel — стеклянный контейнер статичен и не пересоздаётся,
           чтобы backdrop-filter не «глючил» на iOS Safari во время
-          анимации перехода между состояниями (баг с блюр-артефактом) */}
+          анимации перехода между состояниями (баг с блюр-артефактом).
+          Скрыт в режиме выбора сообщений — вместо него снизу появляется
+          панель массовых действий. */}
       <div
         className="shrink-0 px-4 py-2.5 pb-4"
         style={{
+          display: messageSelectMode ? 'none' : undefined,
           background: 'rgba(255,255,255,0.65)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -1034,77 +1250,112 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               </div>
 
               <div className="space-y-1">
-                <motion.button
-                  whileHover={{ backgroundColor: '#F9FAFB' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleReply}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                >
-                  <Reply size={20} style={{ color: 'var(--theme-primary)' }} />
-                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Ответить</span>
-                </motion.button>
+                {(() => {
+                  const isText = !isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && !isImageMessage(menuMessage.text);
+                  const isImg = isImageMessage(menuMessage.text);
+                  const isMine = menuMessage.senderId === 'me';
+                  return (
+                    <>
+                      {isMine && isText && (
+                        <motion.button
+                          whileHover={{ backgroundColor: '#F9FAFB' }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleEditMessage}
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                        >
+                          <Pencil size={20} style={{ color: 'var(--theme-primary)' }} />
+                          <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Редактировать</span>
+                        </motion.button>
+                      )}
 
-                <motion.button
-                  whileHover={{ backgroundColor: '#F9FAFB' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleForward}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                >
-                  <Forward size={20} style={{ color: 'var(--theme-primary)' }} />
-                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Переслать</span>
-                </motion.button>
+                      <motion.button
+                        whileHover={{ backgroundColor: '#F9FAFB' }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleReply}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                      >
+                        <Reply size={20} style={{ color: 'var(--theme-primary)' }} />
+                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Ответить</span>
+                      </motion.button>
 
-                <motion.button
-                  whileHover={{ backgroundColor: '#F9FAFB' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleMarkUnread}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                >
-                  <EyeOff size={20} style={{ color: 'var(--theme-primary)' }} />
-                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
-                </motion.button>
+                      <motion.button
+                        whileHover={{ backgroundColor: '#F9FAFB' }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleForward}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                      >
+                        <Forward size={20} style={{ color: 'var(--theme-primary)' }} />
+                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Переслать</span>
+                      </motion.button>
 
-                {!isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && !isImageMessage(menuMessage.text) && (
-                  <motion.button
-                    whileHover={{ backgroundColor: '#F9FAFB' }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleCopyText}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                  >
-                    <Copy size={20} style={{ color: 'var(--theme-primary)' }} />
-                    <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Скопировать текст</span>
-                  </motion.button>
-                )}
+                      {isImg && (
+                        <motion.button
+                          whileHover={{ backgroundColor: '#F9FAFB' }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleSaveToGallery}
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                        >
+                          <Download size={20} style={{ color: 'var(--theme-primary)' }} />
+                          <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Сохранить в галерею</span>
+                        </motion.button>
+                      )}
 
-                <motion.button
-                  whileHover={{ backgroundColor: '#F9FAFB' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleReport}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                >
-                  <Flag size={20} className="text-[#EF4444]" />
-                  <span className="font-heading font-semibold text-sm text-[#EF4444]">Пожаловаться</span>
-                </motion.button>
+                      <motion.button
+                        whileHover={{ backgroundColor: '#F9FAFB' }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleMarkUnread}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                      >
+                        <EyeOff size={20} style={{ color: 'var(--theme-primary)' }} />
+                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
+                      </motion.button>
 
-                <motion.button
-                  whileHover={{ backgroundColor: '#F9FAFB' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleDeleteMessage}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                >
-                  <Trash2 size={20} className="text-[#EF4444]" />
-                  <span className="font-heading font-semibold text-sm text-[#EF4444]">Удалить</span>
-                </motion.button>
+                      {isText && (
+                        <motion.button
+                          whileHover={{ backgroundColor: '#F9FAFB' }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleCopyText}
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                        >
+                          <Copy size={20} style={{ color: 'var(--theme-primary)' }} />
+                          <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Скопировать текст</span>
+                        </motion.button>
+                      )}
 
-                <motion.button
-                  whileHover={{ backgroundColor: '#F9FAFB' }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleSelectMessage}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
-                >
-                  <CheckSquare size={20} style={{ color: 'var(--theme-primary)' }} />
-                  <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
-                </motion.button>
+                      {!isMine && (
+                        <motion.button
+                          whileHover={{ backgroundColor: '#F9FAFB' }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={handleReport}
+                          className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                        >
+                          <Flag size={20} className="text-[#EF4444]" />
+                          <span className="font-heading font-semibold text-sm text-[#EF4444]">Пожаловаться</span>
+                        </motion.button>
+                      )}
+
+                      <motion.button
+                        whileHover={{ backgroundColor: '#F9FAFB' }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleDeleteMessage}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                      >
+                        <Trash2 size={20} className="text-[#EF4444]" />
+                        <span className="font-heading font-semibold text-sm text-[#EF4444]">Удалить</span>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ backgroundColor: '#F9FAFB' }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleSelectMessage}
+                        className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left"
+                      >
+                        <CheckSquare size={20} style={{ color: 'var(--theme-primary)' }} />
+                        <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Выбрать</span>
+                      </motion.button>
+                    </>
+                  );
+                })()}
               </div>
             </motion.div>
           </motion.div>
@@ -1119,6 +1370,115 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             onClose={() => setForwardMessage(null)}
             onSend={handleSendForward}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Экран пересылки нескольких выбранных сообщений */}
+      <AnimatePresence>
+        {bulkForwardTexts && (
+          <ForwardChat
+            excludeChatId={chat.id}
+            onClose={() => setBulkForwardTexts(null)}
+            onSend={handleSendBulkForward}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Модальное окно "Пожаловаться" */}
+      <AnimatePresence>
+        {reportingMessage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-6"
+            onClick={() => !reportSent && setReportingMessage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm bg-white rounded-3xl p-6"
+              style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}
+            >
+              {reportSent ? (
+                <div className="flex flex-col items-center gap-3 py-4">
+                  <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: '#4FD3C8' }}>
+                    <Check size={28} className="text-white" />
+                  </div>
+                  <p className="font-heading font-bold text-base text-[#1A1A1A] text-center">Жалоба отправлена</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-3 mb-2">
+                    <Flag size={22} className="text-[#EF4444]" />
+                    <h3 className="font-heading font-extrabold text-lg text-[#1A1A1A]">Пожаловаться</h3>
+                  </div>
+                  <p className="text-sm font-body text-sevchik-textSecondary mb-5">
+                    Сообщение будет отправлено на модерацию. Вы уверены, что хотите пожаловаться на это сообщение?
+                  </p>
+                  <div className="flex gap-2">
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setReportingMessage(null)}
+                      className="flex-1 py-3 rounded-2xl bg-[#F3F4F6] text-[#4B5563] font-heading font-bold text-sm"
+                    >
+                      Отмена
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
+                      onClick={handleSubmitReport}
+                      className="flex-1 py-3 rounded-2xl text-white font-heading font-bold text-sm"
+                      style={{ background: '#EF4444' }}
+                    >
+                      Пожаловаться
+                    </motion.button>
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Нижняя панель действий в режиме выбора сообщений */}
+      <AnimatePresence>
+        {messageSelectMode && (
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+            className="fixed bottom-0 left-0 right-0 z-40 px-6 py-4 flex items-center justify-around"
+            style={{
+              background: 'rgba(255,255,255,0.85)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              boxShadow: '0 -4px 16px rgba(15,23,42,0.08)',
+            }}
+          >
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              disabled={selectedMessageIds.length === 0}
+              onClick={handleBulkForward}
+              className="flex flex-col items-center gap-1 disabled:opacity-40"
+            >
+              <Forward size={22} style={{ color: 'var(--theme-primary)' }} />
+              <span className="text-xs font-heading font-semibold text-[#1A1A1A]">Переслать</span>
+            </motion.button>
+
+            <motion.button
+              whileTap={{ scale: 0.92 }}
+              disabled={selectedMessageIds.length === 0}
+              onClick={handleBulkDelete}
+              className="flex flex-col items-center gap-1 disabled:opacity-40"
+            >
+              <Trash2 size={22} className="text-[#EF4444]" />
+              <span className="text-xs font-heading font-semibold text-[#EF4444]">Удалить</span>
+            </motion.button>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
