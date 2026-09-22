@@ -229,10 +229,10 @@ export const searchResults: SearchResult[] = [
 
 // Данные друзей/контактов (для экрана "Начать общение" и Contacts)
 export const friendsData = [
-  { id: 'f1', name: 'Анна Петрова', handle: '@anna_p', avatarColor: '#FF9848', initials: 'АП', status: 'В сети', online: true },
-  { id: 'f2', name: 'Миша Иванов', handle: '@misha_iv', avatarColor: '#4FD3C8', initials: 'МИ', status: 'В сети', online: true },
-  { id: 'f3', name: 'Лёша Кузнецов', handle: '@lesha_k', avatarColor: '#4ECDC4', initials: 'ЛК', status: 'В сети', online: true },
-  { id: 'f4', name: 'Никита Волков', handle: '@nikita_v', avatarColor: '#A78BFA', initials: 'НВ', status: 'В сети', online: true },
-  { id: 'f5', name: 'Оля Зайцева', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
-  { id: 'f6', name: 'Катя Сидорова', handle: '@kate_sid', avatarColor: '#FF6B6B', initials: 'КС', status: 'Был(а) 2 ч назад', online: false },
+  { id: 'f1', name: 'Анна Петрова', phone: '+7 900 123-45-67', handle: '@anna_p', avatarColor: '#FF9848', initials: 'АП', status: 'В сети', online: true },
+  { id: 'f2', name: 'Миша Иванов', phone: '+7 900 234-56-78', handle: '@misha_iv', avatarColor: '#4FD3C8', initials: 'МИ', status: 'В сети', online: true },
+  { id: 'f3', name: 'Лёша Кузнецов', phone: '+7 900 345-67-89', handle: '@lesha_k', avatarColor: '#4ECDC4', initials: 'ЛК', status: 'В сети', online: true },
+  { id: 'f4', name: 'Никита Волков', phone: '+7 900 456-78-90', handle: '@nikita_v', avatarColor: '#A78BFA', initials: 'НВ', status: 'В сети', online: true },
+  { id: 'f5', name: 'Оля Зайцева', phone: '+7 900 567-89-01', handle: '@olya_z', avatarColor: '#FF9848', initials: 'ОЗ', status: 'Был(а) 30 мин назад', online: false },
+  { id: 'f6', name: 'Катя Сидорова', phone: '+7 900 678-90-12', handle: '@kate_sid', avatarColor: '#FF6B6B', initials: 'КС', status: 'Был(а) 2 ч назад', online: false },
 ];

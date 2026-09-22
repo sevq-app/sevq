@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star } from 'lucide-react';
+import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star, Loader2 } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
 import { previewText } from '@/lib/messagePreview';
+import { getOrCreateDirectChat, searchProfiles, type RemoteProfile } from '@/lib/messagingService';
+import type { Chat } from '@/data/mock';
 
 interface ChatsProps {
   onOpenChat: (chatId: string) => void;
@@ -13,11 +15,22 @@ interface ChatsProps {
   fontSize: number;
 }
 
+function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
 export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProps) {
   const [query, setQuery] = useState('');
+  const [profileResults, setProfileResults] = useState<RemoteProfile[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(false);
+  const [openingProfileId, setOpeningProfileId] = useState<string | null>(null);
   const chats = useChatStore((s) => s.chats);
   const markChatsRead = useChatStore((s) => s.markChatsRead);
   const deleteChats = useChatStore((s) => s.deleteChats);
+  const upsertRealChat = useChatStore((s) => s.upsertRealChat);
   const [showMenu, setShowMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -35,6 +48,34 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
     const t = setTimeout(() => setCardsBlurred(true), 200);
     return () => clearTimeout(t);
   }, [selectMode]);
+
+  useEffect(() => {
+    const searchQuery = query.trim();
+    if (!searchQuery) {
+      setProfileResults([]);
+      setProfilesLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setProfilesLoading(true);
+    const timer = window.setTimeout(async () => {
+      try {
+        const found = await searchProfiles(searchQuery);
+        if (!cancelled) setProfileResults(found);
+      } catch (error) {
+        console.error(error);
+        if (!cancelled) setProfileResults([]);
+      } finally {
+        if (!cancelled) setProfilesLoading(false);
+      }
+    }, 400);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [query]);
 
   // Чат "Избранное" всегда закреплён первым, независимо от порядка в сторе
   const filtered = chats
@@ -62,6 +103,34 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
   const deleteSelected = () => {
     deleteChats(selectedIds);
     exitSelectMode();
+  };
+
+  const openProfileChat = async (profile: RemoteProfile) => {
+    setOpeningProfileId(profile.id);
+    try {
+      const remoteChatId = await getOrCreateDirectChat(profile.id);
+      const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
+      const chat: Chat = {
+        id: `real-${remoteChatId}`,
+        name,
+        avatarColor: '#6546C7',
+        initials: initialsOf(name),
+        lastMessage: '',
+        time: '',
+        unread: 0,
+        online: false,
+        isReal: true,
+        remoteChatId,
+        remoteUserId: profile.id,
+        messages: [],
+      };
+      upsertRealChat(chat);
+      onOpenChat(chat.id);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setOpeningProfileId(null);
+    }
   };
 
   return (
@@ -171,7 +240,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Люди, группы и сообщения"
+            placeholder="Чаты, люди и @никнеймы"
             className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
             style={{
               background: 'rgba(255,152,72,0.65)',
@@ -185,6 +254,39 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
 
       {/* Список чатов */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
+        {!selectMode && query.trim() && (profilesLoading || profileResults.length > 0) && (
+          <div className="mb-4">
+            <h2 className="mb-2 ml-1 text-xs font-bold uppercase tracking-wider text-sevchik-textSecondary">Пользователи</h2>
+            <div className="overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
+              {profilesLoading && profileResults.length === 0 ? (
+                <div className="flex items-center justify-center gap-2 px-4 py-5 text-sm font-body text-sevchik-textSecondary">
+                  <Loader2 size={16} className="animate-spin" /> Ищем пользователей...
+                </div>
+              ) : (
+                profileResults.map((profile, index) => {
+                  const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
+                  const details = [profile.username && `@${profile.username}`, profile.phone].filter(Boolean).join(' · ');
+                  return (
+                    <motion.button
+                      key={profile.id}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => openProfileChat(profile)}
+                      disabled={openingProfileId === profile.id}
+                      className={`flex w-full items-center gap-4 px-4 py-3 text-left disabled:opacity-60 ${index !== profileResults.length - 1 ? 'border-b border-[#F3F4F6]' : ''}`}
+                    >
+                      <Avatar initials={initialsOf(name)} color="#6546C7" size="lg" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-heading font-bold text-sevchik-text">{name}</p>
+                        {details && <p className="truncate text-xs font-body text-sevchik-textSecondary">{details}</p>}
+                      </div>
+                      {openingProfileId === profile.id && <Loader2 size={18} className="animate-spin text-sevchik-purple" />}
+                    </motion.button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
         <div className="space-y-3">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);
