@@ -30,6 +30,7 @@ export interface Message {
   status?: DeliveryStatus;
   edited?: boolean;
   replyTo?: { text: string; senderName: string };
+  reaction?: string;
 }
 
 export interface Chat {

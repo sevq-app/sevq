@@ -18,6 +18,7 @@ interface ChatStore {
   deleteMessage: (chatId: string, messageId: string) => void;
   deleteMessages: (chatId: string, messageIds: string[]) => void;
   editMessage: (chatId: string, messageId: string, newText: string) => void;
+  toggleReaction: (chatId: string, messageId: string, emoji: string) => void;
   markChatsRead: (chatIds: string[]) => void;
   markChatUnread: (chatId: string) => void;
   deleteChats: (chatIds: string[]) => void;
@@ -69,6 +70,21 @@ export const useChatStore = create<ChatStore>((set) => ({
       chats: state.chats.map((c) =>
         c.id === chatId
           ? { ...c, messages: c.messages.map((m) => (m.id === messageId ? { ...m, text: newText, edited: true } : m)) }
+          : c
+      ),
+    })),
+
+  // Повторный тап той же реакцией снимает её — как обычно в мессенджерах
+  toggleReaction: (chatId, messageId, emoji) =>
+    set((state) => ({
+      chats: state.chats.map((c) =>
+        c.id === chatId
+          ? {
+              ...c,
+              messages: c.messages.map((m) =>
+                m.id === messageId ? { ...m, reaction: m.reaction === emoji ? undefined : emoji } : m
+              ),
+            }
           : c
       ),
     })),
