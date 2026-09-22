@@ -32,6 +32,47 @@ function playTone(ctx: AudioContext, freq: number, startTime: number, duration: 
   osc.stop(startTime + duration + 0.02);
 }
 
+/**
+ * Тихий тон с нисходящей частотой и нарастающим приглушением — ощущение,
+ * что звук "улетает от нас" (для отправленного сообщения). Частота
+ * плавно едет вниз, а lowpass-фильтр закрывается к хвосту, будто звук
+ * удаляется и глохнет вдалеке.
+ */
+function playDepartingTone(
+  ctx: AudioContext,
+  startTime: number,
+  freqStart: number,
+  freqEnd: number,
+  duration: number,
+  attack: number,
+  decayTau: number,
+  peak: number,
+  filterStart: number,
+  filterEnd: number
+) {
+  const osc = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freqStart, startTime);
+  osc.frequency.linearRampToValueAtTime(freqEnd, startTime + duration);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(filterStart, startTime);
+  filter.frequency.linearRampToValueAtTime(filterEnd, startTime + duration);
+
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.linearRampToValueAtTime(peak, startTime + attack);
+  gain.gain.setTargetAtTime(0.0001, startTime + attack, decayTau);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.1);
+}
+
 export type SoundKind = 'send' | 'receive' | 'tap' | 'key';
 
 /** Короткий (<0.5с), тихий и приятный звук. Не громче, чем нужно для лёгкого фидбэка. */
@@ -42,9 +83,9 @@ export function playSound(kind: SoundKind) {
     const now = ctx.currentTime;
     switch (kind) {
       case 'send':
-        // мягкий восходящий "поп"
-        playTone(ctx, 660, now, 0.09, 0.06);
-        playTone(ctx, 880, now + 0.06, 0.1, 0.05);
+        // тихий, тёплый тон, "улетающий" вниз и глохнущий — ощущение,
+        // что сообщение уходит от нас (в отличие от входящего)
+        playDepartingTone(ctx, now, 210, 130, 0.22, 0.02, 0.075, 0.14, 2600, 800);
         break;
       case 'receive':
         // мягкий двухтональный "дзынь"
