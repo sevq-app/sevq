@@ -118,7 +118,7 @@ function playMuffledTone(
   lfo.stop(startTime + duration + 0.1);
 }
 
-export type SoundKind = 'send' | 'receive' | 'tap' | 'key';
+export type SoundKind = 'send' | 'receive' | 'tap';
 
 /** Короткий (<0.5с), тихий и приятный звук. Не громче, чем нужно для лёгкого фидбэка. */
 export function playSound(kind: SoundKind) {
@@ -134,9 +134,6 @@ export function playSound(kind: SoundKind) {
       case 'receive':
         // тихий приглушённый тон с мягкой атакой — G3-a
         playMuffledTone(ctx, now, 145, 0.22, 0.025, 0.075, 0.13, 1500);
-        break;
-      case 'key':
-        playTone(ctx, 1000, now, 0.02, 0.02);
         break;
       case 'tap':
       default:
