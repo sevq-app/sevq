@@ -33,8 +33,49 @@ function playTone(ctx: AudioContext, freq: number, startTime: number, duration: 
 }
 
 /**
+ * Тихий тон с нисходящей частотой и нарастающим приглушением — ощущение,
+ * что звук "улетает от нас" (для отправленного сообщения). Частота
+ * плавно едет вниз, а lowpass-фильтр закрывается к хвосту, будто звук
+ * удаляется и глохнет вдалеке.
+ */
+function playDepartingTone(
+  ctx: AudioContext,
+  startTime: number,
+  freqStart: number,
+  freqEnd: number,
+  duration: number,
+  attack: number,
+  decayTau: number,
+  peak: number,
+  filterStart: number,
+  filterEnd: number
+) {
+  const osc = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freqStart, startTime);
+  osc.frequency.linearRampToValueAtTime(freqEnd, startTime + duration);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(filterStart, startTime);
+  filter.frequency.linearRampToValueAtTime(filterEnd, startTime + duration);
+
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.linearRampToValueAtTime(peak, startTime + attack);
+  gain.gain.setTargetAtTime(0.0001, startTime + attack, decayTau);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.1);
+}
+
+/**
  * Тихий приглушённый тон с лёгким вибрато — мягкий, "войлочный" звук
- * без резких верхних частот (используется для отправки сообщения).
+ * без резких верхних частот (используется для входящего сообщения).
  */
 function playMuffledTone(
   ctx: AudioContext,
@@ -87,13 +128,12 @@ export function playSound(kind: SoundKind) {
     const now = ctx.currentTime;
     switch (kind) {
       case 'send':
-        // тихий приглушённый тон с мягкой атакой — вариант G3-a
-        playMuffledTone(ctx, now, 145, 0.22, 0.025, 0.075, 0.13, 1500);
+        // тихий, тёплый тон, "улетающий" вниз и глохнущий — H1
+        playDepartingTone(ctx, now, 210, 130, 0.22, 0.02, 0.075, 0.14, 2600, 800);
         break;
       case 'receive':
-        // мягкий двухтональный "дзынь"
-        playTone(ctx, 520, now, 0.12, 0.05);
-        playTone(ctx, 780, now + 0.08, 0.14, 0.045);
+        // тихий приглушённый тон с мягкой атакой — G3-a
+        playMuffledTone(ctx, now, 145, 0.22, 0.025, 0.075, 0.13, 1500);
         break;
       case 'key':
         playTone(ctx, 1000, now, 0.02, 0.02);
