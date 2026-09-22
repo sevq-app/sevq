@@ -68,7 +68,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
       </div>
 
       {/* Список чатов */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28">
         <div className="space-y-2">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);

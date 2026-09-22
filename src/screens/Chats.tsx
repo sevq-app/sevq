@@ -169,7 +169,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
       </div>
 
       {/* Список чатов */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
         <div className="space-y-3">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);

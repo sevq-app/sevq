@@ -64,7 +64,7 @@ export function StartChat({ onBack }: StartChatProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0 relative">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0 relative">
         <div className="max-w-2xl mx-auto pt-2">
           {/* Action buttons */}
           <div className="space-y-2 mb-6">

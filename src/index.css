@@ -67,6 +67,16 @@
   }
 }
 
+/* Плавный momentum-скролл (iOS) и защита от scroll-chaining на всех
+   прокручиваемых контейнерах приложения — не позволяет свайпу "пробить"
+   границу контейнера и утащить за собой родительский скролл, из-за чего
+   скролл иногда как будто "не долистывает" до самого верха/низа. */
+.overflow-y-auto,
+.overflow-auto {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

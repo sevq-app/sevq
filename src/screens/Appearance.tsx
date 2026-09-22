@@ -74,7 +74,7 @@ export function Appearance({
         <h1 className="font-heading font-bold text-lg text-sevchik-text">Оформление</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6 max-w-2xl mx-auto w-full">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-6 max-w-2xl mx-auto w-full">
         {/* Размер шрифта */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

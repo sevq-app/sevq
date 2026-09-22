@@ -160,7 +160,7 @@ function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="flex-1 overflow-hidden"
+            className="flex-1 min-h-0 overflow-hidden"
           >
             {screen === 'chats' && (
               <Chats
