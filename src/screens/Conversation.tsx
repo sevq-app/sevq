@@ -4,13 +4,13 @@ import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, 
 import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
-import { chats } from '@/data/mock';
-import type { Chat, Message, DeliveryStatus } from '@/data/mock';
+import type { Message, DeliveryStatus } from '@/data/mock';
 import { playSound, triggerHaptic } from '@/lib/feedback';
 import { getDisplayContact } from '@/lib/contactOverrides';
+import { useChatStore } from '@/store/chatStore';
 
 interface ConversationProps {
-  chat: Chat;
+  chatId: string;
   onBack: () => void;
   onOpenProfile: () => void;
   fontSize: number;
@@ -146,9 +146,13 @@ function TypingDots() {
   );
 }
 
-export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
-  const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
-  const [messages, setMessages] = useState<Message[]>(() => [...chat.messages]);
+export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
+  const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
+  const sendMessage = useChatStore((s) => s.sendMessage);
+  const updateMessageStatus = useChatStore((s) => s.updateMessageStatus);
+  const markAllMineRead = useChatStore((s) => s.markAllMineRead);
+  const deleteMessage = useChatStore((s) => s.deleteMessage);
+  const forwardMessageToChats = useChatStore((s) => s.forwardMessageToChats);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -168,16 +172,11 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
   const messageHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
+  const messages = chat?.messages ?? [];
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
-
-  // Синхронизируем историю обратно в общий объект чата (переприсваиванием
-  // ссылки, а не мутацией), чтобы другие экраны (профиль контакта,
-  // медиафайлы) видели актуальные сообщения этой сессии
-  useEffect(() => {
-    chat.messages = messages;
-  }, [messages, chat]);
 
   useEffect(() => {
     if (isRecording) {
@@ -197,6 +196,9 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
     };
   }, [isRecording]);
 
+  if (!chat) return null;
+  const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
+
   const handleSend = () => {
     if (!input.trim()) return;
     const msg: Message = {
@@ -207,17 +209,17 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
       date: todayIso(),
       status: 'sent',
     };
-    setMessages(prev => [...prev, msg]);
+    sendMessage(chat.id, msg);
     setInput('');
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
     setTimeout(() => {
-      setMessages(prev => prev.map(m => (m.id === msg.id ? { ...m, status: 'delivered' } : m)));
+      updateMessageStatus(chat.id, msg.id, 'delivered');
     }, 500);
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
-      setMessages(prev => prev.map(m => (m.senderId === 'me' ? { ...m, status: 'read' } : m)));
+      markAllMineRead(chat.id);
       const reply: Message = {
         id: `m-${Date.now()}-r`,
         senderId: chat.id,
@@ -225,7 +227,7 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
         date: todayIso(),
       };
-      setMessages(prev => [...prev, reply]);
+      sendMessage(chat.id, reply);
       if (soundsEnabled) playSound('receive');
       if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
     }, 1500);
@@ -257,16 +259,16 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
       date: todayIso(),
       status: 'sent',
     };
-    setMessages(prev => [...prev, msg]);
+    sendMessage(chat.id, msg);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
     setTimeout(() => {
-      setMessages(prev => prev.map(m => (m.id === msg.id ? { ...m, status: 'delivered' } : m)));
+      updateMessageStatus(chat.id, msg.id, 'delivered');
     }, 500);
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
-      setMessages(prev => prev.map(m => (m.senderId === 'me' ? { ...m, status: 'read' } : m)));
+      markAllMineRead(chat.id);
       const reply: Message = {
         id: `img-${Date.now()}-r`,
         senderId: chat.id,
@@ -274,7 +276,7 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
         date: todayIso(),
       };
-      setMessages(prev => [...prev, reply]);
+      sendMessage(chat.id, reply);
       if (soundsEnabled) playSound('receive');
       if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
     }, 1500);
@@ -348,7 +350,7 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
 
   const handleDeleteMessage = () => {
     if (menuMessage) {
-      setMessages(prev => prev.filter(m => m.id !== menuMessage.id));
+      deleteMessage(chat.id, menuMessage.id);
     }
     setMenuMessage(null);
   };
@@ -360,19 +362,7 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
 
   const handleSendForward = (chatIds: string[]) => {
     if (!forwardMessage) return;
-    chatIds.forEach((chatId) => {
-      const target = chats.find((c) => c.id === chatId);
-      if (target) {
-        target.messages.push({
-          id: `fwd-${Date.now()}-${chatId}`,
-          senderId: 'me',
-          text: forwardMessage.text,
-          time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
-          date: todayIso(),
-          status: 'sent',
-        });
-      }
-    });
+    forwardMessageToChats(chatIds, forwardMessage.text);
     setForwardMessage(null);
   };
 
@@ -422,20 +412,20 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
         date: todayIso(),
         status: 'sent',
       };
-      setMessages(prev => [...prev, voiceMsg]);
+      sendMessage(chat.id, voiceMsg);
       setIsRecording(false);
       setRecordingTime(0);
       if (soundsEnabled) playSound('send');
       if (hapticsEnabled) triggerHaptic(12);
 
       setTimeout(() => {
-        setMessages(prev => prev.map(m => (m.id === voiceMsg.id ? { ...m, status: 'delivered' } : m)));
+        updateMessageStatus(chat.id, voiceMsg.id, 'delivered');
       }, 500);
 
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
-        setMessages(prev => prev.map(m => (m.senderId === 'me' ? { ...m, status: 'read' } : m)));
+        markAllMineRead(chat.id);
         const reply: Message = {
           id: `voice-${Date.now()}-r`,
           senderId: chat.id,
@@ -443,7 +433,7 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
           time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
           date: todayIso(),
         };
-        setMessages(prev => [...prev, reply]);
+        sendMessage(chat.id, reply);
         if (soundsEnabled) playSound('receive');
         if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
       }, 1500);
@@ -478,12 +468,12 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
       date: todayIso(),
       status: 'sent',
     };
-    setMessages((prev) => [...prev, msg]);
+    sendMessage(chat.id, msg);
     setShowStickerPanel(false);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
     setTimeout(() => {
-      setMessages(prev => prev.map(m => (m.id === msg.id ? { ...m, status: 'delivered' } : m)));
+      updateMessageStatus(chat.id, msg.id, 'delivered');
     }, 500);
   };
 

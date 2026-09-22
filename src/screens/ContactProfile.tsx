@@ -2,12 +2,12 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Pencil, Phone, Video, Bell, BellOff, Search, Image, Ban, Trash2, ChevronRight } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { searchResults, friendsData } from '@/data/mock';
-import type { Chat } from '@/data/mock';
 import { useState } from 'react';
 import { getContactOverride, getDisplayContact } from '@/lib/contactOverrides';
+import { useChatStore } from '@/store/chatStore';
 
 interface ContactProfileProps {
-  chat: Chat;
+  chatId: string;
   onBack: () => void;
   onEdit: () => void;
   onOpenMedia: () => void;
@@ -18,8 +18,10 @@ function findContactMeta(name: string) {
   return all.find((c) => c.name === name);
 }
 
-export function ContactProfile({ chat, onBack, onEdit, onOpenMedia }: ContactProfileProps) {
+export function ContactProfile({ chatId, onBack, onEdit, onOpenMedia }: ContactProfileProps) {
+  const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
   const [isMuted, setIsMuted] = useState(false);
+  if (!chat) return null;
   const override = getContactOverride(chat.id);
   const { name: displayName, initials: displayInitials } = getDisplayContact(chat, override);
   const meta = findContactMeta(chat.name);

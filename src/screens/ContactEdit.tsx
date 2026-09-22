@@ -1,20 +1,23 @@
 import { useState, type ReactNode } from 'react';
 import { ArrowLeft, User as UserIcon, Phone, MessageSquare } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
-import type { Chat } from '@/data/mock';
 import { getContactOverride, saveContactOverride, getDisplayContact } from '@/lib/contactOverrides';
+import { useChatStore } from '@/store/chatStore';
 
 interface ContactEditProps {
-  chat: Chat;
+  chatId: string;
   onBack: () => void;
 }
 
-export function ContactEdit({ chat, onBack }: ContactEditProps) {
-  const saved = getContactOverride(chat.id);
-  const [name, setName] = useState(saved.name || chat.name);
+export function ContactEdit({ chatId, onBack }: ContactEditProps) {
+  const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
+  const saved = getContactOverride(chatId);
+  const [name, setName] = useState(saved.name || chat?.name || '');
   const [phone, setPhone] = useState(saved.phone || '');
   const [note, setNote] = useState(saved.note || '');
   const [saving, setSaving] = useState(false);
+
+  if (!chat) return null;
 
   const { initials: previewInitials } = getDisplayContact(chat, { name, phone, note });
 

@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Image as ImageIcon, X } from 'lucide-react';
-import type { Chat } from '@/data/mock';
+import { useChatStore } from '@/store/chatStore';
 
 interface MediaGalleryProps {
-  chat: Chat;
+  chatId: string;
   onBack: () => void;
 }
 
-export function MediaGallery({ chat, onBack }: MediaGalleryProps) {
+export function MediaGallery({ chatId, onBack }: MediaGalleryProps) {
+  const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
   const [selected, setSelected] = useState<string | null>(null);
+  if (!chat) return null;
   const images = chat.messages.filter((m) => m.text.startsWith('image:')).map((m) => m.text.replace('image:', ''));
 
   return (
