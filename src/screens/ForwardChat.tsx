@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Send } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
-import { chats } from '@/data/mock';
+import { useChatStore } from '@/store/chatStore';
 
 interface ForwardChatProps {
   excludeChatId: string;
@@ -11,6 +11,7 @@ interface ForwardChatProps {
 }
 
 export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps) {
+  const chats = useChatStore((s) => s.chats);
   const [query, setQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);

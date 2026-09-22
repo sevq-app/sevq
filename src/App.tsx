@@ -11,21 +11,25 @@ import { AboutMe } from '@/screens/AboutMe';
 import { Photos } from '@/screens/Photos';
 import { MyGroups } from '@/screens/MyGroups';
 import { Group } from '@/screens/Group';
+import { ContactProfile } from '@/screens/ContactProfile';
+import { ContactEdit } from '@/screens/ContactEdit';
+import { MediaGallery } from '@/screens/MediaGallery';
 import { Search } from '@/screens/Search';
 import { Settings } from '@/screens/Settings';
 import { Appearance } from '@/screens/Appearance';
 import { Login } from '@/screens/Login';
-import type { Chat, Screen } from '@/data/mock';
-import { chats } from '@/data/mock';
+import type { Screen } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
+import { useChatStore } from '@/store/chatStore';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [profileData, setProfileData] = useState<any>({});
   const [screen, setScreen] = useState<Screen>('chats');
-  const [activeChat, setActiveChat] = useState<Chat | null>(null);
+  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const chats = useChatStore((s) => s.chats);
   const [fontSize, setFontSize] = useState<number>(16);
   const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => {
     const saved = localStorage.getItem('sevchik_themeMode');
@@ -101,15 +105,15 @@ function App() {
     localStorage.setItem('sevchik_haptics', String(hapticsEnabled));
   }, [hapticsEnabled]);
 
-  const handleOpenChat = (chat: Chat) => {
-    setActiveChat(chat);
+  const handleOpenChat = (chatId: string) => {
+    setActiveChatId(chatId);
     setScreen('conversation');
   };
 
   const handleWriteToName = (name: string) => {
     const chat = chats.find((c) => c.name === name);
     if (chat) {
-      setActiveChat(chat);
+      setActiveChatId(chat.id);
       setScreen('conversation');
     }
   };
@@ -127,14 +131,14 @@ function App() {
     setCurrentUser(null);
     setProfileData({});
     setScreen('chats');
-    setActiveChat(null);
+    setActiveChatId(null);
   };
 
   const handleTabNavigate = (tab: Screen) => {
     setScreen(tab);
   };
 
-  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group';
+  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group' && screen !== 'contact-profile' && screen !== 'contact-edit' && screen !== 'media-gallery';
 
   if (authLoading) {
     return (
@@ -169,14 +173,29 @@ function App() {
                 fontSize={fontSize}
               />
             )}
-            {screen === 'conversation' && activeChat && (
+            {screen === 'conversation' && activeChatId && (
               <Conversation
-                chat={activeChat}
+                chatId={activeChatId}
                 onBack={() => setScreen('chats')}
+                onOpenProfile={() => setScreen('contact-profile')}
                 fontSize={fontSize}
                 soundsEnabled={soundsEnabled}
                 hapticsEnabled={hapticsEnabled}
               />
+            )}
+            {screen === 'contact-profile' && activeChatId && (
+              <ContactProfile
+                chatId={activeChatId}
+                onBack={() => setScreen('conversation')}
+                onEdit={() => setScreen('contact-edit')}
+                onOpenMedia={() => setScreen('media-gallery')}
+              />
+            )}
+            {screen === 'contact-edit' && activeChatId && (
+              <ContactEdit chatId={activeChatId} onBack={() => setScreen('contact-profile')} />
+            )}
+            {screen === 'media-gallery' && activeChatId && (
+              <MediaGallery chatId={activeChatId} onBack={() => setScreen('contact-profile')} />
             )}
             {screen === 'contacts' && <Friends onWriteMessage={handleWriteToName} />}
             {screen === 'calls' && <Calls onNavigate={setScreen} />}

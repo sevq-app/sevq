@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
-import { chats as initialChats } from '@/data/mock';
-import type { Chat } from '@/data/mock';
+import { getDisplayContact } from '@/lib/contactOverrides';
+import { useChatStore } from '@/store/chatStore';
 
 interface ChatsProps {
-  onOpenChat: (chat: Chat) => void;
+  onOpenChat: (chatId: string) => void;
   onStartChat?: () => void;
   grayMode: boolean;
   fontSize: number;
@@ -14,7 +14,9 @@ interface ChatsProps {
 
 export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProps) {
   const [query, setQuery] = useState('');
-  const [chats, setChats] = useState(initialChats);
+  const chats = useChatStore((s) => s.chats);
+  const markChatsRead = useChatStore((s) => s.markChatsRead);
+  const deleteChats = useChatStore((s) => s.deleteChats);
   const [showMenu, setShowMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -36,16 +38,12 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
   };
 
   const markAllRead = () => {
-    setChats((prev) =>
-      prev.map((c) =>
-        selectedIds.includes(c.id) ? { ...c, unread: 0 } : c
-      )
-    );
+    markChatsRead(selectedIds);
     exitSelectMode();
   };
 
   const deleteSelected = () => {
-    setChats((prev) => prev.filter((c) => !selectedIds.includes(c.id)));
+    deleteChats(selectedIds);
     exitSelectMode();
   };
 
@@ -173,6 +171,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         <div className="space-y-3">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);
+            const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
             return (
               <motion.button
                 key={chat.id}
@@ -185,7 +184,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   if (selectMode) {
                     toggleSelect(chat.id);
                   } else {
-                    onOpenChat(chat);
+                    onOpenChat(chat.id);
                   }
                 }}
                 className={`w-full h-24 flex items-center gap-4 px-4 py-4 rounded-2xl text-left btn-3d ${
@@ -225,7 +224,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 )}
 
                 <Avatar
-                  initials={chat.initials}
+                  initials={displayInitials}
                   color={chat.avatarColor}
                   size="lg"
                   online={chat.online}
@@ -237,7 +236,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       className="font-heading font-bold text-sevchik-text truncate"
                       style={{ fontSize: `${fontSize + 2}px` }}
                     >
-                      {chat.name}
+                      {displayName}
                     </h3>
                     <span
                       className="text-xs text-sevchik-textSecondary font-body shrink-0"

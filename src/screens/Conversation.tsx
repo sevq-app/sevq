@@ -1,23 +1,68 @@
-import { useState, useRef, useEffect, type MouseEvent } from 'react';
+import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, Lock, ChevronLeft } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
-import { chats } from '@/data/mock';
-import type { Chat, Message } from '@/data/mock';
+import type { Message, DeliveryStatus } from '@/data/mock';
 import { playSound, triggerHaptic } from '@/lib/feedback';
+import { getDisplayContact } from '@/lib/contactOverrides';
+import { useChatStore } from '@/store/chatStore';
 
 interface ConversationProps {
-  chat: Chat;
+  chatId: string;
   onBack: () => void;
+  onOpenProfile: () => void;
   fontSize: number;
   soundsEnabled: boolean;
   hapticsEnabled: boolean;
 }
 
+// Разделитель по датам между сообщениями разных дней
+function DateSeparator({ label }: { label: string }) {
+  return (
+    <div className="flex justify-center my-1">
+      <span
+        className="text-xs font-heading font-semibold px-3 py-1 rounded-full"
+        style={{
+          background: 'rgba(255,255,255,0.55)',
+          backdropFilter: 'blur(8px)',
+          WebkitBackdropFilter: 'blur(8px)',
+          color: 'var(--text-secondary)',
+        }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+// "Сегодня" / "Вчера" / полная дата — относительно текущего момента
+function formatDateLabel(dateStr: string): string {
+  const msgDate = new Date(`${dateStr}T00:00:00`);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today.getTime() - msgDate.getTime()) / 86400000);
+  if (diffDays === 0) return 'Сегодня';
+  if (diffDays === 1) return 'Вчера';
+  const sameYear = msgDate.getFullYear() === today.getFullYear();
+  return msgDate.toLocaleDateString('ru', sameYear ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+// Галочки статуса доставки: отправлено (1 галочка) → доставлено (2 галочки,
+// приглушённые) → прочитано (2 галочки, выделены цветом)
+function DeliveryTicks({ status, size = 13 }: { status?: DeliveryStatus; size?: number }) {
+  if (status === 'read') return <CheckCheck size={size} className="text-sevchik-mint" />;
+  if (status === 'delivered') return <CheckCheck size={size} />;
+  return <Check size={size} />;
+}
+
 // Компонент голосового сообщения
-function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; time: string; isMe: boolean; read?: boolean }) {
+function VoiceMessageBubble({ duration, time, isMe, status }: { duration: string; time: string; isMe: boolean; status?: DeliveryStatus }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
@@ -78,16 +123,38 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
         {/* Время и статус прочтения — внутри пузыря, снизу справа */}
         <div className={`flex items-center justify-end gap-1 ${isMe ? 'text-white/70' : 'text-sevchik-textSecondary'}`}>
           <span className="text-[11px]">{time}</span>
-          {isMe && (read ? <CheckCheck size={13} /> : <Check size={13} />)}
+          {isMe && <DeliveryTicks status={status} size={13} />}
         </div>
       </div>
     </div>
   );
 }
 
-export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
-  const [messages, setMessages] = useState<Message[]>(chat.messages);
+// Анимированные точки для индикатора "печатает..."
+function TypingDots() {
+  return (
+    <span className="flex items-center gap-0.5">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="w-1 h-1 rounded-full bg-sevchik-mint"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1, repeat: Infinity, delay: i * 0.2, ease: 'easeInOut' }}
+        />
+      ))}
+    </span>
+  );
+}
+
+export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
+  const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
+  const sendMessage = useChatStore((s) => s.sendMessage);
+  const updateMessageStatus = useChatStore((s) => s.updateMessageStatus);
+  const markAllMineRead = useChatStore((s) => s.markAllMineRead);
+  const deleteMessage = useChatStore((s) => s.deleteMessage);
+  const forwardMessageToChats = useChatStore((s) => s.forwardMessageToChats);
   const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
@@ -103,6 +170,9 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const holdTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messageHoldTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  const messages = chat?.messages ?? [];
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -126,6 +196,9 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
     };
   }, [isRecording]);
 
+  if (!chat) return null;
+  const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
+
   const handleSend = () => {
     if (!input.trim()) return;
     const msg: Message = {
@@ -133,19 +206,28 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       senderId: 'me',
       text: input.trim(),
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      date: todayIso(),
+      status: 'sent',
     };
-    setMessages(prev => [...prev, msg]);
+    sendMessage(chat.id, msg);
     setInput('');
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
     setTimeout(() => {
+      updateMessageStatus(chat.id, msg.id, 'delivered');
+    }, 500);
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      markAllMineRead(chat.id);
       const reply: Message = {
         id: `m-${Date.now()}-r`,
         senderId: chat.id,
         text: 'Принято! 👍',
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        date: todayIso(),
       };
-      setMessages(prev => [...prev, reply]);
+      sendMessage(chat.id, reply);
       if (soundsEnabled) playSound('receive');
       if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
     }, 1500);
@@ -159,8 +241,56 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
   ];
 
   const handleAttach = (label: string) => {
+    if (label === 'Галерея') {
+      setShowAttachMenu(false);
+      galleryInputRef.current?.click();
+      return;
+    }
     alert(`${label}: функция будет добавлена позже`);
     setShowAttachMenu(false);
+  };
+
+  const handleSendImage = (dataUrl: string) => {
+    const msg: Message = {
+      id: `img-${Date.now()}`,
+      senderId: 'me',
+      text: `image:${dataUrl}`,
+      time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      date: todayIso(),
+      status: 'sent',
+    };
+    sendMessage(chat.id, msg);
+    if (soundsEnabled) playSound('send');
+    if (hapticsEnabled) triggerHaptic(12);
+    setTimeout(() => {
+      updateMessageStatus(chat.id, msg.id, 'delivered');
+    }, 500);
+    setIsTyping(true);
+    setTimeout(() => {
+      setIsTyping(false);
+      markAllMineRead(chat.id);
+      const reply: Message = {
+        id: `img-${Date.now()}-r`,
+        senderId: chat.id,
+        text: 'Красиво! 😍',
+        time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        date: todayIso(),
+      };
+      sendMessage(chat.id, reply);
+      if (soundsEnabled) playSound('receive');
+      if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
+    }, 1500);
+  };
+
+  const handleGalleryFileSelected = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') handleSendImage(reader.result);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
@@ -220,7 +350,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
 
   const handleDeleteMessage = () => {
     if (menuMessage) {
-      setMessages(prev => prev.filter(m => m.id !== menuMessage.id));
+      deleteMessage(chat.id, menuMessage.id);
     }
     setMenuMessage(null);
   };
@@ -232,17 +362,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
 
   const handleSendForward = (chatIds: string[]) => {
     if (!forwardMessage) return;
-    chatIds.forEach((chatId) => {
-      const target = chats.find((c) => c.id === chatId);
-      if (target) {
-        target.messages.push({
-          id: `fwd-${Date.now()}-${chatId}`,
-          senderId: 'me',
-          text: forwardMessage.text,
-          time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
-        });
-      }
-    });
+    forwardMessageToChats(chatIds, forwardMessage.text);
     setForwardMessage(null);
   };
 
@@ -289,21 +409,31 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         senderId: 'me',
         text: `voice:${duration}`,
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+        date: todayIso(),
+        status: 'sent',
       };
-      setMessages(prev => [...prev, voiceMsg]);
+      sendMessage(chat.id, voiceMsg);
       setIsRecording(false);
       setRecordingTime(0);
       if (soundsEnabled) playSound('send');
       if (hapticsEnabled) triggerHaptic(12);
 
       setTimeout(() => {
+        updateMessageStatus(chat.id, voiceMsg.id, 'delivered');
+      }, 500);
+
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        markAllMineRead(chat.id);
         const reply: Message = {
           id: `voice-${Date.now()}-r`,
           senderId: chat.id,
           text: 'Прослушал голосовое 👂',
           time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+          date: todayIso(),
         };
-        setMessages(prev => [...prev, reply]);
+        sendMessage(chat.id, reply);
         if (soundsEnabled) playSound('receive');
         if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
       }, 1500);
@@ -322,6 +452,8 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
   const getVoiceDuration = (text: string) => text.replace('voice:', '');
   const isStickerMessage = (text: string) => text.startsWith('sticker:');
   const getStickerEmoji = (text: string) => text.replace('sticker:', '');
+  const isImageMessage = (text: string) => text.startsWith('image:');
+  const getImageSrc = (text: string) => text.replace('image:', '');
 
   const handleSelectEmoji = (emoji: string) => {
     setInput((prev) => prev + emoji);
@@ -333,11 +465,16 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       senderId: 'me',
       text: `sticker:${emoji}`,
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      date: todayIso(),
+      status: 'sent',
     };
-    setMessages((prev) => [...prev, msg]);
+    sendMessage(chat.id, msg);
     setShowStickerPanel(false);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
+    setTimeout(() => {
+      updateMessageStatus(chat.id, msg.id, 'delivered');
+    }, 500);
   };
 
   return (
@@ -352,14 +489,25 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         >
           <ArrowLeft size={22} />
         </motion.button>
-        <Avatar initials={chat.initials} color={chat.avatarColor} size="sm" online={chat.online} />
-        <div className="flex-1 min-w-0">
-          <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{chat.name}</h2>
-          <p className={`text-sm font-body flex items-center gap-1 ${chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
-            {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
-            {chat.online ? 'в сети' : 'не в сети'}
-          </p>
-        </div>
+        <button onClick={onOpenProfile} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+          <Avatar initials={displayInitials} color={chat.avatarColor} size="sm" online={chat.online} />
+          <div className="flex-1 min-w-0">
+            <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
+            <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
+              {isTyping ? (
+                <>
+                  печатает
+                  <TypingDots />
+                </>
+              ) : (
+                <>
+                  {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
+                  {chat.online ? 'в сети' : 'не в сети'}
+                </>
+              )}
+            </p>
+          </div>
+        </button>
         
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -447,15 +595,18 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
 
       {/* Messages */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4 space-y-3">
-        {messages.map(msg => {
+        {messages.map((msg, i) => {
           const isMe = msg.senderId === 'me';
           const isVoice = isVoiceMessage(msg.text);
           const voiceDuration = isVoice ? getVoiceDuration(msg.text) : '';
           const isSticker = isStickerMessage(msg.text);
+          const isImage = isImageMessage(msg.text);
+          const showDateSeparator = !!msg.date && msg.date !== messages[i - 1]?.date;
 
           return (
+            <div key={msg.id}>
+            {showDateSeparator && <DateSeparator label={formatDateLabel(msg.date!)} />}
             <motion.div
-              key={msg.id}
               initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
               animate={isMe ? { scale: 1, opacity: 1 } : { y: 0, opacity: 1 }}
               transition={{ duration: 0.22, ease: 'easeOut' }}
@@ -472,11 +623,19 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
                   <span className="text-6xl leading-none">{getStickerEmoji(msg.text)}</span>
                   <div className={`flex items-center gap-1 mt-1 ${isMe ? 'text-sevchik-textSecondary' : 'text-sevchik-textSecondary'}`}>
                     <span className="text-[11px]">{msg.time}</span>
-                    {isMe && (msg.read ? <CheckCheck size={12} /> : <Check size={12} />)}
+                    {isMe && <DeliveryTicks status={msg.status} size={12} />}
                   </div>
                 </div>
               ) : isVoice ? (
-                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} read={msg.read} />
+                <VoiceMessageBubble duration={voiceDuration} time={msg.time} isMe={isMe} status={msg.status} />
+              ) : isImage ? (
+                <div className="relative max-w-[75%] rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.1)' }}>
+                  <img src={getImageSrc(msg.text)} alt="" className="block max-h-[320px] w-auto object-cover" />
+                  <div className="absolute bottom-1.5 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-[11px]" style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}>
+                    <span>{msg.time}</span>
+                    {isMe && <DeliveryTicks status={msg.status} size={12} />}
+                  </div>
+                </div>
               ) : (
                 <div
                   className={`max-w-[75%] px-4 py-3 font-body text-sm relative overflow-hidden ${
@@ -489,11 +648,12 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
                   <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
                   <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
                     <span className="text-[11px]">{msg.time}</span>
-                    {isMe && (msg.read ? <CheckCheck size={13} /> : <Check size={13} />)}
+                    {isMe && <DeliveryTicks status={msg.status} size={13} />}
                   </div>
                 </div>
               )}
             </motion.div>
+            </div>
           );
         })}
         <div ref={endRef} />
@@ -756,6 +916,8 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         )}
       </AnimatePresence>
 
+      <input ref={galleryInputRef} type="file" accept="image/*" className="hidden" onChange={handleGalleryFileSelected} />
+
       {/* Модальное окно "Вложения" */}
       <AnimatePresence>
         {showAttachMenu && (
@@ -877,7 +1039,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
                   <span className="font-heading font-semibold text-sm text-[#1A1A1A]">Отметить непрочитанным</span>
                 </motion.button>
 
-                {!isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && (
+                {!isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && !isImageMessage(menuMessage.text) && (
                   <motion.button
                     whileHover={{ backgroundColor: '#F9FAFB' }}
                     whileTap={{ scale: 0.98 }}
