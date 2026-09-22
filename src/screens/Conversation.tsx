@@ -85,9 +85,26 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
   );
 }
 
+// Анимированные точки для индикатора "печатает..."
+function TypingDots() {
+  return (
+    <span className="flex items-center gap-0.5">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="w-1 h-1 rounded-full bg-sevchik-mint"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1, repeat: Infinity, delay: i * 0.2, ease: 'easeInOut' }}
+        />
+      ))}
+    </span>
+  );
+}
+
 export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
   const [messages, setMessages] = useState<Message[]>(chat.messages);
   const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showNotificationsModal, setShowNotificationsModal] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
@@ -138,7 +155,9 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
     setInput('');
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
+    setIsTyping(true);
     setTimeout(() => {
+      setIsTyping(false);
       const reply: Message = {
         id: `m-${Date.now()}-r`,
         senderId: chat.id,
@@ -296,7 +315,9 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
       if (soundsEnabled) playSound('send');
       if (hapticsEnabled) triggerHaptic(12);
 
+      setIsTyping(true);
       setTimeout(() => {
+        setIsTyping(false);
         const reply: Message = {
           id: `voice-${Date.now()}-r`,
           senderId: chat.id,
@@ -355,9 +376,18 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
         <Avatar initials={chat.initials} color={chat.avatarColor} size="sm" online={chat.online} />
         <div className="flex-1 min-w-0">
           <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{chat.name}</h2>
-          <p className={`text-sm font-body flex items-center gap-1 ${chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
-            {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
-            {chat.online ? 'в сети' : 'не в сети'}
+          <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
+            {isTyping ? (
+              <>
+                печатает
+                <TypingDots />
+              </>
+            ) : (
+              <>
+                {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
+                {chat.online ? 'в сети' : 'не в сети'}
+              </>
+            )}
           </p>
         </div>
         
