@@ -1,5 +1,8 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Palette, Sun, Flower, Leaf, Snowflake, Sparkles, Waves } from 'lucide-react';
+import { ArrowLeft, Palette, Sun, Flower, Leaf, Snowflake, Sparkles, Waves, Monitor, Moon, Volume2, Vibrate } from 'lucide-react';
+import { playSound, triggerHaptic } from '@/lib/feedback';
+
+type ThemeMode = 'system' | 'light' | 'dark';
 
 interface AppearanceProps {
   onBack: () => void;
@@ -7,8 +10,12 @@ interface AppearanceProps {
   setFontSize: (size: number) => void;
   selectedTheme: string;
   setSelectedTheme: (theme: string) => void;
-  grayMode: boolean;
-  setGrayMode: (value: boolean) => void;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
+  soundsEnabled: boolean;
+  setSoundsEnabled: (value: boolean) => void;
+  hapticsEnabled: boolean;
+  setHapticsEnabled: (value: boolean) => void;
 }
 
 const themes = [
@@ -20,7 +27,25 @@ const themes = [
   { id: 'sea', name: 'Море', gradient: 'linear-gradient(135deg, #38b2ac, #2c7a7b)', primary: '#38b2ac', icon: Waves },
 ];
 
-export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSelectedTheme, grayMode, setGrayMode }: AppearanceProps) {
+const themeModes: { id: ThemeMode; name: string; icon: typeof Monitor }[] = [
+  { id: 'system', name: 'Системная', icon: Monitor },
+  { id: 'light', name: 'Светлая', icon: Sun },
+  { id: 'dark', name: 'Тёмная', icon: Moon },
+];
+
+export function Appearance({
+  onBack,
+  fontSize,
+  setFontSize,
+  selectedTheme,
+  setSelectedTheme,
+  themeMode,
+  setThemeMode,
+  soundsEnabled,
+  setSoundsEnabled,
+  hapticsEnabled,
+  setHapticsEnabled,
+}: AppearanceProps) {
   const applyTheme = (themeId: string) => {
     // Убираем все классы тем
     themes.forEach(t => {
@@ -163,33 +188,124 @@ export function Appearance({ onBack, fontSize, setFontSize, selectedTheme, setSe
           </div>
         </motion.div>
 
-        {/* Серый режим */}
+        {/* Режим оформления: системная / светлая / тёмная */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="rounded-3xl p-5 flex items-center justify-between"
+          className="rounded-3xl p-5"
           style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
         >
-          <div>
-            <h3 className="font-heading font-bold" style={{ color: textMain }}>Серый режим</h3>
-            <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>
-              Приглушённые цвета для комфортного чтения
-            </p>
+          <div className="flex items-center gap-[12px] mb-[16px]">
+            <div
+              className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
+              style={{ background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
+            >
+              <Moon size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="font-heading font-bold" style={{ color: textMain }}>Режим оформления</h3>
+              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                «Системная» следует настройке устройства
+              </p>
+            </div>
           </div>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setGrayMode(!grayMode)}
-            className={`w-14 h-8 rounded-full transition-colors ${
-              grayMode ? 'bg-[#6546C7]' : 'bg-[var(--bg-input)]'
-            }`}
-          >
-            <motion.div
-              animate={{ x: grayMode ? 24 : 4 }}
-              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              className="w-6 h-6 rounded-full bg-white shadow-md"
-            />
-          </motion.button>
+          <div className="grid grid-cols-3 gap-2">
+            {themeModes.map((mode) => {
+              const ModeIcon = mode.icon;
+              const active = themeMode === mode.id;
+              return (
+                <motion.button
+                  key={mode.id}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setThemeMode(mode.id)}
+                  className="flex flex-col items-center gap-1.5 rounded-2xl py-3 transition-colors"
+                  style={{
+                    background: active ? '#6546C7' : 'var(--bg-input)',
+                    color: active ? '#fff' : 'var(--text-secondary)',
+                  }}
+                >
+                  <ModeIcon size={20} />
+                  <span className="font-heading font-semibold text-xs">{mode.name}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+        </motion.div>
+
+        {/* Звук и вибрация */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="rounded-3xl p-5 space-y-4"
+          style={{ backgroundColor: cardBg, boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
+        >
+          <div className="flex items-center gap-[12px]">
+            <div
+              className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
+              style={{ background: '#FF9848', boxShadow: '0 4px 12px rgba(255,152,72,0.2)' }}
+            >
+              <Volume2 size={20} className="text-white" />
+            </div>
+            <h3 className="font-heading font-bold" style={{ color: textMain }}>Тактильная обратная связь</h3>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Volume2 size={18} style={{ color: 'var(--text-secondary)' }} />
+              <div>
+                <p className="font-heading font-semibold text-sm" style={{ color: textMain }}>Звуки</p>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>При отправке и получении сообщений</p>
+              </div>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const next = !soundsEnabled;
+                setSoundsEnabled(next);
+                if (next) playSound('tap');
+              }}
+              className={`shrink-0 w-14 h-8 rounded-full transition-colors ${
+                soundsEnabled ? 'bg-[#6546C7]' : 'bg-[var(--bg-input)]'
+              }`}
+            >
+              <motion.div
+                animate={{ x: soundsEnabled ? 24 : 4 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                className="w-6 h-6 rounded-full bg-white shadow-md"
+              />
+            </motion.button>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Vibrate size={18} style={{ color: 'var(--text-secondary)' }} />
+              <div>
+                <p className="font-heading font-semibold text-sm" style={{ color: textMain }}>Вибрация</p>
+                <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                  Только на устройствах с поддержкой (недоступно в Safari на iOS)
+                </p>
+              </div>
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                const next = !hapticsEnabled;
+                setHapticsEnabled(next);
+                if (next) triggerHaptic(15);
+              }}
+              className={`shrink-0 w-14 h-8 rounded-full transition-colors ${
+                hapticsEnabled ? 'bg-[#6546C7]' : 'bg-[var(--bg-input)]'
+              }`}
+            >
+              <motion.div
+                animate={{ x: hapticsEnabled ? 24 : 4 }}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                className="w-6 h-6 rounded-full bg-white shadow-md"
+              />
+            </motion.button>
+          </div>
         </motion.div>
       </div>
     </div>
