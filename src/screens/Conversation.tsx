@@ -76,6 +76,40 @@ function ReplyQuotePreview({ replyTo, isMe }: { replyTo: NonNullable<Message['re
   );
 }
 
+// Живые эмодзи: у каждого своя зацикленная анимация, подобранная под его
+// характер — огонь мерцает, сердце бьётся, смайлы покачиваются и т.д.
+// Крутится непрерывно и независимо от любых внешних анимаций (появление,
+// выбор) — те управляют внешним элементом, эта только самим "лицом" эмодзи.
+const EMOJI_IDLE_ANIMATIONS: Record<string, { animate: Record<string, (number | string)[]>; transition: Record<string, unknown> }> = {
+  '👍': { animate: { rotate: [0, -18, 14, 0] }, transition: { duration: 1.6, repeat: Infinity, repeatDelay: 0.6, ease: 'easeInOut' } },
+  '👎': { animate: { rotate: [0, 14, -18, 0] }, transition: { duration: 1.6, repeat: Infinity, repeatDelay: 0.6, ease: 'easeInOut' } },
+  '❤️': { animate: { scale: [1, 1.28, 1, 1.16, 1] }, transition: { duration: 1, repeat: Infinity, ease: 'easeInOut' } },
+  '😍': { animate: { scale: [1, 1.22, 1, 1.12, 1] }, transition: { duration: 1.1, repeat: Infinity, ease: 'easeInOut' } },
+  '🔥': { animate: { scale: [1, 1.12, 0.95, 1.08, 1], rotate: [0, -3, 3, -2, 0] }, transition: { duration: 0.9, repeat: Infinity, ease: 'easeInOut' } },
+  '😂': { animate: { rotate: [0, -10, 10, -6, 6, 0], y: [0, -2, 0, -2, 0] }, transition: { duration: 0.8, repeat: Infinity, ease: 'easeInOut' } },
+  '😮': { animate: { scale: [1, 1.22, 1] }, transition: { duration: 1.3, repeat: Infinity, repeatDelay: 0.5, ease: 'easeInOut' } },
+  '🤯': { animate: { scale: [1, 1.32, 0.9, 1], rotate: [0, -5, 5, 0] }, transition: { duration: 1, repeat: Infinity, repeatDelay: 0.5, ease: 'easeInOut' } },
+  '😢': { animate: { rotate: [0, -6, 6, 0], y: [0, 2, 0] }, transition: { duration: 1.6, repeat: Infinity, ease: 'easeInOut' } },
+  '🙏': { animate: { y: [0, -3, 0] }, transition: { duration: 1.4, repeat: Infinity, ease: 'easeInOut' } },
+  '🎉': { animate: { rotate: [0, 15, -15, 0], scale: [1, 1.15, 1] }, transition: { duration: 1, repeat: Infinity, repeatDelay: 0.4, ease: 'easeInOut' } },
+  '👏': { animate: { scale: [1, 0.85, 1.1, 1] }, transition: { duration: 0.6, repeat: Infinity, ease: 'easeInOut' } },
+};
+const DEFAULT_EMOJI_IDLE = { animate: { y: [0, -2, 0] }, transition: { duration: 1.8, repeat: Infinity, ease: 'easeInOut' } };
+
+function AnimatedEmoji({ emoji, className }: { emoji: string; className?: string }) {
+  const preset = EMOJI_IDLE_ANIMATIONS[emoji] ?? DEFAULT_EMOJI_IDLE;
+  return (
+    <motion.span
+      className={className}
+      style={{ display: 'inline-block' }}
+      animate={preset.animate}
+      transition={preset.transition}
+    >
+      {emoji}
+    </motion.span>
+  );
+}
+
 // Значок реакции — маленькая "таблетка" с эмодзи, выступающая за нижний
 // край пузыря сообщения (со стороны, противоположной хвостику), тап
 // снимает реакцию. Рендерится вне overflow-hidden пузыря, поэтому не
@@ -92,7 +126,7 @@ function ReactionBadge({ emoji, isMe, onClick }: { emoji: string; isMe: boolean;
       className={`absolute -bottom-2.5 ${isMe ? 'right-1.5' : 'left-1.5'} flex items-center justify-center w-6 h-6 rounded-full text-xs z-10`}
       style={{ background: '#ffffff', boxShadow: '0 2px 8px rgba(15,23,42,0.18)' }}
     >
-      {emoji}
+      <AnimatedEmoji emoji={emoji} />
     </motion.button>
   );
 }
@@ -1356,7 +1390,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                   onClick={() => handleSelectReaction(emoji)}
                   className="text-lg w-7 h-7 shrink-0 flex items-center justify-center rounded-full"
                 >
-                  {emoji}
+                  <AnimatedEmoji emoji={emoji} />
                 </motion.button>
               ))}
             </div>
