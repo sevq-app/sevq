@@ -341,9 +341,9 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
   };
 
   return (
-    <div className="flex flex-col h-full chat-wallpaper">
+    <div className="flex flex-col h-full overflow-hidden chat-wallpaper">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent">
+      <div className="shrink-0 sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent">
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
           onClick={onBack}
@@ -510,7 +510,7 @@ export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEna
           чтобы backdrop-filter не «глючил» на iOS Safari во время
           анимации перехода между состояниями (баг с блюр-артефактом) */}
       <div
-        className="px-4 py-2.5 pb-4"
+        className="shrink-0 px-4 py-2.5 pb-4"
         style={{
           background: 'rgba(255,255,255,0.65)',
           backdropFilter: 'blur(20px)',
