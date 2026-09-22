@@ -1,13 +1,31 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Send } from 'lucide-react';
+import { Search, X, Send, Check, Star } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { useChatStore } from '@/store/chatStore';
+import { getDisplayContact } from '@/lib/contactOverrides';
+import type { Chat } from '@/data/mock';
 
 interface ForwardChatProps {
   excludeChatId: string;
   onClose: () => void;
   onSend: (chatIds: string[]) => void;
+}
+
+function groupAlphabetically(list: Chat[]) {
+  const withNames = list.map((chat) => ({ chat, name: getDisplayContact(chat).name }));
+  withNames.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  const groups: { letter: string; chats: Chat[] }[] = [];
+  for (const { chat, name } of withNames) {
+    const letter = (name[0] || '#').toUpperCase();
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup?.letter === letter) {
+      lastGroup.chats.push(chat);
+    } else {
+      groups.push({ letter, chats: [chat] });
+    }
+  }
+  return groups;
 }
 
 export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps) {
@@ -16,9 +34,21 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
-  const filtered = chats
-    .filter((c) => c.id !== excludeChatId)
-    .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()));
+  const favoritesChat = chats.find((c) => c.isFavorites && c.id !== excludeChatId);
+  const candidates = chats.filter((c) => c.id !== excludeChatId && !c.isFavorites);
+  const recentFive = candidates
+    .slice()
+    .sort((a, b) => b.messages.length - a.messages.length)
+    .slice(0, 5);
+  const recentIds = new Set(recentFive.map((c) => c.id));
+  const alphabeticalGroups = groupAlphabetically(candidates.filter((c) => !recentIds.has(c.id)));
+
+  const searchPool = chats.filter((c) => c.id !== excludeChatId);
+  const filtered = query
+    ? searchPool
+        .filter((c) => getDisplayContact(c).name.toLowerCase().includes(query.toLowerCase()))
+        .sort((a, b) => getDisplayContact(a).name.localeCompare(getDisplayContact(b).name, 'ru'))
+    : [];
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -31,13 +61,21 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
     onSend(selectedIds);
   };
 
+  const handleCloseClick = () => {
+    if (selectedIds.length > 0) {
+      setShowCloseConfirm(true);
+    } else {
+      onClose();
+    }
+  };
+
   return (
     <motion.div
       initial={{ x: '100%' }}
       animate={{ x: 0 }}
       exit={{ x: '100%' }}
       transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-      className="fixed inset-0 z-50 flex flex-col bg-[var(--bg-main)]"
+      className="fixed inset-0 z-50 flex flex-col chat-wallpaper"
     >
       {/* Header */}
       <div className="sticky top-0 z-10 pt-4 pb-3 px-4 sm:px-6 bg-transparent">
@@ -45,9 +83,9 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
           <h1 className="font-heading font-bold text-lg text-sevchik-text">Переслать</h1>
           <motion.button
             whileTap={{ scale: 0.9 }}
-            onClick={() => setShowCloseConfirm(true)}
-            className="w-11 h-11 rounded-full bg-white flex items-center justify-center text-sevchik-textSecondary"
-            style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.07)' }}
+            onClick={handleCloseClick}
+            className="w-11 h-11 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
           >
             <X size={20} />
           </motion.button>
@@ -56,71 +94,127 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
         <div className="relative">
           <Search
             size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Найти чат или канал"
-            className="w-full text-[var(--text-main)] placeholder:text-[var(--text-secondary)] rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm bg-[var(--bg-input)]"
+            placeholder="Найти чат или контакт"
+            className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
+            style={{
+              background: 'rgba(255,152,72,0.65)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+              boxShadow: '0 4px 14px rgba(255,152,72,0.28)',
+            }}
           />
         </div>
       </div>
 
       {/* Список чатов */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28">
-        <div className="space-y-2">
-          {filtered.map((chat, i) => {
-            const isSelected = selectedIds.includes(chat.id);
-            return (
-              <motion.button
+        {query ? (
+          <div className="space-y-2">
+            {filtered.map((chat, i) => (
+              <ChatRow
                 key={chat.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.03 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => toggleSelect(chat.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 bg-white rounded-2xl text-left btn-3d ${
-                  isSelected ? 'ring-2 ring-[#6546C7]' : ''
-                }`}
-                style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}
-              >
-                <div
-                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                    isSelected ? 'bg-[#6546C7]' : 'bg-[#E5E7EB]'
-                  }`}
-                >
-                  {isSelected && (
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="white"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  )}
-                </div>
+                chat={chat}
+                index={i}
+                isSelected={selectedIds.includes(chat.id)}
+                onToggle={toggleSelect}
+              />
+            ))}
+            {filtered.length === 0 && (
+              <div className="text-center py-12 text-white/80 font-body">
+                Ничего не найдено
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* Избранное — закреплено сверху, для быстрого сохранения себе */}
+            {favoritesChat && (
+              <div className="mb-4 space-y-2">
+                <ChatRow
+                  chat={favoritesChat}
+                  index={0}
+                  isSelected={selectedIds.includes(favoritesChat.id)}
+                  onToggle={toggleSelect}
+                />
+              </div>
+            )}
 
-                <Avatar initials={chat.initials} color={chat.avatarColor} size="md" online={chat.online} />
-                <span className="font-heading font-bold text-sevchik-text truncate">{chat.name}</span>
-              </motion.button>
-            );
-          })}
-          {filtered.length === 0 && (
-            <div className="text-center py-12 text-sevchik-textSecondary font-body">
-              Ничего не найдено
-            </div>
-          )}
-        </div>
+            {/* Быстрый доступ: последние контакты */}
+            {recentFive.length > 0 && (
+              <div className="mb-4">
+                <h2 className="text-xs font-bold text-white/70 uppercase tracking-wider mb-3 ml-1">
+                  Последние
+                </h2>
+                <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+                  {recentFive.map((chat) => {
+                    const isSelected = selectedIds.includes(chat.id);
+                    const { name, initials } = getDisplayContact(chat);
+                    return (
+                      <button
+                        key={chat.id}
+                        onClick={() => toggleSelect(chat.id)}
+                        className="flex flex-col items-center gap-1.5 shrink-0 w-16"
+                      >
+                        <div className="relative">
+                          <Avatar initials={initials} color={chat.avatarColor} size="lg" online={chat.online} />
+                          {isSelected && (
+                            <div
+                              className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white"
+                              style={{ background: '#6546C7' }}
+                            >
+                              <Check size={12} className="text-white" />
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-xs font-body text-white/90 truncate w-full text-center">
+                          {name.split(' ')[0]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Все контакты по алфавиту */}
+            {alphabeticalGroups.length > 0 && (
+              <div>
+                <h2 className="text-xs font-bold text-white/70 uppercase tracking-wider mb-3 ml-1">
+                  Все контакты
+                </h2>
+                <div className="space-y-3">
+                  {alphabeticalGroups.map((group) => (
+                    <div key={group.letter}>
+                      <div className="text-xs font-heading font-bold text-white/60 mb-1.5 ml-1">
+                        {group.letter}
+                      </div>
+                      <div className="space-y-2">
+                        {group.chats.map((chat, i) => (
+                          <ChatRow
+                            key={chat.id}
+                            chat={chat}
+                            index={i}
+                            isSelected={selectedIds.includes(chat.id)}
+                            onToggle={toggleSelect}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
-      {/* Нижняя фиолетовая плашка */}
+      {/* Нижняя плашка отправки */}
       <div className="fixed bottom-0 left-0 right-0 px-4 sm:px-6 pb-6 pt-3 max-w-2xl mx-auto">
         <motion.button
           whileHover={selectedIds.length > 0 ? { scale: 1.02 } : {}}
@@ -129,8 +223,9 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
           disabled={selectedIds.length === 0}
           className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden disabled:opacity-40"
           style={{
-            background: '#6546C7',
+            background: 'var(--theme-message-gradient)',
             boxShadow: selectedIds.length > 0 ? '0 4px 14px rgba(101,70,199,0.22)' : 'none',
+            backdropFilter: 'blur(8px)',
           }}
         >
           <Send size={20} className="relative z-10" />
@@ -156,8 +251,13 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm bg-white rounded-3xl p-6"
-              style={{ boxShadow: '0 20px 60px rgba(0,0,0,0.25)' }}
+              className="w-full max-w-sm rounded-3xl p-6"
+              style={{
+                background: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
+              }}
             >
               <h3 className="font-heading font-extrabold text-lg text-[#1A1A1A] text-center mb-6">
                 Прервать отправку?
@@ -183,5 +283,67 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+function ChatRow({
+  chat,
+  index,
+  isSelected,
+  onToggle,
+}: {
+  chat: Chat;
+  index: number;
+  isSelected: boolean;
+  onToggle: (id: string) => void;
+}) {
+  const { name, initials } = getDisplayContact(chat);
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.03 }}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => onToggle(chat.id)}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left btn-3d ${
+        isSelected ? 'ring-2 ring-[#6546C7]' : ''
+      }`}
+      style={{
+        background: 'rgba(255,255,255,0.65)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
+      }}
+    >
+      <div
+        className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
+          isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
+        }`}
+      >
+        {isSelected && (
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </div>
+
+      <Avatar
+        initials={initials}
+        color={chat.avatarColor}
+        size="md"
+        online={chat.online}
+        icon={chat.isFavorites ? <Star size={20} fill="white" strokeWidth={0} /> : undefined}
+      />
+      <span className="font-heading font-bold text-sevchik-text truncate">{name}</span>
+    </motion.button>
   );
 }

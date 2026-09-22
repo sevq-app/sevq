@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface AvatarProps {
@@ -8,6 +9,8 @@ interface AvatarProps {
   ringColor?: string;
   ringWidth?: number;
   className?: string;
+  /** Иконка вместо инициалов — для системных "чатов" вроде "Избранное" */
+  icon?: ReactNode;
 }
 
 const sizeMap = {
@@ -16,6 +19,14 @@ const sizeMap = {
   lg: 'w-16 h-16 text-lg',
   xl: 'w-24 h-24 text-xl',
   xxl: 'w-[140px] h-[140px] text-4xl',
+};
+
+const iconSizeMap = {
+  sm: 20,
+  md: 24,
+  lg: 28,
+  xl: 38,
+  xxl: 56,
 };
 
 const dotSizeMap = {
@@ -34,6 +45,7 @@ export function Avatar({
   ringColor,
   ringWidth = 2,
   className,
+  icon,
 }: AvatarProps) {
   return (
     <div className={cn('relative shrink-0', className)}>
@@ -49,7 +61,13 @@ export function Avatar({
             : '0 2px 6px rgba(15,23,42,0.12)',
         }}
       >
-        <span className="relative z-10">{initials}</span>
+        {icon ? (
+          <span className="relative z-10 flex items-center justify-center" style={{ width: iconSizeMap[size], height: iconSizeMap[size] }}>
+            {icon}
+          </span>
+        ) : (
+          <span className="relative z-10">{initials}</span>
+        )}
       </div>
       {online && (
         <div

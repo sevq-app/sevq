@@ -61,7 +61,8 @@ export const useChatStore = create<ChatStore>((set) => ({
 
   deleteChats: (chatIds) =>
     set((state) => ({
-      chats: state.chats.filter((c) => !chatIds.includes(c.id)),
+      // Системный чат "Избранное" удалить нельзя
+      chats: state.chats.filter((c) => c.isFavorites || !chatIds.includes(c.id)),
     })),
 
   forwardMessageToChats: (chatIds, text) =>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck } from 'lucide-react';
+import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
+import { previewText } from '@/lib/messagePreview';
 
 interface ChatsProps {
   onOpenChat: (chatId: string) => void;
@@ -21,9 +22,11 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-  const filtered = chats.filter((c) =>
-    c.name.toLowerCase().includes(query.toLowerCase())
-  );
+  // Чат "Избранное" всегда закреплён первым, независимо от порядка в сторе
+  const filtered = chats
+    .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()))
+    .slice()
+    .sort((a, b) => Number(!!b.isFavorites) - Number(!!a.isFavorites));
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -181,7 +184,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => {
-                  if (selectMode) {
+                  if (selectMode && !chat.isFavorites) {
                     toggleSelect(chat.id);
                   } else {
                     onOpenChat(chat.id);
@@ -197,13 +200,13 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   boxShadow: '0 8px 24px rgba(15,23,42,0.06)',
                 }}
               >
-                {/* Кружочек выбора (только в режиме выбора) */}
-                {selectMode && (
+                {/* Кружочек выбора (только в режиме выбора) — нейтральный,
+                    без выбора — просто тонкое кольцо в тон фона карточки.
+                    У системного чата "Избранное" его нет — он неудаляемый. */}
+                {selectMode && !chat.isFavorites && (
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                      isSelected
-                        ? 'bg-[#6546C7]'
-                        : 'bg-[#E5E7EB]'
+                      isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
                     }`}
                   >
                     {isSelected && (
@@ -229,6 +232,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   size="lg"
                   online={chat.online}
                   ringColor={chat.online ? '#4FD3C8' : undefined}
+                  icon={chat.isFavorites ? <Star size={28} fill="white" strokeWidth={0} /> : undefined}
                 />
                 <div className="flex-1 min-w-0 relative z-10">
                   <div className="flex items-center justify-between gap-2">
@@ -250,7 +254,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       className="text-sm text-sevchik-textSecondary font-body truncate"
                       style={{ fontSize: `${fontSize}px` }}
                     >
-                      {chat.lastMessage}
+                      {chat.isFavorites ? previewText(chat.messages[chat.messages.length - 1]?.text, chat.lastMessage) : chat.lastMessage}
                     </p>
                     {chat.unread > 0 && (
                       <span
