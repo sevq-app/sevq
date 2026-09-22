@@ -1,13 +1,15 @@
 import { motion } from 'framer-motion';
-import { ArrowLeft, Phone, Video, Bell, BellOff, Search, Image, Ban, Trash2, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Pencil, Phone, Video, Bell, BellOff, Search, Image, Ban, Trash2, ChevronRight } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { searchResults, friendsData } from '@/data/mock';
 import type { Chat } from '@/data/mock';
 import { useState } from 'react';
+import { getContactOverride, getDisplayContact } from '@/lib/contactOverrides';
 
 interface ContactProfileProps {
   chat: Chat;
   onBack: () => void;
+  onEdit: () => void;
 }
 
 function findContactMeta(name: string) {
@@ -15,8 +17,10 @@ function findContactMeta(name: string) {
   return all.find((c) => c.name === name);
 }
 
-export function ContactProfile({ chat, onBack }: ContactProfileProps) {
+export function ContactProfile({ chat, onBack, onEdit }: ContactProfileProps) {
   const [isMuted, setIsMuted] = useState(false);
+  const override = getContactOverride(chat.id);
+  const { name: displayName, initials: displayInitials } = getDisplayContact(chat, override);
   const meta = findContactMeta(chat.name);
   const statusText = meta?.status || (chat.online ? 'В сети' : 'Не в сети');
 
@@ -31,13 +35,22 @@ export function ContactProfile({ chat, onBack }: ContactProfileProps) {
         >
           <ArrowLeft size={22} />
         </motion.button>
-        <h2 className="font-heading font-bold text-lg text-sevchik-text">Профиль</h2>
+        <h2 className="font-heading font-bold text-lg text-sevchik-text flex-1">Профиль</h2>
+        <motion.button
+          whileTap={{ scale: 0.9, y: 2 }}
+          onClick={onEdit}
+          className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
+          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+        >
+          <Pencil size={19} />
+        </motion.button>
       </div>
 
       <div className="flex flex-col items-center px-4 mt-2 mb-6">
-        <Avatar initials={chat.initials} color={chat.avatarColor} size="xxl" online={chat.online} />
-        <h1 className="font-heading font-extrabold text-2xl text-sevchik-text mt-4">{chat.name}</h1>
+        <Avatar initials={displayInitials} color={chat.avatarColor} size="xxl" online={chat.online} />
+        <h1 className="font-heading font-extrabold text-2xl text-sevchik-text mt-4">{displayName}</h1>
         {meta?.handle && <p className="text-sm text-[var(--text-secondary)] font-body mt-1">{meta.handle}</p>}
+        {override.phone && <p className="text-sm text-[var(--text-secondary)] font-body mt-1">{override.phone}</p>}
         <p className={`text-sm font-body mt-1 flex items-center gap-1.5 ${chat.online ? 'text-sevchik-mint' : 'text-[var(--text-secondary)]'}`}>
           {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
           {statusText}
@@ -57,6 +70,13 @@ export function ContactProfile({ chat, onBack }: ContactProfileProps) {
       </div>
 
       <div className="px-4 sm:px-6 space-y-4 max-w-2xl mx-auto">
+        {override.note && (
+          <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(101,70,199,0.08)]">
+            <h3 className="font-heading font-bold text-[var(--text-main)] mb-2">Заметка</h3>
+            <p className="text-sm text-sevchik-textSecondary font-body">{override.note}</p>
+          </section>
+        )}
+
         <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(101,70,199,0.08)]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-heading font-bold text-[var(--text-main)]">Медиафайлы</h3>

@@ -4,6 +4,7 @@ import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck } from 'lucide-re
 import { Avatar } from '@/components/Avatar';
 import { chats as initialChats } from '@/data/mock';
 import type { Chat } from '@/data/mock';
+import { getDisplayContact } from '@/lib/contactOverrides';
 
 interface ChatsProps {
   onOpenChat: (chat: Chat) => void;
@@ -173,6 +174,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         <div className="space-y-3">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);
+            const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
             return (
               <motion.button
                 key={chat.id}
@@ -225,7 +227,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 )}
 
                 <Avatar
-                  initials={chat.initials}
+                  initials={displayInitials}
                   color={chat.avatarColor}
                   size="lg"
                   online={chat.online}
@@ -237,7 +239,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       className="font-heading font-bold text-sevchik-text truncate"
                       style={{ fontSize: `${fontSize + 2}px` }}
                     >
-                      {chat.name}
+                      {displayName}
                     </h3>
                     <span
                       className="text-xs text-sevchik-textSecondary font-body shrink-0"

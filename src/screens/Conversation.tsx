@@ -7,6 +7,7 @@ import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
 import { chats } from '@/data/mock';
 import type { Chat, Message, DeliveryStatus } from '@/data/mock';
 import { playSound, triggerHaptic } from '@/lib/feedback';
+import { getDisplayContact } from '@/lib/contactOverrides';
 
 interface ConversationProps {
   chat: Chat;
@@ -146,6 +147,7 @@ function TypingDots() {
 }
 
 export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
+  const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
   const [messages, setMessages] = useState<Message[]>(chat.messages);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -440,9 +442,9 @@ export function Conversation({ chat, onBack, onOpenProfile, fontSize, soundsEnab
           <ArrowLeft size={22} />
         </motion.button>
         <button onClick={onOpenProfile} className="flex items-center gap-3 flex-1 min-w-0 text-left">
-          <Avatar initials={chat.initials} color={chat.avatarColor} size="sm" online={chat.online} />
+          <Avatar initials={displayInitials} color={chat.avatarColor} size="sm" online={chat.online} />
           <div className="flex-1 min-w-0">
-            <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{chat.name}</h2>
+            <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
             <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
               {isTyping ? (
                 <>
