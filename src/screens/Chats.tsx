@@ -170,7 +170,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
 
       {/* Список чатов */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
-        <div className="space-y-2">
+        <div className="space-y-3">
           {filtered.map((chat, i) => {
             const isSelected = selectedIds.includes(chat.id);
             return (
@@ -188,7 +188,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     onOpenChat(chat);
                   }
                 }}
-                className={`w-full h-20 flex items-center gap-4 px-4 py-3 rounded-2xl text-left btn-3d ${
+                className={`w-full h-24 flex items-center gap-4 px-4 py-4 rounded-2xl text-left btn-3d ${
                   isSelected ? 'ring-2 ring-[#6546C7]' : ''
                 }`}
                 style={{
@@ -227,7 +227,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 <Avatar
                   initials={chat.initials}
                   color={chat.avatarColor}
-                  size="md"
+                  size="lg"
                   online={chat.online}
                   ringColor={chat.online ? '#4FD3C8' : undefined}
                 />
@@ -235,7 +235,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   <div className="flex items-center justify-between gap-2">
                     <h3
                       className="font-heading font-bold text-sevchik-text truncate"
-                      style={{ fontSize: `${fontSize}px` }}
+                      style={{ fontSize: `${fontSize + 2}px` }}
                     >
                       {chat.name}
                     </h3>
@@ -246,7 +246,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       {chat.time}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between gap-2 mt-1">
+                  <div className="flex items-center justify-between gap-2 mt-1.5">
                     <p
                       className="text-sm text-sevchik-textSecondary font-body truncate"
                       style={{ fontSize: `${fontSize}px` }}
@@ -255,7 +255,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     </p>
                     {chat.unread > 0 && (
                       <span
-                        className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[22px] h-[22px] px-1.5 flex items-center justify-center"
+                        className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[26px] h-[26px] px-2 flex items-center justify-center"
                         style={{
                           background: '#6546C7',
                           boxShadow: '0 3px 10px rgba(101,70,199,0.18)',

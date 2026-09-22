@@ -27,12 +27,23 @@ function App() {
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [fontSize, setFontSize] = useState<number>(16);
-  const [grayMode, setGrayMode] = useState<boolean>(() => {
-    return localStorage.getItem('grayMode') === 'true';
+  const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('sevchik_themeMode');
+    return saved === 'light' || saved === 'dark' ? saved : 'system';
   });
+  const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(() => {
+    return typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+  const grayMode = themeMode === 'dark' || (themeMode === 'system' && systemPrefersDark);
   const [selectedTheme, setSelectedTheme] = useState<string>(() => {
     const saved = localStorage.getItem('selectedTheme');
     return saved || 'spring';
+  });
+  const [soundsEnabled, setSoundsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('sevchik_sounds') !== 'false';
+  });
+  const [hapticsEnabled, setHapticsEnabled] = useState<boolean>(() => {
+    return localStorage.getItem('sevchik_haptics') !== 'false';
   });
 
   // Проверка текущей сессии Supabase при загрузке приложения
@@ -58,11 +69,17 @@ function App() {
     setSelectedTheme(savedTheme);
   }, []);
 
-  // Восстановление серого режима при загрузке
+  // Применение тёмного/серого режима при изменении вычисленного значения
   useEffect(() => {
-    if (grayMode) {
-      document.documentElement.classList.add('gray-theme');
-    }
+    document.documentElement.classList.toggle('gray-theme', grayMode);
+  }, [grayMode]);
+
+  // Слежение за системной темой (для режима "Системная")
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => setSystemPrefersDark(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
   }, []);
 
   // Сохранение темы при изменении
@@ -70,10 +87,19 @@ function App() {
     localStorage.setItem('selectedTheme', selectedTheme);
   }, [selectedTheme]);
 
-  // Сохранение серого режима при изменении
+  // Сохранение режима оформления (системная/светлая/тёмная) при изменении
   useEffect(() => {
-    localStorage.setItem('grayMode', String(grayMode));
-  }, [grayMode]);
+    localStorage.setItem('sevchik_themeMode', themeMode);
+  }, [themeMode]);
+
+  // Сохранение настроек звука и вибрации при изменении
+  useEffect(() => {
+    localStorage.setItem('sevchik_sounds', String(soundsEnabled));
+  }, [soundsEnabled]);
+
+  useEffect(() => {
+    localStorage.setItem('sevchik_haptics', String(hapticsEnabled));
+  }, [hapticsEnabled]);
 
   const handleOpenChat = (chat: Chat) => {
     setActiveChat(chat);
@@ -102,15 +128,6 @@ function App() {
     setProfileData({});
     setScreen('chats');
     setActiveChat(null);
-  };
-
-  const updateGrayMode = (value: boolean) => {
-    setGrayMode(value);
-    if (value) {
-      document.documentElement.classList.add('gray-theme');
-    } else {
-      document.documentElement.classList.remove('gray-theme');
-    }
   };
 
   const handleTabNavigate = (tab: Screen) => {
@@ -153,7 +170,13 @@ function App() {
               />
             )}
             {screen === 'conversation' && activeChat && (
-              <Conversation chat={activeChat} onBack={() => setScreen('chats')} fontSize={fontSize} />
+              <Conversation
+                chat={activeChat}
+                onBack={() => setScreen('chats')}
+                fontSize={fontSize}
+                soundsEnabled={soundsEnabled}
+                hapticsEnabled={hapticsEnabled}
+              />
             )}
             {screen === 'contacts' && <Friends onWriteMessage={handleWriteToName} />}
             {screen === 'calls' && <Calls onNavigate={setScreen} />}
@@ -181,8 +204,12 @@ function App() {
                 setFontSize={setFontSize}
                 selectedTheme={selectedTheme}
                 setSelectedTheme={setSelectedTheme}
-                grayMode={grayMode}
-                setGrayMode={updateGrayMode}
+                themeMode={themeMode}
+                setThemeMode={setThemeMode}
+                soundsEnabled={soundsEnabled}
+                setSoundsEnabled={setSoundsEnabled}
+                hapticsEnabled={hapticsEnabled}
+                setHapticsEnabled={setHapticsEnabled}
               />
             )}
           </motion.div>

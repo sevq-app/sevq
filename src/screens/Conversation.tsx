@@ -6,11 +6,14 @@ import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
 import { chats } from '@/data/mock';
 import type { Chat, Message } from '@/data/mock';
+import { playSound, triggerHaptic } from '@/lib/feedback';
 
 interface ConversationProps {
   chat: Chat;
   onBack: () => void;
   fontSize: number;
+  soundsEnabled: boolean;
+  hapticsEnabled: boolean;
 }
 
 // Компонент голосового сообщения
@@ -82,7 +85,7 @@ function VoiceMessageBubble({ duration, time, isMe, read }: { duration: string; 
   );
 }
 
-export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
+export function Conversation({ chat, onBack, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
   const [messages, setMessages] = useState<Message[]>(chat.messages);
   const [input, setInput] = useState('');
   const [showMenu, setShowMenu] = useState(false);
@@ -133,6 +136,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     };
     setMessages(prev => [...prev, msg]);
     setInput('');
+    if (soundsEnabled) playSound('send');
+    if (hapticsEnabled) triggerHaptic(12);
     setTimeout(() => {
       const reply: Message = {
         id: `m-${Date.now()}-r`,
@@ -141,6 +146,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
         time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages(prev => [...prev, reply]);
+      if (soundsEnabled) playSound('receive');
+      if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
     }, 1500);
   };
 
@@ -265,6 +272,7 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     holdTimeoutRef.current = setTimeout(() => {
       setIsRecording(true);
       setRecordingTime(0);
+      if (hapticsEnabled) triggerHaptic(15);
     }, 300);
   };
 
@@ -285,7 +293,9 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
       setMessages(prev => [...prev, voiceMsg]);
       setIsRecording(false);
       setRecordingTime(0);
-      
+      if (soundsEnabled) playSound('send');
+      if (hapticsEnabled) triggerHaptic(12);
+
       setTimeout(() => {
         const reply: Message = {
           id: `voice-${Date.now()}-r`,
@@ -294,6 +304,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
           time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
         };
         setMessages(prev => [...prev, reply]);
+        if (soundsEnabled) playSound('receive');
+        if (hapticsEnabled) triggerHaptic([0, 12, 40, 12]);
       }, 1500);
     } else {
       setShowHoldHint(true);
@@ -324,6 +336,8 @@ export function Conversation({ chat, onBack, fontSize }: ConversationProps) {
     };
     setMessages((prev) => [...prev, msg]);
     setShowStickerPanel(false);
+    if (soundsEnabled) playSound('send');
+    if (hapticsEnabled) triggerHaptic(12);
   };
 
   return (
