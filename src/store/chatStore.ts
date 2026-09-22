@@ -16,7 +16,10 @@ interface ChatStore {
   updateMessageStatus: (chatId: string, messageId: string, status: DeliveryStatus) => void;
   markAllMineRead: (chatId: string) => void;
   deleteMessage: (chatId: string, messageId: string) => void;
+  deleteMessages: (chatId: string, messageIds: string[]) => void;
+  editMessage: (chatId: string, messageId: string, newText: string) => void;
   markChatsRead: (chatIds: string[]) => void;
+  markChatUnread: (chatId: string) => void;
   deleteChats: (chatIds: string[]) => void;
   forwardMessageToChats: (chatIds: string[], text: string) => void;
 }
@@ -54,9 +57,30 @@ export const useChatStore = create<ChatStore>((set) => ({
       ),
     })),
 
+  deleteMessages: (chatId, messageIds) =>
+    set((state) => ({
+      chats: state.chats.map((c) =>
+        c.id === chatId ? { ...c, messages: c.messages.filter((m) => !messageIds.includes(m.id)) } : c
+      ),
+    })),
+
+  editMessage: (chatId, messageId, newText) =>
+    set((state) => ({
+      chats: state.chats.map((c) =>
+        c.id === chatId
+          ? { ...c, messages: c.messages.map((m) => (m.id === messageId ? { ...m, text: newText, edited: true } : m)) }
+          : c
+      ),
+    })),
+
   markChatsRead: (chatIds) =>
     set((state) => ({
       chats: state.chats.map((c) => (chatIds.includes(c.id) ? { ...c, unread: 0 } : c)),
+    })),
+
+  markChatUnread: (chatId) =>
+    set((state) => ({
+      chats: state.chats.map((c) => (c.id === chatId ? { ...c, unread: Math.max(c.unread, 1) } : c)),
     })),
 
   deleteChats: (chatIds) =>

@@ -28,6 +28,8 @@ export interface Message {
   time: string;
   date?: string;
   status?: DeliveryStatus;
+  edited?: boolean;
+  replyTo?: { text: string; senderName: string };
 }
 
 export interface Chat {
