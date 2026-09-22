@@ -9,6 +9,8 @@ export interface RemoteProfile {
   id: string;
   email: string;
   full_name: string | null;
+  username: string | null;
+  phone: string | null;
 }
 
 export interface RemoteMessage {
@@ -30,11 +32,42 @@ async function requireUserId(): Promise<string> {
 export async function findProfileByEmail(email: string): Promise<RemoteProfile | null> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, email, full_name')
+    .select('id, email, full_name, username, phone')
     .ilike('email', email.trim())
     .maybeSingle();
   if (error || !data) return null;
   return data as RemoteProfile;
+}
+
+/** Обновляет собственную запись в profiles (никнейм, телефон, имя) — вызывается при сохранении "О себе". */
+export async function upsertMyProfile(fields: { full_name?: string; username?: string; phone?: string }): Promise<void> {
+  const { data: userData } = await supabase.auth.getUser();
+  const me = userData.user;
+  if (!me) return;
+  await supabase.from('profiles').upsert({
+    id: me.id,
+    email: me.email,
+    full_name: fields.full_name || null,
+    username: fields.username || null,
+    phone: fields.phone || null,
+  });
+}
+
+/** Ищет реальных пользователей по имени, никнейму, телефону или email (частичное совпадение). */
+export async function searchProfiles(query: string): Promise<RemoteProfile[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const myId = await requireUserId().catch(() => null);
+  const pattern = `%${q}%`;
+  let request = supabase
+    .from('profiles')
+    .select('id, email, full_name, username, phone')
+    .or(`full_name.ilike.${pattern},username.ilike.${pattern},phone.ilike.${pattern},email.ilike.${pattern}`)
+    .limit(20);
+  if (myId) request = request.neq('id', myId);
+  const { data, error } = await request;
+  if (error || !data) return [];
+  return data as RemoteProfile[];
 }
 
 /** Возвращает id уже существующего личного чата с пользователем либо создаёт новый. */
