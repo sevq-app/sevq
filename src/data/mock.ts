@@ -207,6 +207,19 @@ export const chats: Chat[] = [
       { id: 'm1', senderId: 'c7', text: 'Давай созвонимся вечером', time: '18:00', date: isoDaysAgo(3) },
     ],
   },
+  {
+    id: 'c8',
+    name: 'Ульяна',
+    avatarColor: '#FF6B6B',
+    initials: 'УЛ',
+    lastMessage: 'Привет! Тестирую приложение 🙂',
+    time: '12:00',
+    unread: 1,
+    online: true,
+    messages: [
+      { id: 'm1', senderId: 'c8', text: 'Привет! Тестирую приложение 🙂', time: '12:00', date: isoDaysAgo(0) },
+    ],
+  },
 ];
 
 // Результаты поиска (для экрана Search)
