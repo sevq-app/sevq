@@ -5,35 +5,32 @@ interface QLogoProps {
   /** Plays the idle look-around + smile loop. Off by default (static resting pose). */
   animate?: boolean;
   /**
-   * 'light' — тело фиолетовое, чёткая серо-фиолетовая окантовка — для светлого/кремового фона.
-   * 'dark' — тело и ножки белые, окантовки нет — для тёмного/цветного фона.
+   * 'light' — акцентный цвет (окантовка тела, ножки, окантовка глаз, рот) фиолетовый —
+   * для светлого/кремового фона.
+   * 'dark' — акцентный цвет белый — для тёмного/цветного фона.
    * 'system' (по умолчанию) — переключается автоматически по системной теме устройства
    * через `@media (prefers-color-scheme: dark)`, без участия JS.
    */
   theme?: 'light' | 'dark' | 'system';
 }
 
-const LIGHT_VARS = {
-  '--qlogo-body': '#6546C7',
-  '--qlogo-outline-width': '5px',
-  '--qlogo-outline-color': '#C9C0E6',
-};
-const DARK_VARS = {
-  '--qlogo-body': '#FFFFFF',
-  '--qlogo-outline-width': '0px',
-  '--qlogo-outline-color': '#FFFFFF',
+const ACCENT = {
+  light: '#6546C7',
+  dark: '#FFFFFF',
 };
 
 /**
  * Севчик — талисман приложения: кольцо-голова, две ножки, глаза со зрачками и звёздочка.
- * При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку и обратно.
- * Цвет тела/ножек и окантовки задаётся CSS-переменными --qlogo-body/--qlogo-outline-color/
- * --qlogo-outline-width, которые переключаются пропом theme — глаза и звезда одинаковые
- * в обеих темах. Никаких blur/glow-фильтров на персонаже нет — окантовка читается только
- * за счёт цвета, без тени.
+ *
+ * Тело персонажа не залито — сквозь него виден фон страницы, видна только окантовка.
+ * Окантовка тела, ножки, тонкая окантовка вокруг глаз и рот — один и тот же акцентный цвет
+ * (--qlogo-accent), переключаемый темой. Глаза (белые с чёрным зрачком) и звезда (оранжевая)
+ * не зависят от темы. Никаких blur/glow-фильтров на персонаже нет — окантовка всегда чёткая
+ * линия. При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку.
  */
 export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoProps) {
   const uid = useId().replace(/:/g, '');
+  const systemClass = `qlogo-system-${uid}`;
 
   const containerStyle: React.CSSProperties = {
     width: size,
@@ -42,30 +39,21 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    // Для 'system' переменные задаются только через класс ниже (в т.ч. под @media) —
-    // инлайн-style имеет более высокий приоритет, чем @media-правило, и перебил бы его.
-    ...(theme === 'system' ? {} : ((theme === 'dark' ? DARK_VARS : LIGHT_VARS) as React.CSSProperties)),
+    // Для 'system' переменная задаётся только через класс ниже (см. <style> с @media) —
+    // инлайн-style имеет более высокий приоритет, чем правило из @media, и перебил бы его.
+    ...(theme === 'system' ? {} : ({ '--qlogo-accent': ACCENT[theme] } as React.CSSProperties)),
   };
 
   const mouthRest = 'M 91 127 Q 100 127 109 127';
   const mouthSmile = 'M 91 121 Q 100 133 109 121';
-  const systemClass = `qlogo-system-${uid}`;
 
   return (
     <div style={containerStyle} className={theme === 'system' ? systemClass : undefined}>
       {theme === 'system' && (
         <style>{`
-          .${systemClass} {
-            --qlogo-body: ${LIGHT_VARS['--qlogo-body']};
-            --qlogo-outline-width: ${LIGHT_VARS['--qlogo-outline-width']};
-            --qlogo-outline-color: ${LIGHT_VARS['--qlogo-outline-color']};
-          }
+          .${systemClass} { --qlogo-accent: ${ACCENT.light}; }
           @media (prefers-color-scheme: dark) {
-            .${systemClass} {
-              --qlogo-body: ${DARK_VARS['--qlogo-body']};
-              --qlogo-outline-width: ${DARK_VARS['--qlogo-outline-width']};
-              --qlogo-outline-color: ${DARK_VARS['--qlogo-outline-color']};
-            }
+            .${systemClass} { --qlogo-accent: ${ACCENT.dark}; }
           }
         `}</style>
       )}
@@ -95,22 +83,20 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
           </radialGradient>
         </defs>
 
-        {/* Ножки: заливка и окантовка переключаются CSS-переменными темы */}
-        <g fill="var(--qlogo-body)" stroke="var(--qlogo-outline-color)" strokeWidth="var(--qlogo-outline-width)">
+        {/* Ножки: залиты акцентным цветом темы */}
+        <g fill="var(--qlogo-accent)">
           <rect x="50" y="130" width="16" height="42" rx="8" transform="rotate(-32 58 130)" />
           <rect x="134" y="130" width="16" height="42" rx="8" transform="rotate(32 142 130)" />
         </g>
 
-        {/* Кольцо-голова: нижний круг — окантовка (белая на тёмной теме, сероватая на светлой,
-            чтобы читаться на белой карточке), верхний — тело */}
-        <circle cx="100" cy="92" r="58" fill="var(--qlogo-outline-color)" />
-        <circle cx="100" cy="92" r="52" fill="var(--qlogo-body)" />
+        {/* Кольцо-голова: тело не залито, видна только окантовка акцентным цветом */}
+        <circle cx="100" cy="92" r="55" fill="none" stroke="var(--qlogo-accent)" strokeWidth="8" />
 
-        {/* Белая основа глаз — неподвижна */}
-        <ellipse cx="77" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} />
-        <ellipse cx="123" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} />
+        {/* Белая основа глаз с тонкой окантовкой акцентным цветом — не зависит от темы по цвету заливки */}
+        <ellipse cx="77" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" />
+        <ellipse cx="123" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" />
 
-        {/* Зрачки с бликом — "смотрят" */}
+        {/* Чёрные зрачки с бликом — анимированная часть, "смотрят" */}
         <g className={animate ? `qlogo-eyes-${uid}` : undefined} transform={animate ? undefined : 'translate(-7, 5)'}>
           <circle cx="77" cy="92" r="10.5" fill="#1A1522" />
           <circle cx="73" cy="88" r="3.3" fill="#FFFFFF" />
@@ -118,8 +104,9 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
           <circle cx="119" cy="88" r="3.3" fill="#FFFFFF" />
         </g>
 
-        {/* Рот: выгибается из прямой линии в улыбку и обратно, в такт со взглядом */}
-        <path d={mouthRest} fill="none" stroke="#FFFFFF" strokeWidth="4.5" strokeLinecap="round">
+        {/* Рот: акцентным цветом (иначе был бы невидим на светлом фоне сквозь прозрачное тело);
+            выгибается из прямой линии в улыбку и обратно, в такт со взглядом */}
+        <path d={mouthRest} fill="none" stroke="var(--qlogo-accent)" strokeWidth="4.5" strokeLinecap="round">
           {animate && (
             <animate
               attributeName="d"
@@ -133,7 +120,7 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
           )}
         </path>
 
-        {/* Звёздочка: увеличена относительно своего центра, чтобы была заметна */}
+        {/* Звёздочка: всегда оранжевая, не зависит от темы */}
         <path
           fill={`url(#${uid}-star)`}
           transform="translate(162, 33) scale(1.6) translate(-162, -33)"
