@@ -27,10 +27,22 @@ export function QLogo({ size = 64, animate = false, theme = 'dark' }: QLogoProps
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    filter: 'drop-shadow(0 8px 24px rgba(101, 70, 199, 0.3))',
+    filter:
+      theme === 'light'
+        ? 'drop-shadow(0 10px 20px rgba(101, 70, 199, 0.28)) drop-shadow(0 2px 6px rgba(40, 30, 70, 0.18))'
+        : 'drop-shadow(0 8px 24px rgba(101, 70, 199, 0.3))',
     ...(theme === 'light'
-      ? ({ '--qlogo-body': '#6546C7', '--qlogo-outline-width': '5px' } as React.CSSProperties)
-      : ({ '--qlogo-body': '#FFFFFF', '--qlogo-outline-width': '0px' } as React.CSSProperties)),
+      ? ({
+          '--qlogo-body': '#6546C7',
+          '--qlogo-outline-width': '5px',
+          // Чисто белая окантовка не читается на белой карточке — берём лёгкий серо-фиолетовый оттенок
+          '--qlogo-outline-color': '#DCD6EE',
+        } as React.CSSProperties)
+      : ({
+          '--qlogo-body': '#FFFFFF',
+          '--qlogo-outline-width': '0px',
+          '--qlogo-outline-color': '#FFFFFF',
+        } as React.CSSProperties)),
   };
 
   const mouthRest = 'M 91 127 Q 100 127 109 127';
@@ -65,14 +77,14 @@ export function QLogo({ size = 64, animate = false, theme = 'dark' }: QLogoProps
         </defs>
 
         {/* Ножки: заливка и окантовка переключаются CSS-переменными темы */}
-        <g fill="var(--qlogo-body)" stroke="#FFFFFF" strokeWidth="var(--qlogo-outline-width)">
+        <g fill="var(--qlogo-body)" stroke="var(--qlogo-outline-color)" strokeWidth="var(--qlogo-outline-width)">
           <rect x="50" y="130" width="16" height="42" rx="8" transform="rotate(-32 58 130)" />
           <rect x="134" y="130" width="16" height="42" rx="8" transform="rotate(32 142 130)" />
         </g>
 
-        {/* Кольцо-голова: белый круг снизу всегда виден как окантовка на тёмной теме (сливается с телом)
-            и как контур на светлой теме, когда верхний круг становится фиолетовым */}
-        <circle cx="100" cy="92" r="58" fill="#FFFFFF" />
+        {/* Кольцо-голова: нижний круг — окантовка (белая на тёмной теме, сероватая на светлой,
+            чтобы читаться на белой карточке), верхний — тело */}
+        <circle cx="100" cy="92" r="58" fill="var(--qlogo-outline-color)" />
         <circle cx="100" cy="92" r="52" fill="var(--qlogo-body)" />
 
         {/* Белая основа глаз — неподвижна */}
@@ -102,9 +114,10 @@ export function QLogo({ size = 64, animate = false, theme = 'dark' }: QLogoProps
           )}
         </path>
 
-        {/* Звёздочка */}
+        {/* Звёздочка: увеличена относительно своего центра, чтобы была заметна */}
         <path
           fill={`url(#${uid}-star)`}
+          transform="translate(162, 33) scale(1.6) translate(-162, -33)"
           d="
             M 162.63 10.933
             L 166.189 27.496
