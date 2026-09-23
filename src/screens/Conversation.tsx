@@ -8,6 +8,8 @@ import type { Message, DeliveryStatus } from '@/data/mock';
 import { playSound, triggerHaptic } from '@/lib/feedback';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
+import { supabase } from '@/lib/supabase';
+import { fetchMessages, sendRealMessage, subscribeToChatMessages, type RemoteMessage } from '@/lib/messagingService';
 
 interface ConversationProps {
   chatId: string;
@@ -229,6 +231,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const toggleReaction = useChatStore((s) => s.toggleReaction);
   const markChatUnread = useChatStore((s) => s.markChatUnread);
   const forwardMessageToChats = useChatStore((s) => s.forwardMessageToChats);
+  const setChatMessages = useChatStore((s) => s.setChatMessages);
+  const appendIncomingMessage = useChatStore((s) => s.appendIncomingMessage);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -266,6 +270,43 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Реальный чат (Supabase): подгружаем историю и подписываемся на новые
+  // сообщения через Realtime — вместо локальной заглушки-автоответа.
+  useEffect(() => {
+    if (!chat?.isReal || !chat.remoteChatId) return;
+    const remoteChatId = chat.remoteChatId;
+    const contactSenderId = chat.remoteUserId;
+    let cancelled = false;
+
+    const toLocalMessage = (m: RemoteMessage, myId: string | undefined): Message => ({
+      id: m.id,
+      senderId: m.sender_id === myId ? 'me' : chat.id,
+      text: m.text,
+      time: new Date(m.created_at).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
+      date: m.created_at.slice(0, 10),
+    });
+
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const myId = userData.user?.id;
+      const history = await fetchMessages(remoteChatId);
+      if (cancelled) return;
+      setChatMessages(chat.id, history.map((m) => toLocalMessage(m, myId)));
+    })();
+
+    const unsubscribe = subscribeToChatMessages(remoteChatId, async (m) => {
+      const { data: userData } = await supabase.auth.getUser();
+      const myId = userData.user?.id;
+      appendIncomingMessage(chat.id, toLocalMessage(m, myId));
+      if (m.sender_id === contactSenderId && soundsEnabled) playSound('receive');
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [chat?.isReal, chat?.remoteChatId, chat?.remoteUserId, chat?.id, setChatMessages, appendIncomingMessage, soundsEnabled]);
 
   useEffect(() => {
     if (isRecording) {
@@ -312,20 +353,29 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       return;
     }
 
+    const text = input.trim();
+    setInput('');
+    setReplyTo(null);
+    if (soundsEnabled) playSound('send');
+    if (hapticsEnabled) triggerHaptic(12);
+
+    // Реальный чат: сообщение уходит в Supabase, а не в мок-стор — оно
+    // появится у обеих сторон через realtime-подписку выше.
+    if (chat.isReal && chat.remoteChatId) {
+      sendRealMessage(chat.remoteChatId, text).catch((e) => console.error('Не удалось отправить сообщение:', e));
+      return;
+    }
+
     const msg: Message = {
       id: `m-${Date.now()}`,
       senderId: 'me',
-      text: input.trim(),
+      text,
       time: new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       date: todayIso(),
       status: 'sent',
       replyTo: getReplySnapshot(),
     };
     sendMessage(chat.id, msg);
-    setInput('');
-    setReplyTo(null);
-    if (soundsEnabled) playSound('send');
-    if (hapticsEnabled) triggerHaptic(12);
     if (isFavoritesChat) {
       setTimeout(() => updateMessageStatus(chat.id, msg.id, 'read'), 300);
       return;

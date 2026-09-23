@@ -16,6 +16,7 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { upsertMyProfile } from '@/lib/messagingService';
 
 const storageKey = 'sevchik-about-me';
 const profileStorageKey = 'sevchik-profile-data';
@@ -153,7 +154,14 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
     };
     localStorage.setItem(profileStorageKey, JSON.stringify(profileData));
     setProfileData(profileData);
-    if (user) await supabase.auth.updateUser({ data });
+    if (user) {
+      await supabase.auth.updateUser({ data });
+      await upsertMyProfile({
+        full_name: `${data.firstName} ${data.lastName}`.trim(),
+        username: data.username,
+        phone: data.phone,
+      });
+    }
     setSaving(false);
     onBack();
   };

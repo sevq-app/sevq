@@ -20,12 +20,12 @@ export function Friends({ onWriteMessage }: FriendsProps) {
 
   const filteredFriends = friendsData.filter(friend =>
     friend.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    friend.handle.toLowerCase().includes(searchQuery.toLowerCase())
+    friend.phone.includes(searchQuery)
   );
 
   const filteredForSelection = friendsData.filter(friend =>
     friend.name.toLowerCase().includes(groupSearch.toLowerCase()) ||
-    friend.handle.toLowerCase().includes(groupSearch.toLowerCase())
+    friend.phone.includes(groupSearch)
   );
 
   const handleConnectContacts = () => {
@@ -153,7 +153,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Поиск по имени или никнейму"
+              placeholder="Поиск по имени или номеру"
               className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
@@ -217,7 +217,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-heading font-bold text-[#1A1A1A] text-sm truncate">{friend.name}</h3>
-                    <p className="text-xs text-[#6B7280] font-body mt-0.5">{friend.handle}</p>
+                    <p className="text-xs text-[#6B7280] font-body mt-0.5">{friend.phone}</p>
                   </div>
                   {friend.online && (
                     <div className="flex items-center gap-1.5">
@@ -323,7 +323,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               type="text"
               value={groupSearch}
               onChange={(e) => setGroupSearch(e.target.value)}
-              placeholder="Найти по имени"
+              placeholder="Найти по имени или номеру"
               className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
@@ -371,7 +371,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <h3 className="font-heading font-bold text-[#1A1A1A] text-sm truncate">{friend.name}</h3>
-                    <p className="text-xs text-[#6B7280] font-body mt-0.5">{friend.handle}</p>
+                    <p className="text-xs text-[#6B7280] font-body mt-0.5">{friend.phone}</p>
                   </div>
                   {/* Галочка выбора */}
                   <div
