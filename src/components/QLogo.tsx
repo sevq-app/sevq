@@ -5,19 +5,34 @@ interface QLogoProps {
   /** Plays the idle look-around + smile loop. Off by default (static resting pose). */
   animate?: boolean;
   /**
-   * 'dark' (по умолчанию) — тело и ножки белые, для тёмного/цветного фона.
-   * 'light' — тело и ножки фиолетовые с белой окантовкой, для светлого/кремового фона.
+   * 'light' — тело фиолетовое, чёткая серо-фиолетовая окантовка — для светлого/кремового фона.
+   * 'dark' — тело и ножки белые, окантовки нет — для тёмного/цветного фона.
+   * 'system' (по умолчанию) — переключается автоматически по системной теме устройства
+   * через `@media (prefers-color-scheme: dark)`, без участия JS.
    */
-  theme?: 'dark' | 'light';
+  theme?: 'light' | 'dark' | 'system';
 }
+
+const LIGHT_VARS = {
+  '--qlogo-body': '#6546C7',
+  '--qlogo-outline-width': '5px',
+  '--qlogo-outline-color': '#C9C0E6',
+};
+const DARK_VARS = {
+  '--qlogo-body': '#FFFFFF',
+  '--qlogo-outline-width': '0px',
+  '--qlogo-outline-color': '#FFFFFF',
+};
 
 /**
  * Севчик — талисман приложения: кольцо-голова, две ножки, глаза со зрачками и звёздочка.
  * При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку и обратно.
- * Цвет тела/ножек и окантовки задаётся CSS-переменными --qlogo-body/--qlogo-outline-width,
- * которые переключаются пропом theme — глаза и звезда одинаковые в обеих темах.
+ * Цвет тела/ножек и окантовки задаётся CSS-переменными --qlogo-body/--qlogo-outline-color/
+ * --qlogo-outline-width, которые переключаются пропом theme — глаза и звезда одинаковые
+ * в обеих темах. Никаких blur/glow-фильтров на персонаже нет — окантовка читается только
+ * за счёт цвета, без тени.
  */
-export function QLogo({ size = 64, animate = false, theme = 'dark' }: QLogoProps) {
+export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoProps) {
   const uid = useId().replace(/:/g, '');
 
   const containerStyle: React.CSSProperties = {
@@ -27,29 +42,33 @@ export function QLogo({ size = 64, animate = false, theme = 'dark' }: QLogoProps
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    filter:
-      theme === 'light'
-        ? 'drop-shadow(0 10px 20px rgba(101, 70, 199, 0.28)) drop-shadow(0 2px 6px rgba(40, 30, 70, 0.18))'
-        : 'drop-shadow(0 8px 24px rgba(101, 70, 199, 0.3))',
-    ...(theme === 'light'
-      ? ({
-          '--qlogo-body': '#6546C7',
-          '--qlogo-outline-width': '5px',
-          // Чисто белая окантовка не читается на белой карточке — берём лёгкий серо-фиолетовый оттенок
-          '--qlogo-outline-color': '#DCD6EE',
-        } as React.CSSProperties)
-      : ({
-          '--qlogo-body': '#FFFFFF',
-          '--qlogo-outline-width': '0px',
-          '--qlogo-outline-color': '#FFFFFF',
-        } as React.CSSProperties)),
+    // Для 'system' переменные задаются только через класс ниже (в т.ч. под @media) —
+    // инлайн-style имеет более высокий приоритет, чем @media-правило, и перебил бы его.
+    ...(theme === 'system' ? {} : ((theme === 'dark' ? DARK_VARS : LIGHT_VARS) as React.CSSProperties)),
   };
 
   const mouthRest = 'M 91 127 Q 100 127 109 127';
   const mouthSmile = 'M 91 121 Q 100 133 109 121';
+  const systemClass = `qlogo-system-${uid}`;
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} className={theme === 'system' ? systemClass : undefined}>
+      {theme === 'system' && (
+        <style>{`
+          .${systemClass} {
+            --qlogo-body: ${LIGHT_VARS['--qlogo-body']};
+            --qlogo-outline-width: ${LIGHT_VARS['--qlogo-outline-width']};
+            --qlogo-outline-color: ${LIGHT_VARS['--qlogo-outline-color']};
+          }
+          @media (prefers-color-scheme: dark) {
+            .${systemClass} {
+              --qlogo-body: ${DARK_VARS['--qlogo-body']};
+              --qlogo-outline-width: ${DARK_VARS['--qlogo-outline-width']};
+              --qlogo-outline-color: ${DARK_VARS['--qlogo-outline-color']};
+            }
+          }
+        `}</style>
+      )}
       {animate && (
         <style>{`
           @keyframes qlogoLook-${uid} {
