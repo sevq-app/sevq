@@ -6,6 +6,7 @@ import type { Screen } from '@/data/mock';
 interface SidebarProps {
   current: Screen;
   onNavigate: (s: Screen) => void;
+  grayMode?: boolean;
 }
 
 // НОВЫЙ ПОРЯДОК: Контакты → Звонки → Чаты → Мой Севчик
@@ -16,11 +17,11 @@ const navItems: { key: Screen; label: string; icon: React.ElementType }[] = [
   { key: 'profile', label: 'Мой Севчик', icon: User },
 ];
 
-export function Sidebar({ current, onNavigate }: SidebarProps) {
+export function Sidebar({ current, onNavigate, grayMode = false }: SidebarProps) {
   return (
     <div className="hidden md:flex flex-col w-20 lg:w-64 py-6 px-3 shrink-0 h-screen sticky top-0 z-30">
       <div className="mb-8 flex items-center gap-3 px-2">
-        <QLogo size={44} />
+        <QLogo size={44} animate theme={grayMode ? 'dark' : 'light'} />
         <span className="hidden lg:block font-heading font-extrabold text-2xl text-sevchik-text">Севчик</span>
       </div>
       <nav className="flex flex-col gap-2.5 flex-1">
