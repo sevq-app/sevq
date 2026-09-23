@@ -74,20 +74,22 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
             transform-origin: center;
             animation: qlogoLook-${uid} 5s ease-in-out infinite;
           }
-          /* Искра: медленный мягкий пульс размера/прозрачности + более быстрое лёгкое мерцание
-             яркости поверх него — сдержанная, ненавязчивая амплитуда, не отвлекает от полей ввода. */
+          /* Искра: медленный пульс размера/прозрачности + более быстрое мерцание яркости поверх
+             него — амплитуда сделана заметной на глаз (маленькая звёздочка иначе просто не читает
+             тонкие колебания), но короткого 3–4-секундного цикла достаточно, чтобы не отвлекать. */
           @keyframes qlogoStarPulse-${uid} {
-            0%, 100% { transform: scale(1); opacity: 0.95; }
-            50%      { transform: scale(1.07); opacity: 1; }
+            0%, 100% { transform: scale(0.88); opacity: 0.75; }
+            50%      { transform: scale(1.22); opacity: 1; }
           }
           @keyframes qlogoStarFlicker-${uid} {
             0%, 100% { filter: brightness(1); }
-            25%      { filter: brightness(0.93); }
-            55%      { filter: brightness(1.05); }
-            80%      { filter: brightness(0.96); }
+            20%      { filter: brightness(0.8); }
+            45%      { filter: brightness(1.3); }
+            70%      { filter: brightness(0.85); }
+            88%      { filter: brightness(1.15); }
           }
           .qlogo-star-${uid} {
-            animation: qlogoStarPulse-${uid} 3.2s ease-in-out infinite, qlogoStarFlicker-${uid} 2.1s ease-in-out infinite;
+            animation: qlogoStarPulse-${uid} 2.6s ease-in-out infinite, qlogoStarFlicker-${uid} 1.4s ease-in-out infinite;
           }
         `}</style>
       )}
@@ -101,8 +103,8 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
         }
         .qlogo-star-${uid}:hover {
           animation: none;
-          transform: scale(1.18);
-          filter: brightness(1.25);
+          transform: scale(1.4);
+          filter: brightness(1.5);
         }
       `}</style>
       <svg width={size} height={size} viewBox="0 0 200 200" fill="none" style={{ overflow: 'visible' }}>
