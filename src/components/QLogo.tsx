@@ -4,13 +4,20 @@ interface QLogoProps {
   size?: number;
   /** Plays the idle look-around + smile loop. Off by default (static resting pose). */
   animate?: boolean;
+  /**
+   * 'dark' (по умолчанию) — тело и ножки белые, для тёмного/цветного фона.
+   * 'light' — тело и ножки фиолетовые с белой окантовкой, для светлого/кремового фона.
+   */
+  theme?: 'dark' | 'light';
 }
 
 /**
  * Севчик — талисман приложения: кольцо-голова, две ножки, глаза со зрачками и звёздочка.
  * При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку и обратно.
+ * Цвет тела/ножек и окантовки задаётся CSS-переменными --qlogo-body/--qlogo-outline-width,
+ * которые переключаются пропом theme — глаза и звезда одинаковые в обеих темах.
  */
-export function QLogo({ size = 64, animate = false }: QLogoProps) {
+export function QLogo({ size = 64, animate = false, theme = 'dark' }: QLogoProps) {
   const uid = useId().replace(/:/g, '');
 
   const containerStyle: React.CSSProperties = {
@@ -21,6 +28,9 @@ export function QLogo({ size = 64, animate = false }: QLogoProps) {
     alignItems: 'center',
     justifyContent: 'center',
     filter: 'drop-shadow(0 8px 24px rgba(101, 70, 199, 0.3))',
+    ...(theme === 'light'
+      ? ({ '--qlogo-body': '#6546C7', '--qlogo-outline-width': '5px' } as React.CSSProperties)
+      : ({ '--qlogo-body': '#FFFFFF', '--qlogo-outline-width': '0px' } as React.CSSProperties)),
   };
 
   const mouthRest = 'M 91 127 Q 100 127 109 127';
@@ -44,11 +54,6 @@ export function QLogo({ size = 64, animate = false }: QLogoProps) {
       )}
       <svg width={size} height={size} viewBox="0 0 200 200" fill="none" style={{ overflow: 'visible' }}>
         <defs>
-          <linearGradient id={`${uid}-purple`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8366D9" />
-            <stop offset="55%" stopColor="#6546C7" />
-            <stop offset="100%" stopColor="#4E35A5" />
-          </linearGradient>
           <linearGradient id={`${uid}-star`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#FFB87A" />
             <stop offset="100%" stopColor="#E8802F" />
@@ -59,15 +64,16 @@ export function QLogo({ size = 64, animate = false }: QLogoProps) {
           </radialGradient>
         </defs>
 
-        {/* Ножки */}
-        <g fill="#FFFFFF">
+        {/* Ножки: заливка и окантовка переключаются CSS-переменными темы */}
+        <g fill="var(--qlogo-body)" stroke="#FFFFFF" strokeWidth="var(--qlogo-outline-width)">
           <rect x="50" y="130" width="16" height="42" rx="8" transform="rotate(-32 58 130)" />
           <rect x="134" y="130" width="16" height="42" rx="8" transform="rotate(32 142 130)" />
         </g>
 
-        {/* Кольцо-голова */}
+        {/* Кольцо-голова: белый круг снизу всегда виден как окантовка на тёмной теме (сливается с телом)
+            и как контур на светлой теме, когда верхний круг становится фиолетовым */}
         <circle cx="100" cy="92" r="58" fill="#FFFFFF" />
-        <circle cx="100" cy="92" r="52" fill={`url(#${uid}-purple)`} />
+        <circle cx="100" cy="92" r="52" fill="var(--qlogo-body)" />
 
         {/* Белая основа глаз — неподвижна */}
         <ellipse cx="77" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} />

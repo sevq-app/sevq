@@ -157,7 +157,7 @@ function App() {
   return (
     <div className={`h-screen w-screen overflow-hidden ${grayMode ? 'gray-theme' : ''}`}>
       <div className="h-full w-full flex bg-[var(--bg-main)]">
-        {showTabBar && <Sidebar current={screen} onNavigate={handleTabNavigate} />}
+        {showTabBar && <Sidebar current={screen} onNavigate={handleTabNavigate} grayMode={grayMode} />}
         <div className="h-full w-full flex flex-col overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
