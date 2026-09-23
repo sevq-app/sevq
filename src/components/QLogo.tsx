@@ -29,8 +29,9 @@ const PUPIL_COLOR = '#6546C7';
  * (--qlogo-accent), переключаемый темой; сам персонаж простой и чистый, без свечения на себе.
  * Глубину даёт мягкий размытый ореол ПОЗАДИ персонажа (того же акцентного цвета) — единственное
  * место, где используется blur. Глаза (белый белок, фиолетовый зрачок с белым бликом) и звезда
- * (оранжевая) не зависят от темы. При animate=true зрачки поглядывают на звезду, а рот в такт
- * выгибается в улыбку.
+ * (оранжевая) не зависят от темы. При animate=true зрачки поглядывают на звезду, рот в такт
+ * выгибается в улыбку, а звезда мягко пульсирует и мерцает ("Искра"); наведение курсора на
+ * звезду увеличивает и осветляет её независимо от animate.
  */
 export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoProps) {
   const uid = useId().replace(/:/g, '');
@@ -73,8 +74,37 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
             transform-origin: center;
             animation: qlogoLook-${uid} 5s ease-in-out infinite;
           }
+          /* Искра: медленный мягкий пульс размера/прозрачности + более быстрое лёгкое мерцание
+             яркости поверх него — сдержанная, ненавязчивая амплитуда, не отвлекает от полей ввода. */
+          @keyframes qlogoStarPulse-${uid} {
+            0%, 100% { transform: scale(1); opacity: 0.95; }
+            50%      { transform: scale(1.07); opacity: 1; }
+          }
+          @keyframes qlogoStarFlicker-${uid} {
+            0%, 100% { filter: brightness(1); }
+            25%      { filter: brightness(0.93); }
+            55%      { filter: brightness(1.05); }
+            80%      { filter: brightness(0.96); }
+          }
+          .qlogo-star-${uid} {
+            animation: qlogoStarPulse-${uid} 3.2s ease-in-out infinite, qlogoStarFlicker-${uid} 2.1s ease-in-out infinite;
+          }
         `}</style>
       )}
+      <style>{`
+        /* Наведение работает независимо от animate — звезда чуть увеличивается и становится ярче */
+        .qlogo-star-${uid} {
+          transform-box: fill-box;
+          transform-origin: center;
+          cursor: pointer;
+          transition: transform 0.25s ease-out, filter 0.25s ease-out;
+        }
+        .qlogo-star-${uid}:hover {
+          animation: none;
+          transform: scale(1.18);
+          filter: brightness(1.25);
+        }
+      `}</style>
       <svg width={size} height={size} viewBox="0 0 200 200" fill="none" style={{ overflow: 'visible' }}>
         <defs>
           <linearGradient id={`${uid}-star`} x1="0" y1="0" x2="0" y2="1">
@@ -134,30 +164,34 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
           )}
         </path>
 
-        {/* Звёздочка: всегда оранжевая, не зависит от темы */}
-        <path
-          fill={`url(#${uid}-star)`}
-          transform="translate(162, 33) scale(1.05) translate(-162, -33)"
-          d="
-            M 162.63 10.933
-            L 166.189 27.496
-            Q 167.66 34.34, 174.174 36.911
-            L 175.951 37.613
-            Q 182 40, 175.951 42.387
-            L 174.174 43.089
-            Q 167.66 45.66, 164.742 52.023
-            L 163.25 55.273
-            Q 162 58, 160.75 55.273
-            L 159.258 52.023
-            Q 156.34 45.66, 149.826 43.089
-            L 148.049 42.387
-            Q 142 40, 148.049 37.613
-            L 149.826 36.911
-            Q 156.34 34.34, 157.811 27.496
-            L 161.37 10.933
-            Q 162 8, 162.63 10.933
-            Z"
-        />
+        {/* Звёздочка: всегда оранжевая, не зависит от темы. Внешняя группа задаёт базовый
+            размер/позицию (статичный transform-атрибут); анимация "Искра" — на самом path,
+            через CSS transform, чтобы не конфликтовать с базовым атрибутом. */}
+        <g transform="translate(162, 33) scale(1.05) translate(-162, -33)">
+          <path
+            className={`qlogo-star-${uid}`}
+            fill={`url(#${uid}-star)`}
+            d="
+              M 162.63 10.933
+              L 166.189 27.496
+              Q 167.66 34.34, 174.174 36.911
+              L 175.951 37.613
+              Q 182 40, 175.951 42.387
+              L 174.174 43.089
+              Q 167.66 45.66, 164.742 52.023
+              L 163.25 55.273
+              Q 162 58, 160.75 55.273
+              L 159.258 52.023
+              Q 156.34 45.66, 149.826 43.089
+              L 148.049 42.387
+              Q 142 40, 148.049 37.613
+              L 149.826 36.911
+              Q 156.34 34.34, 157.811 27.496
+              L 161.37 10.933
+              Q 162 8, 162.63 10.933
+              Z"
+          />
+        </g>
       </svg>
     </div>
   );
