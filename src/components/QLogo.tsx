@@ -18,15 +18,22 @@ const ACCENT = {
   light: '#6546C7',
   dark: '#FFFFFF',
 };
+// Чуть светлее основного тона — используется для внутреннего/внешнего свечения и бликов.
+const GLOW = {
+  light: '#B4A0F0',
+  dark: '#FFFFFF',
+};
 
 /**
  * Севчик — талисман приложения: кольцо-голова, две ножки, глаза со зрачками и звёздочка.
  *
  * Тело персонажа не залито — сквозь него виден фон страницы, видна только окантовка.
  * Окантовка тела, ножки, тонкая окантовка вокруг глаз и рот — один и тот же акцентный цвет
- * (--qlogo-accent), переключаемый темой. Глаза (белые с чёрным зрачком) и звезда (оранжевая)
- * не зависят от темы. Никаких blur/glow-фильтров на персонаже нет — окантовка всегда чёткая
- * линия. При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку.
+ * (--qlogo-accent), переключаемый темой. Объём даёт --qlogo-glow (чуть светлее акцента):
+ * тонкие чёткие кольца-свечение по внутреннему и внешнему краю окантовки плюс несколько
+ * маленьких бликов — без единого blur-фильтра, все края остаются резкими.
+ * Глаза (белые с чёрным зрачком) и звезда (оранжевая) не зависят от темы.
+ * При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку.
  */
 export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoProps) {
   const uid = useId().replace(/:/g, '');
@@ -39,9 +46,11 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    // Для 'system' переменная задаётся только через класс ниже (см. <style> с @media) —
+    // Для 'system' переменные задаются только через класс ниже (см. <style> с @media) —
     // инлайн-style имеет более высокий приоритет, чем правило из @media, и перебил бы его.
-    ...(theme === 'system' ? {} : ({ '--qlogo-accent': ACCENT[theme] } as React.CSSProperties)),
+    ...(theme === 'system'
+      ? {}
+      : ({ '--qlogo-accent': ACCENT[theme], '--qlogo-glow': GLOW[theme] } as React.CSSProperties)),
   };
 
   const mouthRest = 'M 91 127 Q 100 127 109 127';
@@ -51,9 +60,9 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
     <div style={containerStyle} className={theme === 'system' ? systemClass : undefined}>
       {theme === 'system' && (
         <style>{`
-          .${systemClass} { --qlogo-accent: ${ACCENT.light}; }
+          .${systemClass} { --qlogo-accent: ${ACCENT.light}; --qlogo-glow: ${GLOW.light}; }
           @media (prefers-color-scheme: dark) {
-            .${systemClass} { --qlogo-accent: ${ACCENT.dark}; }
+            .${systemClass} { --qlogo-accent: ${ACCENT.dark}; --qlogo-glow: ${GLOW.dark}; }
           }
         `}</style>
       )}
@@ -83,18 +92,37 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
           </radialGradient>
         </defs>
 
+        {/* Ножки: чуть увеличенный дубль позади — тонкий чёткий ореол свечения по краю ножек */}
+        <g fill="var(--qlogo-glow)" opacity="0.35">
+          <rect x="47" y="127" width="22" height="48" rx="11" transform="rotate(-32 58 130)" />
+          <rect x="131" y="127" width="22" height="48" rx="11" transform="rotate(32 142 130)" />
+        </g>
         {/* Ножки: залиты акцентным цветом темы */}
         <g fill="var(--qlogo-accent)">
           <rect x="50" y="130" width="16" height="42" rx="8" transform="rotate(-32 58 130)" />
           <rect x="134" y="130" width="16" height="42" rx="8" transform="rotate(32 142 130)" />
         </g>
 
+        {/* Внешнее свечение кольца-головы: два тонких чётких кольца, без blur, компактный радиус */}
+        <circle cx="100" cy="92" r="63" fill="none" stroke="var(--qlogo-glow)" strokeWidth="1.4" opacity="0.18" />
+        <circle cx="100" cy="92" r="60.5" fill="none" stroke="var(--qlogo-glow)" strokeWidth="1.8" opacity="0.35" />
+
         {/* Кольцо-голова: тело не залито, видна только окантовка акцентным цветом */}
         <circle cx="100" cy="92" r="55" fill="none" stroke="var(--qlogo-accent)" strokeWidth="8" />
+
+        {/* Внутреннее свечение: тонкое чёткое кольцо по внутреннему краю окантовки, будто свет изнутри */}
+        <circle cx="100" cy="92" r="51.5" fill="none" stroke="var(--qlogo-glow)" strokeWidth="2" opacity="0.55" />
+
+        {/* Блик на голове: маленькая яркая точка сверху-слева, как отражение света на глянцевой поверхности */}
+        <ellipse cx="71" cy="48" rx="7" ry="3" fill="var(--qlogo-glow)" opacity="0.8" transform="rotate(-38 71 48)" />
 
         {/* Белая основа глаз с тонкой окантовкой акцентным цветом — не зависит от темы по цвету заливки */}
         <ellipse cx="77" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" />
         <ellipse cx="123" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" />
+
+        {/* Блики на глазах: маленькие яркие точки для глянца белка глаза */}
+        <ellipse cx="70" cy="75" rx="4" ry="2.3" fill="var(--qlogo-glow)" opacity="0.75" transform="rotate(-20 70 75)" />
+        <ellipse cx="116" cy="75" rx="4" ry="2.3" fill="var(--qlogo-glow)" opacity="0.75" transform="rotate(-20 116 75)" />
 
         {/* Чёрные зрачки с бликом — анимированная часть, "смотрят" */}
         <g className={animate ? `qlogo-eyes-${uid}` : undefined} transform={animate ? undefined : 'translate(-7, 5)'}>
