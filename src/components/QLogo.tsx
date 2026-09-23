@@ -123,7 +123,7 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
         {/* Звёздочка: всегда оранжевая, не зависит от темы */}
         <path
           fill={`url(#${uid}-star)`}
-          transform="translate(162, 33) scale(1.6) translate(-162, -33)"
+          transform="translate(162, 33) scale(1.05) translate(-162, -33)"
           d="
             M 162.63 10.933
             L 166.189 27.496
