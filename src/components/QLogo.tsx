@@ -5,9 +5,9 @@ interface QLogoProps {
   /** Plays the idle look-around + smile loop. Off by default (static resting pose). */
   animate?: boolean;
   /**
-   * 'light' — акцентный цвет (окантовка тела, ножки, окантовка глаз, рот) фиолетовый —
-   * для светлого/кремового фона.
-   * 'dark' — акцентный цвет белый — для тёмного/цветного фона.
+   * 'light' — акцентный цвет (окантовка тела, ножки, окантовка глаз, рот) фиолетовый,
+   * ореол за персонажем мягкий фиолетовый — для светлого/кремового фона.
+   * 'dark' — акцентный цвет белый, ореол мягкий светлый — для тёмного/цветного фона.
    * 'system' (по умолчанию) — переключается автоматически по системной теме устройства
    * через `@media (prefers-color-scheme: dark)`, без участия JS.
    */
@@ -18,22 +18,16 @@ const ACCENT = {
   light: '#6546C7',
   dark: '#FFFFFF',
 };
-// Чуть светлее основного тона — используется для внутреннего/внешнего свечения и бликов.
-const GLOW = {
-  light: '#B4A0F0',
-  dark: '#FFFFFF',
-};
 
 /**
  * Севчик — талисман приложения: кольцо-голова, две ножки, глаза со зрачками и звёздочка.
  *
  * Тело персонажа не залито — сквозь него виден фон страницы, видна только окантовка.
  * Окантовка тела, ножки, тонкая окантовка вокруг глаз и рот — один и тот же акцентный цвет
- * (--qlogo-accent), переключаемый темой. Объём даёт --qlogo-glow (чуть светлее акцента):
- * тонкие чёткие кольца-свечение по внутреннему и внешнему краю окантовки плюс несколько
- * маленьких бликов — без единого blur-фильтра, все края остаются резкими.
- * Глаза (белые с чёрным зрачком) и звезда (оранжевая) не зависят от темы.
- * При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку.
+ * (--qlogo-accent), переключаемый темой; сам персонаж простой и чистый, без свечения на себе.
+ * Глубину даёт мягкий размытый ореол ПОЗАДИ персонажа (того же акцентного цвета) — единственное
+ * место, где используется blur. Глаза (белые с чёрным зрачком) и звезда (оранжевая) не зависят
+ * от темы. При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку.
  */
 export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoProps) {
   const uid = useId().replace(/:/g, '');
@@ -46,11 +40,9 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    // Для 'system' переменные задаются только через класс ниже (см. <style> с @media) —
+    // Для 'system' переменная задаётся только через класс ниже (см. <style> с @media) —
     // инлайн-style имеет более высокий приоритет, чем правило из @media, и перебил бы его.
-    ...(theme === 'system'
-      ? {}
-      : ({ '--qlogo-accent': ACCENT[theme], '--qlogo-glow': GLOW[theme] } as React.CSSProperties)),
+    ...(theme === 'system' ? {} : ({ '--qlogo-accent': ACCENT[theme] } as React.CSSProperties)),
   };
 
   const mouthRest = 'M 91 127 Q 100 127 109 127';
@@ -60,9 +52,9 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
     <div style={containerStyle} className={theme === 'system' ? systemClass : undefined}>
       {theme === 'system' && (
         <style>{`
-          .${systemClass} { --qlogo-accent: ${ACCENT.light}; --qlogo-glow: ${GLOW.light}; }
+          .${systemClass} { --qlogo-accent: ${ACCENT.light}; }
           @media (prefers-color-scheme: dark) {
-            .${systemClass} { --qlogo-accent: ${ACCENT.dark}; --qlogo-glow: ${GLOW.dark}; }
+            .${systemClass} { --qlogo-accent: ${ACCENT.dark}; }
           }
         `}</style>
       )}
@@ -90,46 +82,34 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
             <stop offset="0%" stopColor="#FFFFFF" />
             <stop offset="100%" stopColor="#E3E0F2" />
           </radialGradient>
+          {/* Размытие используется только здесь — для мягкого ореола позади персонажа */}
+          <filter id={`${uid}-halo`} x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="14" />
+          </filter>
         </defs>
 
-        {/* Ножки: чуть увеличенный дубль позади — тонкий чёткий ореол свечения по краю ножек */}
-        <g fill="var(--qlogo-glow)" opacity="0.35">
-          <rect x="47" y="127" width="22" height="48" rx="11" transform="rotate(-32 58 130)" />
-          <rect x="131" y="127" width="22" height="48" rx="11" transform="rotate(32 142 130)" />
-        </g>
-        {/* Ножки: залиты акцентным цветом темы */}
-        <g fill="var(--qlogo-accent)">
+        {/* Ореол за персонажем: мягкое размытое пятно акцентного цвета, чуть больше самой фигуры.
+            Единственный размытый элемент — сам персонаж ниже остаётся чётким и без свечения. */}
+        <ellipse cx="100" cy="108" rx="82" ry="86" fill="var(--qlogo-accent)" opacity="0.32" filter={`url(#${uid}-halo)`} />
+
+        {/* Ножки: залиты акцентным цветом темы, слегка приглушены — мягче, не «пластиковый» тон */}
+        <g fill="var(--qlogo-accent)" opacity="0.92">
           <rect x="50" y="130" width="16" height="42" rx="8" transform="rotate(-32 58 130)" />
           <rect x="134" y="130" width="16" height="42" rx="8" transform="rotate(32 142 130)" />
         </g>
 
-        {/* Внешнее свечение кольца-головы: два тонких чётких кольца, без blur, компактный радиус */}
-        <circle cx="100" cy="92" r="63" fill="none" stroke="var(--qlogo-glow)" strokeWidth="1.4" opacity="0.18" />
-        <circle cx="100" cy="92" r="60.5" fill="none" stroke="var(--qlogo-glow)" strokeWidth="1.8" opacity="0.35" />
+        {/* Кольцо-голова: тело не залито, видна только окантовка акцентным цветом, слегка приглушена */}
+        <circle cx="100" cy="92" r="55" fill="none" stroke="var(--qlogo-accent)" strokeWidth="8" opacity="0.92" />
 
-        {/* Кольцо-голова: тело не залито, видна только окантовка акцентным цветом */}
-        <circle cx="100" cy="92" r="55" fill="none" stroke="var(--qlogo-accent)" strokeWidth="8" />
+        {/* Белая основа глаз с тонкой окантовкой акцентным цветом — не зависит от темы по цвету заливки.
+            Глаза чистые: белок и зрачок, без дополнительных бликов. */}
+        <ellipse cx="77" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" opacity="0.92" />
+        <ellipse cx="123" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" opacity="0.92" />
 
-        {/* Внутреннее свечение: тонкое чёткое кольцо по внутреннему краю окантовки, будто свет изнутри */}
-        <circle cx="100" cy="92" r="51.5" fill="none" stroke="var(--qlogo-glow)" strokeWidth="2" opacity="0.55" />
-
-        {/* Блик на голове: маленькая яркая точка сверху-слева, как отражение света на глянцевой поверхности */}
-        <ellipse cx="71" cy="48" rx="7" ry="3" fill="var(--qlogo-glow)" opacity="0.8" transform="rotate(-38 71 48)" />
-
-        {/* Белая основа глаз с тонкой окантовкой акцентным цветом — не зависит от темы по цвету заливки */}
-        <ellipse cx="77" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" />
-        <ellipse cx="123" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} stroke="var(--qlogo-accent)" strokeWidth="2.5" />
-
-        {/* Блики на глазах: маленькие яркие точки для глянца белка глаза */}
-        <ellipse cx="70" cy="75" rx="4" ry="2.3" fill="var(--qlogo-glow)" opacity="0.75" transform="rotate(-20 70 75)" />
-        <ellipse cx="116" cy="75" rx="4" ry="2.3" fill="var(--qlogo-glow)" opacity="0.75" transform="rotate(-20 116 75)" />
-
-        {/* Чёрные зрачки с бликом — анимированная часть, "смотрят" */}
+        {/* Чёрные зрачки — анимированная часть, "смотрят" */}
         <g className={animate ? `qlogo-eyes-${uid}` : undefined} transform={animate ? undefined : 'translate(-7, 5)'}>
           <circle cx="77" cy="92" r="10.5" fill="#1A1522" />
-          <circle cx="73" cy="88" r="3.3" fill="#FFFFFF" />
           <circle cx="123" cy="92" r="10.5" fill="#1A1522" />
-          <circle cx="119" cy="88" r="3.3" fill="#FFFFFF" />
         </g>
 
         {/* Рот: акцентным цветом (иначе был бы невидим на светлом фоне сквозь прозрачное тело);
