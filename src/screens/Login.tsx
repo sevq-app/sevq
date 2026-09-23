@@ -255,7 +255,7 @@ function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; 
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md relative z-10">
         <div className="bg-white rounded-[32px] p-8 relative overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(15,23,42,0.1), 0 1px 3px rgba(0,0,0,0.05)' }}>
           <div className="flex flex-col items-center mb-8">
-            <QLogo size={64} />
+            <QLogo size={64} animate />
             <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A] mt-4 tracking-tight">{title}</h1>
             <p className="text-[#6B7280] text-sm mt-1 text-center font-body">{subtitle}</p>
           </div>

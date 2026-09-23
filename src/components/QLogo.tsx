@@ -1,19 +1,18 @@
-import { motion } from 'framer-motion';
+import { useId } from 'react';
 
 interface QLogoProps {
   size?: number;
+  /** Plays the idle look-around + smile loop. Off by default (static resting pose). */
   animate?: boolean;
-  variant?: 'solid' | 'ring' | 'gradient';
 }
 
 /**
- * 3D "plastic" Q logo.
- * - variant "solid": filled purple Q with orange tail, drop shadow
- * - variant "ring": outlined Q ring
- * - variant "gradient": gradient-filled Q
+ * Севчик — талисман приложения: кольцо-голова, две ножки, глаза со зрачками и звёздочка.
+ * При animate=true зрачки поглядывают на звезду, а рот в такт выгибается в улыбку и обратно.
  */
-export function QLogo({ size = 64, animate = false, variant = 'solid' }: QLogoProps) {
-  const uid = `qlogo-${variant}-${size}`;
+export function QLogo({ size = 64, animate = false }: QLogoProps) {
+  const uid = useId().replace(/:/g, '');
+
   const containerStyle: React.CSSProperties = {
     width: size,
     height: size,
@@ -24,123 +23,103 @@ export function QLogo({ size = 64, animate = false, variant = 'solid' }: QLogoPr
     filter: 'drop-shadow(0 8px 24px rgba(101, 70, 199, 0.3))',
   };
 
-  const defs = (
-    <>
-      <linearGradient id={`${uid}-purple`} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#8366D9" />
-        <stop offset="55%" stopColor="#6546C7" />
-        <stop offset="100%" stopColor="#4E35A5" />
-      </linearGradient>
-      <linearGradient id={`${uid}-purpleGrad`} x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor="#8366D9" />
-        <stop offset="100%" stopColor="#4E35A5" />
-      </linearGradient>
-      <linearGradient id={`${uid}-gloss`} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.4" />
-        <stop offset="45%" stopColor="#FFFFFF" stopOpacity="0" />
-      </linearGradient>
-      <linearGradient id={`${uid}-orange`} x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stopColor="#FFB87A" />
-        <stop offset="100%" stopColor="#E8802F" />
-      </linearGradient>
-    </>
-  );
+  const mouthRest = 'M 91 127 Q 100 127 109 127';
+  const mouthSmile = 'M 91 121 Q 100 133 109 121';
 
-  // Q ring path (outer)
-  const ringPath = "M32 6C18.2 6 7 17.2 7 31C7 44.8 18.2 56 32 56C39 56 45.3 53.2 49.8 48.7L55 54L59 50L53.7 44.7C57.6 40.2 57 35.5 57 31C57 17.2 45.8 6 32 6Z";
-  // Q inner cutout path
-  const innerPath = "M32 15C23.7 15 17 21.7 17 30C17 38.3 23.7 45 32 45C36.2 45 39.9 43.3 42.7 40.5L37.5 35.3L41.5 31.3L46.7 36.5C48.9 34.2 47 33 47 30C47 21.7 40.3 15 32 15Z";
-  // Tail (the Q tail)
-  const tailPath = "M42 46L54 58";
+  return (
+    <div style={containerStyle}>
+      {animate && (
+        <style>{`
+          @keyframes qlogoLook-${uid} {
+            0%, 18%   { transform: translate(-7px, 5px); }
+            40%, 55%  { transform: translate(7px, -7px); }
+            82%, 100% { transform: translate(-7px, 5px); }
+          }
+          .qlogo-eyes-${uid} {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: qlogoLook-${uid} 5s ease-in-out infinite;
+          }
+        `}</style>
+      )}
+      <svg width={size} height={size} viewBox="0 0 200 200" fill="none" style={{ overflow: 'visible' }}>
+        <defs>
+          <linearGradient id={`${uid}-purple`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#8366D9" />
+            <stop offset="55%" stopColor="#6546C7" />
+            <stop offset="100%" stopColor="#4E35A5" />
+          </linearGradient>
+          <linearGradient id={`${uid}-star`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FFB87A" />
+            <stop offset="100%" stopColor="#E8802F" />
+          </linearGradient>
+          <radialGradient id={`${uid}-eyeWhite`} cx="0.35" cy="0.3" r="0.75">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="100%" stopColor="#E3E0F2" />
+          </radialGradient>
+        </defs>
 
-  const fillMap: Record<string, string> = {
-    solid: `url(#${uid}-purple)`,
-    gradient: `url(#${uid}-purpleGrad)`,
-    ring: 'none',
-  };
-  const strokeMap: Record<string, string> = {
-    solid: 'none',
-    gradient: 'none',
-    ring: '#6546C7',
-  };
+        {/* Ножки */}
+        <g fill="#FFFFFF">
+          <rect x="50" y="130" width="16" height="42" rx="8" transform="rotate(-32 58 130)" />
+          <rect x="134" y="130" width="16" height="42" rx="8" transform="rotate(32 142 130)" />
+        </g>
 
-  const renderQ = (isAnimated: boolean) => {
-    if (!isAnimated) {
-      return (
-        <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{ overflow: 'visible' }}>
-          {defs}
-          {/* Outer ring with 3D fill */}
-          <path d={ringPath} fill={fillMap[variant]} stroke={strokeMap[variant]} strokeWidth={variant === 'ring' ? 4 : 0} />
-          {/* Inner cutout (cream background) */}
-          <path d={innerPath} fill="#FFF8ED" />
-          {/* Gloss highlight on top */}
-          <path d={ringPath} fill={`url(#${uid}-gloss)`} />
-          {/* Tail */}
-          <path d={tailPath} stroke={`url(#${uid}-orange)`} strokeWidth="6" strokeLinecap="round" />
-        </svg>
-      );
-    }
-    const halfW = size / 2;
-    return (
-      <svg width={size} height={size} viewBox="0 0 64 64" fill="none" style={{ overflow: 'visible' }}>
-        {defs}
-        <motion.path
-          d={ringPath}
-          fill={fillMap[variant]}
-          stroke={strokeMap[variant]}
-          strokeWidth={variant === 'ring' ? 4 : 0}
-          initial={{ opacity: 0, x: -halfW }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <motion.path
-          d={innerPath}
-          fill="#FFF8ED"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <motion.path
-          d={ringPath}
-          fill={`url(#${uid}-gloss)`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.5 }}
-        />
-        <motion.path
-          d={tailPath}
-          stroke={`url(#${uid}-orange)`}
-          strokeWidth="6"
-          strokeLinecap="round"
-          initial={{ pathLength: 0, opacity: 0 }}
-          animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 0.35, delay: 0.55, ease: 'easeOut' }}
+        {/* Кольцо-голова */}
+        <circle cx="100" cy="92" r="58" fill="#FFFFFF" />
+        <circle cx="100" cy="92" r="52" fill={`url(#${uid}-purple)`} />
+
+        {/* Белая основа глаз — неподвижна */}
+        <ellipse cx="77" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} />
+        <ellipse cx="123" cy="90" rx="21.5" ry="26" fill={`url(#${uid}-eyeWhite)`} />
+
+        {/* Зрачки с бликом — "смотрят" */}
+        <g className={animate ? `qlogo-eyes-${uid}` : undefined} transform={animate ? undefined : 'translate(-7, 5)'}>
+          <circle cx="77" cy="92" r="10.5" fill="#1A1522" />
+          <circle cx="73" cy="88" r="3.3" fill="#FFFFFF" />
+          <circle cx="123" cy="92" r="10.5" fill="#1A1522" />
+          <circle cx="119" cy="88" r="3.3" fill="#FFFFFF" />
+        </g>
+
+        {/* Рот: выгибается из прямой линии в улыбку и обратно, в такт со взглядом */}
+        <path d={mouthRest} fill="none" stroke="#FFFFFF" strokeWidth="4.5" strokeLinecap="round">
+          {animate && (
+            <animate
+              attributeName="d"
+              values={`${mouthRest};${mouthRest};${mouthSmile};${mouthSmile};${mouthRest};${mouthRest}`}
+              keyTimes="0;0.18;0.40;0.55;0.82;1"
+              calcMode="spline"
+              keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"
+              dur="5s"
+              repeatCount="indefinite"
+            />
+          )}
+        </path>
+
+        {/* Звёздочка */}
+        <path
+          fill={`url(#${uid}-star)`}
+          d="
+            M 162.63 10.933
+            L 166.189 27.496
+            Q 167.66 34.34, 174.174 36.911
+            L 175.951 37.613
+            Q 182 40, 175.951 42.387
+            L 174.174 43.089
+            Q 167.66 45.66, 164.742 52.023
+            L 163.25 55.273
+            Q 162 58, 160.75 55.273
+            L 159.258 52.023
+            Q 156.34 45.66, 149.826 43.089
+            L 148.049 42.387
+            Q 142 40, 148.049 37.613
+            L 149.826 36.911
+            Q 156.34 34.34, 157.811 27.496
+            L 161.37 10.933
+            Q 162 8, 162.63 10.933
+            Z"
         />
       </svg>
-    );
-  };
-
-  return <div style={containerStyle}>{renderQ(animate)}</div>;
-}
-
-/** Three Q logo variants displayed side-by-side for selection */
-export function QLogoShowcase() {
-  const variants: { variant: 'solid' | 'ring' | 'gradient'; label: string; desc: string }[] = [
-    { variant: 'solid', label: 'Объёмный', desc: 'Градиент + блик' },
-    { variant: 'gradient', label: 'Диагональ', desc: 'Скошенный градиент' },
-    { variant: 'ring', label: 'Контурный', desc: 'Только рамка' },
-  ];
-  return (
-    <div className="flex gap-6 justify-center">
-      {variants.map(({ variant, label, desc }) => (
-        <div key={variant} className="flex flex-col items-center gap-2">
-          <div className="w-24 h-24 rounded-card bg-white flex items-center justify-center" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.07)' }}>
-            <QLogo size={56} variant={variant} />
-          </div>
-          <span className="font-heading font-bold text-sm text-sevchik-text">{label}</span>
-          <span className="text-xs text-sevchik-textSecondary font-body">{desc}</span>
-        </div>
-      ))}
     </div>
   );
 }

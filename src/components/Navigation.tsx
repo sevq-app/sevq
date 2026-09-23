@@ -20,7 +20,7 @@ export function Sidebar({ current, onNavigate }: SidebarProps) {
   return (
     <div className="hidden md:flex flex-col w-20 lg:w-64 py-6 px-3 shrink-0 h-screen sticky top-0 z-30">
       <div className="mb-8 flex items-center gap-3 px-2">
-        <QLogo size={44} />
+        <QLogo size={44} animate />
         <span className="hidden lg:block font-heading font-extrabold text-2xl text-sevchik-text">Севчик</span>
       </div>
       <nav className="flex flex-col gap-2.5 flex-1">
