@@ -12,6 +12,9 @@ interface AvatarCropperProps {
 const MIN_STAGE_SIZE = 220;
 const MAX_STAGE_SIZE = 480;
 const STAGE_MARGIN = 24;
+// Не отдаём результат мельче этого, даже если выбранная область в исходных пикселях меньше —
+// иначе аватар и полноразмерный просмотр будут выглядеть замыленными при масштабировании вверх.
+const MIN_OUTPUT_SIZE = 1024;
 // Зум выше "чистого cover" (1×) даёт запас на панорамирование сразу в обе стороны —
 // на 1× более узкое измерение фото ровно равно размеру рамки и двигаться некуда.
 const MIN_ZOOM = 1;
@@ -33,7 +36,9 @@ function pointerDistance(a: { x: number; y: number }, b: { x: number; y: number 
  * внизу и никогда не перекрывается фото — сцена кропа ограничена местом над ней.
  * Рендерится через портал в document.body (а не в обычном дереве экрана), чтобы гарантированно
  * оказаться выше нижней навигации приложения независимо от её собственного z-index/стек-контекста.
- * Сохраняет выбранную область в исходном разрешении без даунскейла (PNG, без потерь).
+ * Сохраняет выбранную область в исходном разрешении (не мельче MIN_OUTPUT_SIZE), JPEG q=0.9 —
+ * совместимый с системной галереей формат вместо PNG (который скачивался как .png и не
+ * распознавался как обычное фото на iOS).
  */
 export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps) {
   const imgRef = useRef<HTMLImageElement>(null);
@@ -142,14 +147,18 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
     const srcSize = stageSize / totalScale;
     const srcX = Math.min(Math.max(sx / totalScale, 0), Math.max(0, naturalSize.w - srcSize));
     const srcY = Math.min(Math.max(sy / totalScale, 0), Math.max(0, naturalSize.h - srcSize));
-    // Полное исходное разрешение вырезанной области — без даунскейла до фиксированного размера.
-    const outputSize = Math.round(srcSize);
+    // Полное исходное разрешение вырезанной области — без даунскейла ниже того, что реально
+    // выбрано, и не мельче MIN_OUTPUT_SIZE (иначе при показе крупнее — на аватарке, в полноэкранном
+    // просмотре — картинка тянется браузером и мылится).
+    const outputSize = Math.max(MIN_OUTPUT_SIZE, Math.round(srcSize));
 
     const canvas = document.createElement('canvas');
     canvas.width = outputSize;
     canvas.height = outputSize;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.save();
     if (flipped) {
       ctx.translate(outputSize, 0);
@@ -157,8 +166,7 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
     }
     ctx.drawImage(imgRef.current, srcX, srcY, srcSize, srcSize, 0, 0, outputSize, outputSize);
     ctx.restore();
-    // PNG — без потерь, то же качество, что у сэмплированных пикселей оригинала.
-    onSave(canvas.toDataURL('image/png'));
+    onSave(canvas.toDataURL('image/jpeg', 0.9));
   };
 
   return createPortal(
