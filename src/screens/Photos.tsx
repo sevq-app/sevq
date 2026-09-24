@@ -1,37 +1,40 @@
 import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Check, MoreVertical, Plus, Share2, Trash2, X } from 'lucide-react';
+import { ArrowLeft, Check, Loader2, MoreVertical, Plus, Share2, Trash2, X } from 'lucide-react';
 import { AvatarCropper } from '@/components/AvatarCropper';
 import { uploadMyAvatar } from '@/lib/avatarPhoto';
+import { deleteMyPhotos, listMyPhotos, uploadMyPhoto, type RemotePhoto } from '@/lib/photoGallery';
 
-const photosKey = 'sevchik-profile-photos';
 const MAX_PHOTO_SIZE = 8 * 1024 * 1024;
 
-function readPhotos(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(photosKey) || '[]') as string[];
-  } catch {
-    return [];
-  }
-}
-
-async function dataUrlToFile(dataUrl: string, filename: string) {
-  const blob = await (await fetch(dataUrl)).blob();
+async function urlToFile(url: string, filename: string) {
+  const blob = await (await fetch(url)).blob();
   return new File([blob], filename, { type: blob.type || 'image/jpeg' });
 }
 
-function downloadDataUrl(dataUrl: string, filename: string) {
+function downloadUrl(url: string, filename: string) {
   const link = document.createElement('a');
-  link.href = dataUrl;
+  link.href = url;
   link.download = filename;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
 
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => (typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('empty result')));
+    reader.onerror = () => reject(reader.error ?? new Error('read failed'));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function Photos({ onBack }: { onBack: () => void }) {
-  const [photos, setPhotos] = useState<string[]>(readPhotos);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<RemotePhoto[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [selected, setSelected] = useState<RemotePhoto | null>(null);
   const [cropSource, setCropSource] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
@@ -41,50 +44,79 @@ export function Photos({ onBack }: { onBack: () => void }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    localStorage.setItem(photosKey, JSON.stringify(photos));
-  }, [photos]);
+    let cancelled = false;
+    listMyPhotos()
+      .then((remote) => {
+        if (!cancelled) setPhotos(remote);
+      })
+      .catch((err) => console.error('Не удалось загрузить фотографии:', err))
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const exitSelectMode = () => {
     setSelectMode(false);
     setSelectedIds([]);
   };
 
-  const toggleSelect = (photo: string) => {
-    setSelectedIds((prev) => (prev.includes(photo) ? prev.filter((p) => p !== photo) : [...prev, photo]));
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((p) => p !== id) : [...prev, id]));
   };
 
-  const handlePhotoClick = (photo: string) => {
+  const handlePhotoClick = (photo: RemotePhoto) => {
     if (selectMode) {
-      toggleSelect(photo);
+      toggleSelect(photo.id);
       return;
     }
     setSelected(photo);
   };
 
-  const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  // Просто добавляет фото в галерею (и в Supabase Storage) — БЕЗ кроппера. Обрезка нужна
+  // только для аватарки в профиле (см. "Сделать аватаркой" ниже и Profile.tsx).
+  const handleUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
     event.target.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setError('Этот файл не является изображением. Выберите файл в формате JPG, PNG или похожем.');
-      return;
+    if (files.length === 0) return;
+
+    setUploading(true);
+    setError(null);
+    let failed = 0;
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        setError('Один из файлов не является изображением. Выберите файлы в формате JPG, PNG или похожем.');
+        failed += 1;
+        continue;
+      }
+      if (file.size > MAX_PHOTO_SIZE) {
+        setError('Один из файлов слишком большой. Максимальный размер — 8 МБ.');
+        failed += 1;
+        continue;
+      }
+      try {
+        const dataUrl = await readFileAsDataUrl(file);
+        const uploaded = await uploadMyPhoto(dataUrl);
+        setPhotos((current) => [uploaded, ...current]);
+      } catch (err) {
+        console.error('Не удалось загрузить фото:', err);
+        failed += 1;
+      }
     }
-    if (file.size > MAX_PHOTO_SIZE) {
-      setError('Файл слишком большой. Максимальный размер — 8 МБ.');
-      return;
+    if (failed > 0 && files.length > 1) {
+      setError(`Не удалось загрузить ${failed} из ${files.length} фото. Проверьте соединение и попробуйте ещё раз.`);
+    } else if (failed > 0 && files.length === 1) {
+      setError('Не удалось загрузить фото. Проверьте соединение и попробуйте ещё раз.');
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== 'string') return;
-      setPhotos((current) => [reader.result as string, ...current]);
-    };
-    reader.onerror = () => setError('Не удалось прочитать файл. Попробуйте другое изображение.');
-    reader.readAsDataURL(file);
+    setUploading(false);
   };
 
   const shareSelected = async () => {
+    const targets = photos.filter((p) => selectedIds.includes(p.id));
     try {
-      const files = await Promise.all(selectedIds.map((photo, i) => dataUrlToFile(photo, `sevchik-photo-${i + 1}.jpg`)));
+      const files = await Promise.all(targets.map((p, i) => urlToFile(p.url, `sevchik-photo-${i + 1}.jpg`)));
       if (navigator.canShare?.({ files })) {
         await navigator.share({ files, title: files.length > 1 ? 'Фотографии' : 'Фотография' });
         return;
@@ -93,13 +125,20 @@ export function Photos({ onBack }: { onBack: () => void }) {
       if ((err as Error)?.name === 'AbortError') return; // пользователь сам отменил — не подменяем это скачиванием
     }
     // Запасной путь для браузеров без Web Share API с файлами (в основном десктоп) — скачиваем.
-    selectedIds.forEach((photo, i) => downloadDataUrl(photo, `sevchik-photo-${i + 1}.jpg`));
+    targets.forEach((p, i) => downloadUrl(p.url, `sevchik-photo-${i + 1}.jpg`));
   };
 
-  const deleteSelected = () => {
-    setPhotos((current) => current.filter((p) => !selectedIds.includes(p)));
+  const deleteSelected = async () => {
+    const targets = photos.filter((p) => selectedIds.includes(p.id));
     setDeleteConfirmOpen(false);
     exitSelectMode();
+    try {
+      await deleteMyPhotos(targets);
+      setPhotos((current) => current.filter((p) => !targets.some((t) => t.id === p.id)));
+    } catch (err) {
+      console.error('Не удалось удалить фото:', err);
+      setError('Не удалось удалить фото на сервере. Попробуйте ещё раз.');
+    }
   };
 
   return (
@@ -176,16 +215,25 @@ export function Photos({ onBack }: { onBack: () => void }) {
           </>
         )}
       </div>
-      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleUpload} />
+      <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleUpload} />
 
       <h1 className="font-heading font-extrabold text-2xl mb-5">Фотографии</h1>
-      {photos.length ? (
+      {loading ? (
+        <div className="flex items-center gap-2 text-sm text-sevchik-textSecondary py-6">
+          <Loader2 size={16} className="animate-spin" /> Загружаем фотографии…
+        </div>
+      ) : photos.length || uploading ? (
         <div className="grid grid-cols-3 gap-2">
+          {uploading && (
+            <div className="aspect-square rounded-xl bg-[var(--bg-input)] flex items-center justify-center">
+              <Loader2 size={20} className="animate-spin text-sevchik-textSecondary" />
+            </div>
+          )}
           {photos.map((photo) => {
-            const isSelected = selectedIds.includes(photo);
+            const isSelected = selectedIds.includes(photo.id);
             return (
-              <button key={photo} onClick={() => handlePhotoClick(photo)} className="relative aspect-square overflow-hidden rounded-xl">
-                <img src={photo} alt="" className="w-full h-full object-cover" />
+              <button key={photo.id} onClick={() => handlePhotoClick(photo)} className="relative aspect-square overflow-hidden rounded-xl">
+                <img src={photo.url} alt="" className="w-full h-full object-cover" />
                 {selectMode && (
                   <div
                     className={`absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white transition-colors ${
@@ -206,11 +254,11 @@ export function Photos({ onBack }: { onBack: () => void }) {
       {/* Просмотр одной фотографии — не трогаем, работает как раньше. */}
       {selected && (
         <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-center p-5" onClick={() => setSelected(null)}>
-          <img src={selected} alt="Увеличенное фото" className="max-h-[75vh] max-w-full rounded-2xl object-contain" onClick={(event) => event.stopPropagation()} />
+          <img src={selected.url} alt="Увеличенное фото" className="max-h-[75vh] max-w-full rounded-2xl object-contain" onClick={(event) => event.stopPropagation()} />
           <button
             onClick={(event) => {
               event.stopPropagation();
-              setCropSource(selected);
+              setCropSource(selected.url);
             }}
             className="mt-6 px-6 py-3 rounded-xl bg-sevchik-purple text-white font-heading font-bold"
           >

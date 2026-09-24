@@ -211,6 +211,10 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
               src={imageSrc}
               alt="Обрезка фото"
               draggable={false}
+              // Нужно для фото из галереи Supabase Storage (https-ссылка, не data:) — без этого
+              // холст (canvas) считается "испачканным" кроссдоменным изображением, и итоговый
+              // toDataURL() в handleSave ниже падает с SecurityError.
+              crossOrigin="anonymous"
               onLoad={(event) => {
                 const target = event.currentTarget;
                 setNaturalSize({ w: target.naturalWidth, h: target.naturalHeight });
