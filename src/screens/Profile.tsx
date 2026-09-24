@@ -4,7 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Copy, Download, Link, MoreVertical, QrCode, Share2, ChevronRight, Settings, Sparkles, Trash2, Users, X } from 'lucide-react';
 import { AvatarCropper } from '@/components/AvatarCropper';
-import { readAvatarPhoto, writeAvatarPhoto } from '@/lib/avatarPhoto';
+import { clearMyAvatar, fetchMyAvatarUrl, readAvatarPhoto, uploadMyAvatar, writeAvatarPhoto } from '@/lib/avatarPhoto';
 import type { Screen } from '@/data/mock';
 import type { ProfileData } from '@/screens/AboutMe';
 
@@ -68,6 +68,23 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   useEffect(() => { localStorage.setItem(photosKey, JSON.stringify(photos)); }, [photos]);
   useEffect(() => { writeAvatarPhoto(avatarPhoto); }, [avatarPhoto]);
 
+  // Локальный кэш аватарки (readAvatarPhoto выше) рисуется мгновенно при заходе на экран,
+  // но источник истины — profiles.avatar_url в Supabase: подгружаем его и, если он отличается
+  // от того, что было в этом браузере (включая случай "аватарку удалили на другом устройстве"),
+  // подменяем состояние на актуальное — без этого аватарка не синхронизировалась бы между устройствами.
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    fetchMyAvatarUrl()
+      .then((remoteUrl) => {
+        if (!cancelled) setAvatarPhoto(remoteUrl);
+      })
+      .catch((error) => console.error('Не удалось загрузить аватарку из профиля:', error));
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   const openFilePicker = () => {
     // <input type="file"> не запрашивает у браузера никакого «разрешения» — это всегда
     // немедленный вызов системного выбора файла по жесту пользователя, поэтому нет смысла
@@ -102,8 +119,18 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   };
 
   const handleCropSave = (dataUrl: string) => {
-    setAvatarPhoto(dataUrl);
     setCropSource(null);
+    // Локальный кроп показываем сразу, не дожидаясь ответа сервера — пользователь должен
+    // увидеть новую аватарку немедленно. Как только загрузка в Storage завершится, подменяем
+    // на постоянную ссылку — именно она попадёт в profiles.avatar_url и станет видна с других устройств.
+    setAvatarPhoto(dataUrl);
+    setUploadError(null);
+    uploadMyAvatar(dataUrl)
+      .then((url) => setAvatarPhoto(url))
+      .catch((error) => {
+        console.error('Не удалось сохранить аватарку в Supabase:', error);
+        setUploadError('Аватарка сохранилась только на этом устройстве — не удалось загрузить её на сервер. Проверьте соединение и попробуйте ещё раз.');
+      });
   };
 
   const requestReplacePhoto = () => {
@@ -120,6 +147,10 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
     // Удаляется только аватарка — сама фотография в галерее остаётся нетронутой.
     setAvatarPhoto(null);
     setDeleteConfirmOpen(false);
+    clearMyAvatar().catch((error) => {
+      console.error('Не удалось удалить аватарку в Supabase:', error);
+      setUploadError('Не удалось удалить аватарку на сервере. Попробуйте ещё раз.');
+    });
   };
 
   const dataUrlToFile = async (dataUrl: string, filename: string) => {
