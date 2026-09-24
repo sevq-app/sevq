@@ -88,16 +88,26 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
             70%      { filter: brightness(0.85); }
             88%      { filter: brightness(1.15); }
           }
+          /* Ореол звезды растёт/тускнеет вместе с ней — та же анимация qlogoStarPulse на
+             отдельном размытом слое, что гарантирует синхронность (не отдельный таймер). */
+          .qlogo-star-${uid}, .qlogo-star-glow-${uid} {
+            animation: qlogoStarPulse-${uid} 2.6s ease-in-out infinite;
+          }
           .qlogo-star-${uid} {
-            animation: qlogoStarPulse-${uid} 2.6s ease-in-out infinite, qlogoStarFlicker-${uid} 1.4s ease-in-out infinite;
+            animation-name: qlogoStarPulse-${uid}, qlogoStarFlicker-${uid};
+            animation-duration: 2.6s, 1.4s;
+            animation-timing-function: ease-in-out, ease-in-out;
+            animation-iteration-count: infinite, infinite;
           }
         `}</style>
       )}
       <style>{`
         /* Наведение работает независимо от animate — звезда чуть увеличивается и становится ярче */
-        .qlogo-star-${uid} {
+        .qlogo-star-${uid}, .qlogo-star-glow-${uid} {
           transform-box: fill-box;
           transform-origin: center;
+        }
+        .qlogo-star-${uid} {
           cursor: pointer;
           transition: transform 0.25s ease-out, filter 0.25s ease-out;
         }
@@ -117,9 +127,13 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
             <stop offset="0%" stopColor="#FFFFFF" />
             <stop offset="100%" stopColor="#E3E0F2" />
           </radialGradient>
-          {/* Размытие используется только здесь — для мягкого ореола позади персонажа */}
+          {/* Размытие для мягкого ореола позади персонажа */}
           <filter id={`${uid}-halo`} x="-60%" y="-60%" width="220%" height="220%">
             <feGaussianBlur stdDeviation="14" />
+          </filter>
+          {/* Размытие для ореола вокруг звезды — тот же приём, компактнее под размер звезды */}
+          <filter id={`${uid}-starGlow`} x="-150%" y="-150%" width="400%" height="400%">
+            <feGaussianBlur stdDeviation="6" />
           </filter>
         </defs>
 
@@ -170,6 +184,18 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
             размер/позицию (статичный transform-атрибут); анимация "Искра" — на самом path,
             через CSS transform, чтобы не конфликтовать с базовым атрибутом. */}
         <g transform="translate(162, 33) scale(1.05) translate(-162, -33)">
+          {/* Ореол звезды: размытое оранжевое пятно позади, растёт и светлеет вместе со звездой
+              (та же анимация qlogoStarPulse, см. transform/opacity) — цвет не зависит от темы,
+              поэтому виден и на светлом, и на тёмном фоне так же, как сама звезда. */}
+          <circle
+            className={`qlogo-star-glow-${uid}`}
+            cx="162"
+            cy="33"
+            r="24"
+            fill="#FFB020"
+            opacity="0.55"
+            filter={`url(#${uid}-starGlow)`}
+          />
           <path
             className={`qlogo-star-${uid}`}
             fill={`url(#${uid}-star)`}
