@@ -83,7 +83,19 @@ export async function getOrCreateDirectChat(otherUserId: string): Promise<string
       .select('chat_id')
       .eq('user_id', otherUserId)
       .in('chat_id', myChatIds);
-    if (shared && shared.length > 0) return shared[0].chat_id as string;
+    const sharedChatIds = (shared ?? []).map((r) => r.chat_id as string);
+    if (sharedChatIds.length > 0) {
+      // Фильтруем по is_group = false — иначе общий групповой чат с этим человеком
+      // ошибочно принимался бы за личную переписку.
+      const { data: directChat } = await supabase
+        .from('chats')
+        .select('id')
+        .in('id', sharedChatIds)
+        .eq('is_group', false)
+        .limit(1)
+        .maybeSingle();
+      if (directChat) return directChat.id as string;
+    }
   }
 
   const { data: chat, error: chatError } = await supabase.from('chats').insert({ is_group: false }).select('id').single();

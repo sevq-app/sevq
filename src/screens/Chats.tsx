@@ -27,6 +27,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
   const [profileResults, setProfileResults] = useState<RemoteProfile[]>([]);
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [openingProfileId, setOpeningProfileId] = useState<string | null>(null);
+  const [profileOpenError, setProfileOpenError] = useState('');
   const chats = useChatStore((s) => s.chats);
   const markChatsRead = useChatStore((s) => s.markChatsRead);
   const deleteChats = useChatStore((s) => s.deleteChats);
@@ -107,6 +108,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
 
   const openProfileChat = async (profile: RemoteProfile) => {
     setOpeningProfileId(profile.id);
+    setProfileOpenError('');
     try {
       const remoteChatId = await getOrCreateDirectChat(profile.id);
       const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
@@ -125,8 +127,12 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         messages: [],
       };
       upsertRealChat(chat);
+      setQuery('');
       onOpenChat(chat.id);
     } catch (error) {
+      // Раньше ошибка только логировалась в консоль, и при сбое (например, если RLS/схема
+      // Supabase не позволяет создать чат) клик по карточке визуально не делал вообще ничего.
+      setProfileOpenError('Не удалось открыть чат. Попробуйте ещё раз.');
       console.error(error);
     } finally {
       setOpeningProfileId(null);
@@ -280,6 +286,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 })
               )}
             </div>
+            {profileOpenError && (
+              <p className="mt-2 ml-1 text-sm font-body text-red-500">{profileOpenError}</p>
+            )}
           </div>
         )}
         <div className="space-y-3">
