@@ -77,7 +77,7 @@ export function Login({ onLogin, onRegister }: AuthProps) {
             <InputField icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="your@email.com" />
             
             <div className="space-y-2.5">
-              <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider ml-1">Пароль</label>
+              <label className="qlogo-auth-label text-xs font-semibold text-[#6B7280] uppercase tracking-wider ml-1">Пароль</label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[#6546C7] transition-colors" size={20} />
                 <input
@@ -269,7 +269,7 @@ function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; 
 function InputField({ icon: Icon, label, type, value, onChange, placeholder, accentColor = '#6546C7' }: any) {
   return (
     <div className="space-y-2.5">
-      <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider ml-1">{label}</label>
+      <label className="qlogo-auth-label text-xs font-semibold text-[#6B7280] uppercase tracking-wider ml-1">{label}</label>
       <div className="relative group">
         <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[#6546C7] transition-colors" size={20} />
         <input
