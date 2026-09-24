@@ -25,16 +25,39 @@ export interface RemoteMessage {
  * Специально getSession(), а не getUser(): getSession() при устаревшем
  * access_token сам обновляет его перед возвратом (если это возможно по
  * refresh_token), тогда как getUser() просто шлёт текущий токен на сервер
- * как есть — если фоновый автообновляющий таймер клиента не успел сработать
- * (например, вкладка долго была в фоне), запрос к базе ушёл бы с протухшим
- * токеном, и RLS увидел бы auth.uid() = null, хотя пользователь по факту
- * авторизован.
+ * как есть.
+ *
+ * Важно: сам @supabase/supabase-js (fetchWithAuth в SupabaseClient) и без
+ * этой проверки берёт свежий access_token через собственный getSession() и
+ * подставляет его в заголовок Authorization при КАЖДОМ запросе к REST —
+ * то есть заголовок формируется правильно независимо от этой функции.
+ * Если сервер всё равно отвечает 403/42501 ("new row violates row-level
+ * security policy"), значит либо сессии реально нет (см. лог ниже — role
+ * будет не "authenticated", или access_token вовсе отсутствует), либо
+ * дело не в клиенте, а в настройках самого проекта Supabase (например,
+ * JWT-ключ/роль в токене) — это уже нужно смотреть в Dashboard.
  */
 async function requireUserId(): Promise<string> {
   const { data, error } = await supabase.auth.getSession();
-  const id = data.session?.user?.id;
-  if (error || !id) throw new Error('Не авторизован');
+  const session = data.session;
+  const id = session?.user?.id;
+  if (error || !id) {
+    console.error('[auth] getSession() не вернул сессию:', error ?? '(session отсутствует)');
+    throw new Error('Не авторизован');
+  }
+  console.debug('[auth] сессия есть, отправляем запрос как:', decodeJwtRoleAndExp(session.access_token));
   return id;
+}
+
+/** Только для диагностики в консоли: достаёт role/exp из access_token, ничего не проверяет и не хранит. */
+function decodeJwtRoleAndExp(accessToken: string): { role: unknown; exp: unknown; sub: unknown } | 'не удалось разобрать токен' {
+  try {
+    const payload = accessToken.split('.')[1];
+    const json = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return { role: json.role, exp: json.exp, sub: json.sub };
+  } catch {
+    return 'не удалось разобрать токен';
+  }
 }
 
 /** Ищет зарегистрированного пользователя по email (точное совпадение, без учёта регистра). */
