@@ -85,10 +85,26 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
 
       <div className="flex flex-col items-center px-4 sm:px-6 mb-6 mt-2">
         <div className="relative">
-          <button onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : setPhotoAccessOpen(true)} className="block rounded-full" aria-label={profilePhoto ? 'Открыть фото профиля' : 'Добавить фото профиля'}>
-            <div className="p-1 rounded-full bg-sevchik-orange shadow-[0_8px_24px_rgba(255,152,72,0.2)]"><div className="p-[3px] rounded-full bg-[var(--bg-card)]">{profilePhoto ? <span className="relative block"><img src={profilePhoto} alt="Фото профиля" className="w-[120px] h-[120px] rounded-full object-cover" /><span className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-[3px] border-[var(--bg-card)] ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/50'}`} /></span> : <Avatar initials="+" color="#6546C7" size="xxl" online={online} />}</div></div>
+          {/* Внешний ореол вместо звезды/кружка-статуса — сама заливка и "+" не трогаются,
+              светится только внешняя окантовка вокруг круга, отражая online */}
+          <button
+            onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : setPhotoAccessOpen(true)}
+            className="block rounded-full transition-shadow duration-300"
+            aria-label={profilePhoto ? 'Открыть фото профиля' : 'Добавить фото профиля'}
+            style={{
+              boxShadow: online
+                ? '0 0 0 4px rgba(79,211,200,0.45), 0 0 28px 8px rgba(79,211,200,0.4)'
+                : '0 0 0 4px rgba(107,114,128,0.22)',
+            }}
+          >
+            <div className="p-[3px] rounded-full bg-[var(--bg-card)]">
+              {profilePhoto ? (
+                <img src={profilePhoto} alt="Фото профиля" className="w-[120px] h-[120px] rounded-full object-cover" />
+              ) : (
+                <Avatar initials="+" color="#6546C7" size="xxl" />
+              )}
+            </div>
           </button>
-          <div className="absolute -top-1 -right-1 w-9 h-9 rounded-full bg-[var(--bg-card)] flex items-center justify-center text-lg shadow-[0_4px_12px_rgba(101,70,199,0.2)]">⭐</div>
         </div>
         <div className="text-center mt-4 space-y-1">
           <h2 className="font-heading font-semibold text-xl">{displayName}</h2>
