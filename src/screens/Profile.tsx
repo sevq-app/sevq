@@ -50,7 +50,6 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [online, setOnline] = useState(true);
   const [photos, setPhotos] = useState<string[]>(readPhotos);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
-  const [isPhotoAccessOpen, setPhotoAccessOpen] = useState(false);
   const [isInviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'menu' | 'qr'>('menu');
   const [cropSource, setCropSource] = useState<string | null>(null);
@@ -66,7 +65,10 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   useEffect(() => { localStorage.setItem(photosKey, JSON.stringify(photos)); }, [photos]);
 
   const openFilePicker = () => {
-    setPhotoAccessOpen(false);
+    // <input type="file"> не запрашивает у браузера никакого «разрешения» — это всегда
+    // немедленный вызов системного выбора файла по жесту пользователя, поэтому нет смысла
+    // держать перед ним свой собственный (симулированный) экран «Разрешите доступ»: он не
+    // соответствовал ничему в Permissions API и просто спрашивал заново каждый раз.
     fileInputRef.current?.click();
   };
 
@@ -108,20 +110,43 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
     setDeleteConfirmOpen(false);
   };
 
-  const saveToGallery = (dataUrl: string) => {
+  const dataUrlToFile = async (dataUrl: string, filename: string) => {
+    const response = await fetch(dataUrl);
+    const blob = await response.blob();
+    return new File([blob], filename, { type: blob.type || 'image/jpeg' });
+  };
+
+  const downloadDataUrl = (dataUrl: string, filename: string) => {
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `sevchik-avatar-${Date.now()}.jpg`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
+  const saveToGallery = async (dataUrl: string) => {
+    const filename = `sevchik-avatar-${Date.now()}.jpg`;
+    if (navigator.share) {
+      try {
+        const file = await dataUrlToFile(dataUrl, filename);
+        if (navigator.canShare?.({ files: [file] })) {
+          // Прямого API записи в системную галерею из веба не существует — на iOS/мобильных
+          // это единственный путь: системное меню «Поделиться» со своим пунктом «Сохранить изображение».
+          await navigator.share({ files: [file], title: 'Сохранить фото' });
+          return;
+        }
+      } catch (error) {
+        if ((error as Error)?.name === 'AbortError') return; // пользователь сам отменил — не подменяем это загрузкой
+      }
+    }
+    // Запасной путь для десктопа/браузеров без Web Share API с файлами — обычная загрузка.
+    downloadDataUrl(dataUrl, filename);
+  };
+
   const sharePhoto = async (dataUrl: string) => {
     try {
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      const file = new File([blob], 'avatar.jpg', { type: blob.type || 'image/jpeg' });
+      const file = await dataUrlToFile(dataUrl, 'sevchik-avatar.jpg');
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Фото профиля' });
       } else {
@@ -149,7 +174,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
           {/* Внешний ореол вместо звезды/кружка-статуса — светится только внешняя
               окантовка вокруг круга, отражая online */}
           <button
-            onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : setPhotoAccessOpen(true)}
+            onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : openFilePicker()}
             className="block rounded-full transition-shadow duration-300"
             aria-label={profilePhoto ? 'Открыть фото профиля' : 'Добавить фото профиля'}
             style={{
@@ -222,7 +247,6 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
           <button onClick={() => setUploadError(null)} className="w-full rounded-xl bg-sevchik-purple text-white py-3 font-heading font-bold mt-5">Понятно</button>
         </Modal>
       )}
-      {isPhotoAccessOpen && <Modal onClose={() => setPhotoAccessOpen(false)}><h2 className="font-heading font-extrabold text-xl">Разрешите доступ</h2><p className="text-sm text-sevchik-textSecondary mt-2">Выберите, какие фотографии можно использовать.</p><div className="space-y-2 mt-5"><button onClick={openFilePicker} className="w-full rounded-xl bg-sevchik-purple text-white py-3 font-heading font-bold">Разрешить полный доступ</button><button onClick={openFilePicker} className="w-full rounded-xl bg-sevchik-orange text-white py-3 font-heading font-bold">Разрешить один раз</button><button onClick={() => setPhotoAccessOpen(false)} className="w-full rounded-xl bg-[var(--bg-input)] py-3 font-heading font-bold">Запретить</button></div></Modal>}
       {isInviteOpen && <Modal onClose={() => setInviteOpen(false)}>{inviteMode === 'qr' ? <><h2 className="font-heading font-extrabold text-xl">QR-код</h2><QrCodeVisual value={inviteUrl} /><button onClick={() => setInviteMode('menu')} className="w-full rounded-xl bg-[var(--bg-input)] py-3 font-heading font-bold">Назад</button></> : <><h2 className="font-heading font-extrabold text-xl">Пригласить друзей</h2><div className="space-y-2 mt-5"><ShareAction icon={Copy} text="Скопировать ссылку" onClick={() => navigator.clipboard?.writeText(inviteUrl)} /><ShareAction icon={Link} text="Реферальная ссылка" onClick={() => navigator.clipboard?.writeText(referralUrl)} /><ShareAction icon={QrCode} text="QR-код" onClick={() => setInviteMode('qr')} /><ShareAction icon={Share2} text="Поделиться в других приложениях" onClick={() => { if (navigator.share) navigator.share({ title: 'Профиль', url: inviteUrl }); }} /></div></>}</Modal>}
     </div>
   );
