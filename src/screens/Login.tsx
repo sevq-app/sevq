@@ -76,8 +76,8 @@ export function Login({ onLogin, onRegister }: AuthProps) {
             )}
             <InputField icon={Mail} label="Email" type="email" value={email} onChange={setEmail} placeholder="your@email.com" />
             
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-[#6B7280] uppercase tracking-wider ml-1">Пароль</label>
+            <div className="space-y-2.5">
+              <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider ml-1">Пароль</label>
               <div className="relative group">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[#6546C7] transition-colors" size={20} />
                 <input
@@ -94,7 +94,7 @@ export function Login({ onLogin, onRegister }: AuthProps) {
               </div>
             </div>
             <div className="flex justify-end pt-1">
-              <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm font-semibold text-[#6546C7] hover:text-[#4a32a0] hover:underline transition-all cursor-pointer bg-transparent border-none p-0 flex items-center gap-1 group" style={{ zIndex: 20 }}>
+              <button type="button" onClick={() => setShowForgotPassword(true)} className="text-sm font-semibold text-[#7C3AED] hover:text-[#4a32a0] hover:underline transition-all cursor-pointer bg-transparent border-none p-0 flex items-center gap-1 group" style={{ zIndex: 20 }}>
                 Забыли пароль? <span className="group-hover:translate-x-0.5 transition-transform">→</span>
               </button>
             </div>
@@ -103,7 +103,7 @@ export function Login({ onLogin, onRegister }: AuthProps) {
               whileTap={{ scale: 0.98, y: 2 }}
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden mt-6 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full py-5 rounded-2xl text-white font-heading font-bold text-lg relative overflow-hidden !mt-8 disabled:opacity-70 disabled:cursor-not-allowed"
               style={{ 
                 background: '#6546C7',
                 boxShadow: '0 4px 14px rgba(101, 70, 199, 0.25)'
@@ -254,10 +254,10 @@ function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; 
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#FF9848]/10 rounded-full blur-3xl" />
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md relative z-10">
         <div className="bg-white rounded-[32px] p-8 relative overflow-hidden" style={{ boxShadow: '0 20px 40px rgba(15,23,42,0.1), 0 1px 3px rgba(0,0,0,0.05)' }}>
-          <div className="flex flex-col items-center mb-8">
+          <div className="flex flex-col items-center mb-10">
             <QLogo size={190} animate theme="light" />
             <h1 className="font-heading font-extrabold text-2xl text-[#1A1A1A] mt-4 tracking-tight">{title}</h1>
-            <p className="text-[#6B7280] text-sm mt-1 text-center font-body">{subtitle}</p>
+            <p className="text-[#585D69] text-sm mt-1 text-center font-body">{subtitle}</p>
           </div>
           {children}
         </div>
@@ -268,8 +268,8 @@ function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; 
 
 function InputField({ icon: Icon, label, type, value, onChange, placeholder, accentColor = '#6546C7' }: any) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-xs font-bold text-[#6B7280] uppercase tracking-wider ml-1">{label}</label>
+    <div className="space-y-2.5">
+      <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-wider ml-1">{label}</label>
       <div className="relative group">
         <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6B7280] group-focus-within:text-[#6546C7] transition-colors" size={20} />
         <input
