@@ -15,17 +15,34 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+-- Явно переименовано в profiles_select_all/profiles_insert_own/profiles_update_own —
+-- удаляем старые имена, иначе после запуска этого блока на базе останутся сразу
+-- и старые, и новые политики (Postgres допускает несколько политик с разными
+-- именами одновременно, они комбинируются через OR).
 drop policy if exists "Profiles are viewable by authenticated users" on public.profiles;
-create policy "Profiles are viewable by authenticated users"
+drop policy if exists "Users can update own profile" on public.profiles;
+
+drop policy if exists "profiles_select_all" on public.profiles;
+create policy "profiles_select_all"
   on public.profiles for select
   to authenticated
   using (true);
 
-drop policy if exists "Users can update own profile" on public.profiles;
-create policy "Users can update own profile"
+-- Без этой политики upsertMyProfile() падает с 42501 (new row violates row-level
+-- security policy): у profiles не было policy для INSERT, а upsert выполняет
+-- INSERT ... ON CONFLICT DO UPDATE, для которого нужны права именно на INSERT.
+drop policy if exists "profiles_insert_own" on public.profiles;
+create policy "profiles_insert_own"
+  on public.profiles for insert
+  to authenticated
+  with check (auth.uid() = id);
+
+drop policy if exists "profiles_update_own" on public.profiles;
+create policy "profiles_update_own"
   on public.profiles for update
   to authenticated
-  using (auth.uid() = id);
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 -- Автоматически создаёт запись в profiles при регистрации нового пользователя
 create or replace function public.handle_new_user()
