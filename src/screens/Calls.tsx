@@ -40,7 +40,7 @@ export function Calls({ onNavigate }: CallsProps) {
         </p>
         
         <div className="w-full max-w-sm space-y-3">
-          <div className="bg-white rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}>
+          <div className="bg-white rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: '0 6px 18px rgba(15,23,42,0.10)' }}>
             <div className="w-11 h-11 rounded-full bg-green-100 flex items-center justify-center text-green-600">
               <PhoneIncoming size={18} />
             </div>
@@ -49,7 +49,7 @@ export function Calls({ onNavigate }: CallsProps) {
               <p className="text-xs text-sevchik-textSecondary font-body">Входящий • 10:45</p>
             </div>
           </div>
-          <div className="bg-white rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}>
+          <div className="bg-white rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: '0 6px 18px rgba(15,23,42,0.10)' }}>
             <div className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
               <PhoneOutgoing size={18} />
             </div>
