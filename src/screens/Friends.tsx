@@ -153,9 +153,9 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Поиск по имени или номеру"
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
-              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+              placeholder="Поиск"
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
+              style={{ background: '#F2F2F7', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
           </div>
         </div>

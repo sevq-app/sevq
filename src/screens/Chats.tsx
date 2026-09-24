@@ -234,20 +234,15 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         <div className="relative">
           <Search
             size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
           />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Чаты, люди и @никнеймы"
-            className="w-full text-white placeholder:text-white/70 rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
-            style={{
-              background: 'rgba(255,152,72,0.65)',
-              backdropFilter: 'blur(16px)',
-              WebkitBackdropFilter: 'blur(16px)',
-              boxShadow: '0 4px 14px rgba(255,152,72,0.28)',
-            }}
+            placeholder="Поиск"
+            className="w-full text-[var(--text-main)] placeholder:text-[var(--text-secondary)] rounded-card py-3.5 pl-12 pr-4 focus:outline-none font-body text-sm"
+            style={{ background: '#F2F2F7' }}
           />
         </div>
       </div>
