@@ -31,7 +31,15 @@ jobs:
         run: npm ci
 
       - name: Build
+        # VITE_* читаются Vite на этапе сборки и запекаются в бандл — раньше тут не было
+        # ни одной переменной, поэтому в собранном на GitHub Pages приложении
+        # VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY были всегда пустыми (src/lib/supabase.ts
+        # бросает ошибку при их отсутствии). Секреты нужно добавить в самом репозитории:
+        # Settings -> Secrets and variables -> Actions -> New repository secret.
         run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

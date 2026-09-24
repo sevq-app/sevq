@@ -141,8 +141,15 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
         console.error(error);
         setTimeout(() => supabase.auth.signOut(), 1500);
       } else {
-        setProfileOpenError('Не удалось открыть чат. Попробуйте ещё раз.');
-        console.error(error);
+        // PostgrestError (RLS-отказ, ошибка схемы и т.п.) содержит code/details/hint —
+        // показываем их в консоли как есть, чтобы не гадать, а видеть точную причину сервера.
+        const pgCode = error && typeof error === 'object' && 'code' in error ? String((error as { code?: unknown }).code) : null;
+        if (pgCode === '42501') {
+          setProfileOpenError('База данных отклонила создание чата (RLS, код 42501) — сервер не считает вас авторизованным. Откройте консоль браузера (F12 → Console) и пришлите, что выводит строка "[auth] сессия есть, отправляем запрос как: ...".');
+        } else {
+          setProfileOpenError('Не удалось открыть чат. Попробуйте ещё раз.');
+        }
+        console.error('Не удалось создать/открыть чат:', error);
       }
     } finally {
       setOpeningProfileId(null);
