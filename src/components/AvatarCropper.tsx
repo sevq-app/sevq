@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from 'react';
 import { Check, FlipHorizontal, X } from 'lucide-react';
 
 interface AvatarCropperProps {
@@ -8,9 +8,9 @@ interface AvatarCropperProps {
   onSave: (dataUrl: string) => void;
 }
 
-const MIN_STAGE_SIZE = 160;
-const MAX_STAGE_SIZE = 340;
-const STAGE_MARGIN = 40;
+const MIN_STAGE_SIZE = 220;
+const MAX_STAGE_SIZE = 480;
+const STAGE_MARGIN = 24;
 // Зум выше "чистого cover" (1×) даёт запас на панорамирование сразу в обе стороны —
 // на 1× более узкое измерение фото ровно равно размеру рамки и двигаться некуда.
 const MIN_ZOOM = 1;
@@ -21,10 +21,15 @@ function clamp(value: number, max: number) {
   return Math.min(max, Math.max(-max, value));
 }
 
+function pointerDistance(a: { x: number; y: number }, b: { x: number; y: number }) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
 /**
- * Круглый кроппер аватара: свободное панорамирование во все стороны (pointer events),
- * зум ползунком, зеркальное отражение, сброс. Область управления зафиксирована внизу
- * и никогда не перекрывается фото — сцена кропа ограничена местом над ней.
+ * Круглый кроппер аватара: свободное панорамирование во все стороны, зум колесом мыши
+ * или щипком двумя пальцами (отдельного слайдера нет — он не давал ощутимой реакции и
+ * только занимал место), зеркальное отражение, сброс. Область управления зафиксирована
+ * внизу и никогда не перекрывается фото — сцена кропа ограничена местом над ней.
  * Сохраняет выбранную область в исходном разрешении без даунскейла (PNG, без потерь).
  */
 export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps) {
@@ -36,6 +41,10 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [flipped, setFlipped] = useState(false);
   const dragState = useRef<{ startX: number; startY: number; startOffsetX: number; startOffsetY: number } | null>(null);
+  const activePointers = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const pinchState = useRef<{ distance: number; zoom: number } | null>(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
 
   useLayoutEffect(() => {
     const el = stageAreaRef.current;
@@ -64,11 +73,36 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
   }, [zoom, naturalSize, stageSize]);
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
-    event.currentTarget.setPointerCapture(event.pointerId);
-    dragState.current = { startX: event.clientX, startY: event.clientY, startOffsetX: offset.x, startOffsetY: offset.y };
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    } catch {
+      // На некоторых устройствах/синтетических событиях capture недоступен —
+      // не критично, продолжаем без него (move/up всё равно долетят при обычном drag).
+    }
+    activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (activePointers.current.size === 2) {
+      dragState.current = null;
+      const [a, b] = [...activePointers.current.values()];
+      pinchState.current = { distance: pointerDistance(a, b), zoom: zoomRef.current };
+    } else if (activePointers.current.size === 1) {
+      pinchState.current = null;
+      dragState.current = { startX: event.clientX, startY: event.clientY, startOffsetX: offset.x, startOffsetY: offset.y };
+    }
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!activePointers.current.has(event.pointerId)) return;
+    activePointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+
+    if (activePointers.current.size >= 2 && pinchState.current) {
+      const [a, b] = [...activePointers.current.values()];
+      const distance = pointerDistance(a, b);
+      const nextZoom = clampZoom((pinchState.current.zoom * distance) / pinchState.current.distance);
+      setZoom(nextZoom);
+      return;
+    }
+
     if (!dragState.current) return;
     const dx = event.clientX - dragState.current.startX;
     const dy = event.clientY - dragState.current.startY;
@@ -78,8 +112,18 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
     });
   };
 
-  const handlePointerUp = () => {
+  const endPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
+    activePointers.current.delete(event.pointerId);
+    if (activePointers.current.size < 2) pinchState.current = null;
     dragState.current = null;
+  };
+
+  function clampZoom(value: number) {
+    return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value));
+  }
+
+  const handleWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
+    setZoom((current) => clampZoom(current - event.deltaY * 0.0015));
   };
 
   const handleReset = () => {
@@ -124,7 +168,7 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
           aria-label="Отразить"
           aria-pressed={flipped}
           className="w-11 h-11 rounded-full flex items-center justify-center text-white transition-colors"
-          style={{ background: flipped ? '#6546C7' : 'rgba(255,255,255,0.1)' }}
+          style={{ background: flipped ? '#6546C7' : 'rgba(255,255,255,0.15)' }}
         >
           <FlipHorizontal size={20} />
         </button>
@@ -136,8 +180,10 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
           style={{ width: stageSize, height: stageSize, cursor: 'grab' }}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
+          onPointerUp={endPointer}
+          onPointerCancel={endPointer}
+          onPointerLeave={endPointer}
+          onWheel={handleWheel}
         >
           <div
             className="absolute pointer-events-none"
@@ -173,36 +219,35 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
       </div>
 
       {/* Фиксированная нижняя панель — всегда на виду, фото двигается только над ней */}
-      <div className="shrink-0 bg-black px-5 pt-4 pb-6" style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.4)' }}>
-        <div className="w-full max-w-xs mx-auto flex items-center gap-3 mb-5">
-          <span className="text-white/70 text-xs select-none">−</span>
-          <input
-            type="range"
-            min={MIN_ZOOM}
-            max={MAX_ZOOM}
-            step={0.01}
-            value={zoom}
-            onChange={(event) => setZoom(Number(event.target.value))}
-            className="flex-1 accent-[#6546C7]"
-            aria-label="Масштаб"
-          />
-          <span className="text-white/70 text-sm select-none">+</span>
-        </div>
-
+      <div className="shrink-0 bg-black px-5 pt-5 pb-6 z-10" style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.4)' }}>
         <div className="w-full max-w-xs mx-auto flex items-center justify-between">
-          <button onClick={onCancel} aria-label="Отмена" className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center text-white">
-            <X size={24} />
+          <button
+            onClick={onCancel}
+            aria-label="Отмена"
+            className="flex flex-col items-center gap-1.5 w-16"
+          >
+            <span className="w-14 h-14 rounded-full flex items-center justify-center text-white" style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              <X size={24} />
+            </span>
+            <span className="text-white/80 text-xs font-body">Отмена</span>
           </button>
-          <button onClick={handleReset} aria-label="Сброс" className="px-5 py-3 rounded-full bg-white/10 text-white font-heading font-semibold text-sm">
-            Сброс
+
+          <button onClick={handleReset} aria-label="Сброс" className="flex flex-col items-center gap-1.5">
+            <span className="px-5 py-3 rounded-full text-white font-heading font-semibold text-sm" style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.15)' }}>
+              Сброс
+            </span>
           </button>
+
           <button
             onClick={handleSave}
             disabled={!naturalSize}
-            aria-label="Подтвердить"
-            className="w-14 h-14 rounded-full bg-sevchik-purple flex items-center justify-center text-white disabled:opacity-50"
+            aria-label="Сохранить"
+            className="flex flex-col items-center gap-1.5 w-16 disabled:opacity-50"
           >
-            <Check size={24} />
+            <span className="w-14 h-14 rounded-full bg-sevchik-purple flex items-center justify-center text-white">
+              <Check size={24} />
+            </span>
+            <span className="text-white/80 text-xs font-body">Сохранить</span>
           </button>
         </div>
       </div>
