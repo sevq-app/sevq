@@ -281,7 +281,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
       </div>
 
       {/* Список чатов */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-40 md:pb-0">
         {!selectMode && query.trim() && (profilesLoading || profileResults.length > 0) && (
           <div className="mb-4">
             <h2 className="mb-2 ml-1 text-xs font-bold uppercase tracking-wider text-sevchik-textSecondary">Пользователи</h2>
