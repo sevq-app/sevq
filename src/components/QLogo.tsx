@@ -2,7 +2,7 @@ import { useId } from 'react';
 
 interface QLogoProps {
   size?: number;
-  /** Plays the idle look-around + smile loop. Off by default (static resting pose). */
+  /** Plays the idle look-around + star sparkle loop. Off by default (static resting pose). */
   animate?: boolean;
   /**
    * 'light' — акцентный цвет (окантовка тела, ножки, окантовка глаз, рот) фиолетовый —
@@ -29,10 +29,10 @@ const PUPIL_COLOR = '#6546C7';
  * (--qlogo-accent), переключаемый темой. Персонаж — просто объект, без собственного свечения;
  * источник света в композиции один — звезда. Персонажу вместо этого даёт объём мягкая нейтральная
  * тень (CSS drop-shadow), а не цветной ореол. Глаза (белый белок, фиолетовый зрачок с белым
- * бликом) и звезда (оранжевая) не зависят от темы. При animate=true зрачки поглядывают на звезду,
- * рот в такт выгибается в улыбку, а звезда мягко пульсирует, мерцает и держит собственный —
- * сдержанный — ореол ("Искра"); наведение курсора на звезду увеличивает и осветляет её независимо
- * от animate.
+ * бликом) и звезда (оранжевая) не зависят от темы. Рот статичный — всегда лёгкая улыбка, без
+ * анимации и смены выражения. При animate=true зрачки поглядывают на звезду, а звезда мягко
+ * пульсирует, мерцает и держит собственный — сдержанный — ореол ("Искра"); наведение курсора на
+ * звезду увеличивает и осветляет её независимо от animate.
  */
 export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoProps) {
   const uid = useId().replace(/:/g, '');
@@ -53,7 +53,7 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
     ...(theme === 'system' ? {} : ({ '--qlogo-accent': ACCENT[theme] } as React.CSSProperties)),
   };
 
-  const mouthRest = 'M 91 127 Q 100 127 109 127';
+  // Рот статичный: всегда улыбка (форма, которая раньше была кадром "взгляд на звезду"), без анимации.
   const mouthSmile = 'M 91 121 Q 100 133 109 121';
 
   return (
@@ -165,21 +165,9 @@ export function QLogo({ size = 64, animate = false, theme = 'system' }: QLogoPro
           <circle cx="119.5" cy="88" r="2.4" fill="#FFFFFF" />
         </g>
 
-        {/* Рот: акцентным цветом (иначе был бы невидим на светлом фоне сквозь прозрачное тело);
-            выгибается из прямой линии в улыбку и обратно, в такт со взглядом */}
-        <path d={mouthRest} fill="none" stroke="var(--qlogo-accent)" strokeWidth="4.5" strokeLinecap="round">
-          {animate && (
-            <animate
-              attributeName="d"
-              values={`${mouthRest};${mouthRest};${mouthSmile};${mouthSmile};${mouthRest};${mouthRest}`}
-              keyTimes="0;0.18;0.40;0.55;0.82;1"
-              calcMode="spline"
-              keySplines="0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1;0.42 0 0.58 1"
-              dur="5s"
-              repeatCount="indefinite"
-            />
-          )}
-        </path>
+        {/* Рот: статичная улыбка акцентным цветом (иначе была бы невидима на светлом фоне сквозь
+            прозрачное тело) — без анимации, выражение лица не меняется */}
+        <path d={mouthSmile} fill="none" stroke="var(--qlogo-accent)" strokeWidth="4.5" strokeLinecap="round" />
 
         {/* Звёздочка: всегда оранжевая, не зависит от темы. Внешняя группа задаёт базовый
             размер/позицию (статичный transform-атрибут); анимация "Искра" — на самом path,
