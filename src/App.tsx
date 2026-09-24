@@ -118,6 +118,17 @@ function App() {
     document.documentElement.classList.toggle('gray-theme', grayMode);
   }, [grayMode]);
 
+  // Цвет статус-бара (Android, и адресной строки в мобильном Safari) должен совпадать
+  // с реально активной темой приложения, а не только с системной (prefers-color-scheme) —
+  // у приложения свой переключатель темы на экране «Оформление», который может отличаться
+  // от настроек устройства. Значения — те же, что у --bg-main в src/index.css.
+  useEffect(() => {
+    const meta = document.getElementById('theme-color-meta');
+    if (meta) {
+      meta.setAttribute('content', grayMode ? '#24272b' : '#F4F1FF');
+    }
+  }, [grayMode]);
+
   // Слежение за системной темой (для режима "Системная")
   useEffect(() => {
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
@@ -197,7 +208,7 @@ function App() {
   }
 
   return (
-    <div className={`h-dvh w-screen overflow-hidden ${grayMode ? 'gray-theme' : ''}`}>
+    <div className={`h-dvh w-screen overflow-hidden bg-[var(--bg-main)] ${grayMode ? 'gray-theme' : ''}`}>
       <div className="h-full w-full flex bg-[var(--bg-main)]">
         {showTabBar && <Sidebar current={screen} onNavigate={handleTabNavigate} grayMode={grayMode} />}
         <div className="h-full w-full flex flex-col overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>

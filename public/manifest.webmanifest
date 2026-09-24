@@ -1,0 +1,11 @@
+{
+  "name": "Севчик",
+  "short_name": "Севчик",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F4F1FF",
+  "theme_color": "#F4F1FF",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
