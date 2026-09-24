@@ -65,33 +65,60 @@ create table if not exists public.chat_members (
 
 alter table public.chat_members enable row level security;
 
--- SELECT: участник видит чаты, в которых состоит
+-- Раньше SELECT-политика на chat_members сама проверяла членство подзапросом К ТОЙ ЖЕ
+-- chat_members ("Members can view chat membership" ниже была удалена) — при выполнении
+-- этого подзапроса Postgres заново применяет RLS к chat_members, и получается
+-- бесконечная рекурсия: "infinite recursion detected in policy for relation
+-- chat_members". Разрывает цикл SECURITY DEFINER-функция: она выполняется от имени
+-- владельца (в Supabase Dashboard SQL Editor это обычно роль с BYPASSRLS), поэтому её
+-- внутренний запрос к chat_members НЕ проходит через RLS заново.
+create or replace function public.is_chat_member(p_chat_id uuid, p_user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.chat_members
+    where chat_id = p_chat_id and user_id = p_user_id
+  );
+$$;
+
+grant execute on function public.is_chat_member(uuid, uuid) to authenticated;
+
+-- Старые политики (в т.ч. рекурсивная) удаляем явно по именам: при повторном запуске
+-- этого скрипта их не заменили бы автоматически — Postgres допускает несколько политик
+-- с разными именами одновременно, и старая рекурсивная политика продолжала бы ломать
+-- чаты, даже когда рядом с ней уже появилась новая безопасная.
 drop policy if exists "Members can view their chats" on public.chats;
-create policy "Members can view their chats"
-  on public.chats for select
-  to authenticated
-  using (exists (select 1 from public.chat_members cm where cm.chat_id = id and cm.user_id = auth.uid()));
-
--- INSERT: любой авторизованный пользователь может создать новый чат
 drop policy if exists "Users can create chats" on public.chats;
-create policy "Users can create chats"
-  on public.chats for insert
-  to authenticated
-  with check (true);
-
 drop policy if exists "Members can view chat membership" on public.chat_members;
-create policy "Members can view chat membership"
+drop policy if exists "Users can add chat members" on public.chat_members;
+
+drop policy if exists "chat_members_select_members" on public.chat_members;
+create policy "chat_members_select_members"
   on public.chat_members for select
   to authenticated
-  using (exists (select 1 from public.chat_members cm2 where cm2.chat_id = chat_members.chat_id and cm2.user_id = auth.uid()));
+  using ( public.is_chat_member(chat_id, auth.uid()) );
 
--- INSERT: разрешено добавлять участников (в т.ч. второго человека — иначе
--- getOrCreateDirectChat не сможет записать собеседника в chat_members)
-drop policy if exists "Users can add chat members" on public.chat_members;
-create policy "Users can add chat members"
+drop policy if exists "chat_members_insert_auth" on public.chat_members;
+create policy "chat_members_insert_auth"
   on public.chat_members for insert
   to authenticated
-  with check (true);
+  with check ( auth.uid() is not null );
+
+drop policy if exists "chats_select_members" on public.chats;
+create policy "chats_select_members"
+  on public.chats for select
+  to authenticated
+  using ( public.is_chat_member(id, auth.uid()) );
+
+drop policy if exists "chats_insert_auth" on public.chats;
+create policy "chats_insert_auth"
+  on public.chats for insert
+  to authenticated
+  with check ( auth.uid() is not null );
 
 create table if not exists public.messages (
   id uuid primary key default gen_random_uuid(),
@@ -104,18 +131,24 @@ create table if not exists public.messages (
 alter table public.messages enable row level security;
 
 drop policy if exists "Members can read messages" on public.messages;
-create policy "Members can read messages"
+drop policy if exists "Members can send messages" on public.messages;
+
+drop policy if exists "messages_select_members" on public.messages;
+create policy "messages_select_members"
   on public.messages for select
   to authenticated
-  using (exists (select 1 from public.chat_members cm where cm.chat_id = messages.chat_id and cm.user_id = auth.uid()));
+  using ( public.is_chat_member(chat_id, auth.uid()) );
 
-drop policy if exists "Members can send messages" on public.messages;
-create policy "Members can send messages"
+drop policy if exists "messages_insert_members" on public.messages;
+create policy "messages_insert_members"
   on public.messages for insert
   to authenticated
   with check (
+    -- sender_id = auth.uid() добавлен сверх присланного шаблона: без него любой участник
+    -- чата мог бы вставить сообщение с чужим sender_id (выдать его за другого участника).
+    -- Рекурсию это условие не создаёт — это обычное сравнение, без обращения к chat_members.
     sender_id = auth.uid()
-    and exists (select 1 from public.chat_members cm where cm.chat_id = messages.chat_id and cm.user_id = auth.uid())
+    and public.is_chat_member(chat_id, auth.uid())
   );
 
 -- Включаем Realtime для мгновенной доставки новых сообщений (идемпотентно —
