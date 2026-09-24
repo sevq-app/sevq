@@ -204,7 +204,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 + index * 0.05 }}
                   className="bg-white rounded-2xl p-4 flex items-center gap-4 hover:shadow-lg transition-shadow"
-                  style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
+                  style={{ boxShadow: '0 6px 18px rgba(15,23,42,0.10)' }}
                 >
                   <div
                     className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative shrink-0"

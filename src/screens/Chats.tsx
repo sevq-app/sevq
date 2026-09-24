@@ -317,8 +317,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   backdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
                   WebkitBackdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
                   boxShadow: isSelected
-                    ? '0 0 0 2px #6546C7, 0 8px 24px rgba(15,23,42,0.06)'
-                    : '0 8px 24px rgba(15,23,42,0.06)',
+                    ? '0 0 0 2px #6546C7, 0 10px 30px rgba(15,23,42,0.12)'
+                    : '0 10px 30px rgba(15,23,42,0.12)',
                 }}
               >
                 {/* Кружочек выбора (только в режиме выбора) — нейтральный,
