@@ -65,6 +65,11 @@ create table if not exists public.chat_members (
 
 alter table public.chat_members enable row level security;
 
+-- ВАЖНО: политики для chats/chat_members/messages используют функцию is_chat_member
+-- с SECURITY DEFINER. Это сделано специально, чтобы избежать бесконечной рекурсии RLS.
+-- НЕ упрощайте эти политики обратно до прямых SELECT из chat_members внутри политики —
+-- это сломает все чаты (ошибка 42P17, infinite recursion).
+--
 -- Раньше SELECT-политика на chat_members сама проверяла членство подзапросом К ТОЙ ЖЕ
 -- chat_members ("Members can view chat membership" ниже была удалена) — при выполнении
 -- этого подзапроса Postgres заново применяет RLS к chat_members, и получается
