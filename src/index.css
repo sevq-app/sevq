@@ -32,7 +32,7 @@
     --chart-5: 27 87% 67%;
     
     /* Кастомные переменные для Севчик */
-    --bg-main: radial-gradient(ellipse at top left, #FFF8ED 0%, #FFF0DC 60%, #FFE9CC 100%);
+    --bg-main: radial-gradient(ellipse at top left, #FAFAFF 0%, #F4F1FF 55%, #EEEBFF 100%);
     --bg-card: #FFFFFF;
     --bg-input: #F9FAFB;
     --text-main: #1A1A1A;
