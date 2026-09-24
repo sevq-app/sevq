@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Phone, PhoneIncoming, PhoneOutgoing, Video } from 'lucide-react';
+import { Phone, Video } from 'lucide-react';
 import type { Screen } from '@/data/mock';
 
 interface CallsProps {
@@ -35,30 +35,9 @@ export function Calls({ onNavigate }: CallsProps) {
           <Video size={40} className="text-sevchik-purple" />
         </motion.div>
         <h2 className="font-heading font-extrabold text-xl text-[#1A1A1A] mb-2">Звонки в Севчик</h2>
-        <p className="text-sevchik-textSecondary font-body max-w-xs mb-8">
+        <p className="text-sevchik-textSecondary font-body max-w-xs">
           Здесь будет история ваших звонков. Мы уже работаем над интеграцией видеосвязи!
         </p>
-        
-        <div className="w-full max-w-sm space-y-3">
-          <div className="bg-white rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: '0 6px 18px rgba(15,23,42,0.10)' }}>
-            <div className="w-11 h-11 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-              <PhoneIncoming size={18} />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-heading font-bold text-sm text-[#1A1A1A]">Анна Смирнова</p>
-              <p className="text-xs text-sevchik-textSecondary font-body">Входящий • 10:45</p>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl p-4 flex items-center gap-4" style={{ boxShadow: '0 6px 18px rgba(15,23,42,0.10)' }}>
-            <div className="w-11 h-11 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-              <PhoneOutgoing size={18} />
-            </div>
-            <div className="flex-1 text-left">
-              <p className="font-heading font-bold text-sm text-[#1A1A1A]">Клуб путешественников</p>
-              <p className="text-xs text-sevchik-textSecondary font-body">Исходящий • Вчера</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

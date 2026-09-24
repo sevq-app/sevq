@@ -14,12 +14,12 @@ import { Group } from '@/screens/Group';
 import { ContactProfile } from '@/screens/ContactProfile';
 import { ContactEdit } from '@/screens/ContactEdit';
 import { MediaGallery } from '@/screens/MediaGallery';
-import { Search } from '@/screens/Search';
 import { Settings } from '@/screens/Settings';
 import { Appearance } from '@/screens/Appearance';
 import { Login, Register } from '@/screens/Login';
 import type { Screen } from '@/data/mock';
 import { supabase } from '@/lib/supabase';
+import { displayNameOf, initialsOf, listMyChats } from '@/lib/messagingService';
 import { useChatStore } from '@/store/chatStore';
 import { useAutoReloadOnNewVersion } from '@/hooks/useAutoReloadOnNewVersion';
 
@@ -33,6 +33,7 @@ function App() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const chats = useChatStore((s) => s.chats);
+  const upsertRealChat = useChatStore((s) => s.upsertRealChat);
   const [fontSize, setFontSize] = useState<number>(16);
   const [themeMode, setThemeMode] = useState<'system' | 'light' | 'dark'>(() => {
     const saved = localStorage.getItem('sevchik_themeMode');
@@ -68,6 +69,42 @@ function App() {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  // Подгружаем уже существующие реальные чаты пользователя при входе — иначе
+  // они попадали бы в список только после клика по результату поиска, и
+  // при каждой перезагрузке страницы (стор чатов не персистится) пропадали
+  // бы из интерфейса, хотя сами данные в Supabase остаются на месте.
+  useEffect(() => {
+    if (!currentUser) return;
+    let cancelled = false;
+    listMyChats()
+      .then((summaries) => {
+        if (cancelled) return;
+        for (const summary of summaries) {
+          const name = displayNameOf(summary.profile);
+          upsertRealChat({
+            id: `real-${summary.chatId}`,
+            name,
+            avatarColor: '#6546C7',
+            initials: initialsOf(name),
+            lastMessage: summary.lastMessageText ?? '',
+            time: summary.lastMessageAt
+              ? new Date(summary.lastMessageAt).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' })
+              : '',
+            unread: 0,
+            online: false,
+            isReal: true,
+            remoteChatId: summary.chatId,
+            remoteUserId: summary.profile.id,
+            messages: [],
+          });
+        }
+      })
+      .catch((error) => console.error('Не удалось загрузить список чатов:', error));
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser, upsertRealChat]);
 
   // Восстановление темы при загрузке (не трогаем class gray-theme)
   useEffect(() => {
@@ -141,7 +178,7 @@ function App() {
     setScreen(tab);
   };
 
-  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'search' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group' && screen !== 'contact-profile' && screen !== 'contact-edit' && screen !== 'media-gallery';
+  const showTabBar = screen !== 'login' && screen !== 'conversation' && screen !== 'settings' && screen !== 'appearance' && screen !== 'about' && screen !== 'photos' && screen !== 'my-groups' && screen !== 'group' && screen !== 'contact-profile' && screen !== 'contact-edit' && screen !== 'media-gallery';
 
   if (authLoading) {
     return (
@@ -212,9 +249,6 @@ function App() {
             {screen === 'photos' && <Photos onBack={() => setScreen('profile')} />}
             {screen === 'my-groups' && <MyGroups groups={[]} onBack={() => setScreen('profile')} onOpenGroup={handleOpenGroup} />}
             {screen === 'group' && activeGroup && <Group name={activeGroup} onBack={() => setScreen('my-groups')} />}
-            {screen === 'search' && (
-              <Search onBack={() => setScreen('chats')} onWriteMessage={handleWriteToName} onOpenChat={handleOpenChat} />
-            )}
             {screen === 'settings' && (
               <Settings
                 onBack={() => setScreen('profile')}

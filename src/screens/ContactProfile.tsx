@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, Pencil, Phone, Video, Bell, BellOff, Search, Image, Ban, Trash2, ChevronRight } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
-import { searchResults, friendsData } from '@/data/mock';
 import { useState } from 'react';
 import { getContactOverride, getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
@@ -13,19 +12,13 @@ interface ContactProfileProps {
   onOpenMedia: () => void;
 }
 
-function findContactMeta(name: string) {
-  const all = [...searchResults, ...friendsData];
-  return all.find((c) => c.name === name);
-}
-
 export function ContactProfile({ chatId, onBack, onEdit, onOpenMedia }: ContactProfileProps) {
   const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
   const [isMuted, setIsMuted] = useState(false);
   if (!chat) return null;
   const override = getContactOverride(chat.id);
   const { name: displayName, initials: displayInitials } = getDisplayContact(chat, override);
-  const meta = findContactMeta(chat.name);
-  const statusText = meta?.status || (chat.online ? 'В сети' : 'Не в сети');
+  const statusText = chat.online ? 'В сети' : 'Не в сети';
   const mediaCount = chat.messages.filter((m) => m.text.startsWith('image:')).length;
 
   return (
@@ -53,7 +46,6 @@ export function ContactProfile({ chatId, onBack, onEdit, onOpenMedia }: ContactP
       <div className="flex flex-col items-center px-4 mt-2 mb-6">
         <Avatar initials={displayInitials} color={chat.avatarColor} size="xxl" online={chat.online} />
         <h1 className="font-heading font-extrabold text-2xl text-sevchik-text mt-4">{displayName}</h1>
-        {meta?.handle && <p className="text-sm text-[var(--text-secondary)] font-body mt-1">{meta.handle}</p>}
         {override.phone && <p className="text-sm text-[var(--text-secondary)] font-body mt-1">{override.phone}</p>}
         <p className={`text-sm font-body mt-1 flex items-center gap-1.5 ${chat.online ? 'text-sevchik-mint' : 'text-[var(--text-secondary)]'}`}>
           {chat.online && <span className="w-1.5 h-1.5 rounded-full bg-sevchik-mint" />}
