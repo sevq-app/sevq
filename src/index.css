@@ -42,6 +42,8 @@
     --theme-primary: #6546C7;
     --theme-primary-rgb: 101, 70, 199;
     --theme-message-gradient: #6546C7;
+    --avatar-placeholder-bg: #EDEAF7;
+    --avatar-placeholder-icon: #6546C7;
   }
 
 }
@@ -209,6 +211,8 @@ html.gray-theme {
   --theme-primary: #5967A8;
   --theme-primary-rgb: 89, 103, 168;
   --theme-message-gradient: #5967A8;
+  --avatar-placeholder-bg: #3A3E46;
+  --avatar-placeholder-icon: #8F7AE0;
   color-scheme: dark;
 }
 

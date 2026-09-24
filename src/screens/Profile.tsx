@@ -1,8 +1,7 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { Copy, Link, QrCode, Share2, ChevronRight, Settings, Sparkles, Users, X } from 'lucide-react';
-import { Avatar } from '@/components/Avatar';
+import { Camera, Copy, Link, QrCode, Share2, ChevronRight, Settings, Sparkles, Users, X } from 'lucide-react';
 import type { Screen } from '@/data/mock';
 import type { ProfileData } from '@/screens/AboutMe';
 
@@ -85,8 +84,8 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
 
       <div className="flex flex-col items-center px-4 sm:px-6 mb-6 mt-2">
         <div className="relative">
-          {/* Внешний ореол вместо звезды/кружка-статуса — сама заливка и "+" не трогаются,
-              светится только внешняя окантовка вокруг круга, отражая online */}
+          {/* Внешний ореол вместо звезды/кружка-статуса — светится только внешняя
+              окантовка вокруг круга, отражая online */}
           <button
             onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : setPhotoAccessOpen(true)}
             className="block rounded-full transition-shadow duration-300"
@@ -101,7 +100,13 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
               {profilePhoto ? (
                 <img src={profilePhoto} alt="Фото профиля" className="w-[120px] h-[120px] rounded-full object-cover" />
               ) : (
-                <Avatar initials="+" color="#6546C7" size="xxl" />
+                <div
+                  className="w-[140px] h-[140px] rounded-full flex flex-col items-center justify-center gap-1.5"
+                  style={{ background: 'var(--avatar-placeholder-bg)', boxShadow: '0 2px 6px rgba(15,23,42,0.08)' }}
+                >
+                  <Camera size={30} style={{ color: 'var(--avatar-placeholder-icon)' }} />
+                  <span className="text-[11px] font-heading font-semibold leading-none" style={{ color: 'var(--avatar-placeholder-icon)' }}>Добавить фото</span>
+                </div>
               )}
             </div>
           </button>
