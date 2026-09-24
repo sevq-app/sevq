@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, FlipHorizontal, X } from 'lucide-react';
 
 interface AvatarCropperProps {
@@ -30,6 +31,8 @@ function pointerDistance(a: { x: number; y: number }, b: { x: number; y: number 
  * или щипком двумя пальцами (отдельного слайдера нет — он не давал ощутимой реакции и
  * только занимал место), зеркальное отражение, сброс. Область управления зафиксирована
  * внизу и никогда не перекрывается фото — сцена кропа ограничена местом над ней.
+ * Рендерится через портал в document.body (а не в обычном дереве экрана), чтобы гарантированно
+ * оказаться выше нижней навигации приложения независимо от её собственного z-index/стек-контекста.
  * Сохраняет выбранную область в исходном разрешении без даунскейла (PNG, без потерь).
  */
 export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps) {
@@ -158,9 +161,9 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
     onSave(canvas.toDataURL('image/png'));
   };
 
-  return (
-    <div className="fixed inset-0 z-[70] bg-black flex flex-col">
-      <div className="flex items-center justify-between px-5 pt-5 pb-2 shrink-0">
+  return createPortal(
+    <div className="fixed inset-0 z-[999] bg-black flex flex-col">
+      <div className="flex items-center justify-between px-5 shrink-0" style={{ paddingTop: 'max(20px, env(safe-area-inset-top))', paddingBottom: '8px' }}>
         <div className="w-11 h-11" />
         <h2 className="text-white font-heading font-bold text-base">Обрежьте фото</h2>
         <button
@@ -218,8 +221,10 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
         </div>
       </div>
 
-      {/* Фиксированная нижняя панель — всегда на виду, фото двигается только над ней */}
-      <div className="shrink-0 bg-black px-5 pt-5 pb-6 z-10" style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.4)' }}>
+      {/* Фиксированная нижняя панель — всегда на виду, фото двигается только над ней.
+          Отступ снизу учитывает safe-area (домашняя полоска на iPhone) поверх минимума в 24px,
+          чтобы кнопки не прилипали к самому краю и не попадали в зону системных жестов. */}
+      <div className="shrink-0 bg-black px-5 pt-5 z-10" style={{ boxShadow: '0 -8px 24px rgba(0,0,0,0.4)', paddingBottom: 'max(24px, env(safe-area-inset-bottom))' }}>
         <div className="w-full max-w-xs mx-auto flex items-center justify-between">
           <button
             onClick={onCancel}
@@ -251,6 +256,7 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
