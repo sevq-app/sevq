@@ -6,6 +6,7 @@ import { Camera, Copy, Download, Link, MoreVertical, QrCode, Share2, ChevronRigh
 import { AvatarCropper } from '@/components/AvatarCropper';
 import { clearMyAvatar, fetchMyAvatarUrl, readAvatarPhoto, uploadMyAvatar, writeAvatarPhoto } from '@/lib/avatarPhoto';
 import { listMyPhotos, uploadMyPhoto, type RemotePhoto } from '@/lib/photoGallery';
+import { fetchMyProfile } from '@/lib/messagingService';
 import type { Screen } from '@/data/mock';
 import type { ProfileData } from '@/screens/AboutMe';
 
@@ -53,15 +54,35 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [cropSource, setCropSource] = useState<string | null>(null);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [dbFullName, setDbFullName] = useState<string | null>(null);
+  const [dbUsername, setDbUsername] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { name, username, avatarUrl, groups } = getMetadata(user, profileData);
   const savedProfile = profileData.name || profileData.username ? profileData : readSavedProfile();
-  const displayName = [savedProfile.name || name, savedProfile.lastName].filter(Boolean).join(' ') || user?.email?.split('@')[0] || 'Пользователь';
-  const displayUsername = savedProfile.username || username || user?.email?.split('@')[0] || '';
+  // profiles в Supabase — источник истины (см. эффект ниже): пока он не подгрузился,
+  // рисуем локальный кэш/auth-метаданные для мгновенного отклика, а как только пришёл
+  // ответ — он побеждает, даже если локально было что-то другое (устаревшее).
+  const displayName = dbFullName || [savedProfile.name || name, savedProfile.lastName].filter(Boolean).join(' ') || user?.email?.split('@')[0] || 'Пользователь';
+  const displayUsername = dbUsername || savedProfile.username || username || user?.email?.split('@')[0] || '';
   // Аватарка (кроп) больше не берётся из галереи — это отдельная, независимая сущность.
   const profilePhoto = avatarPhoto || avatarUrl;
 
   useEffect(() => { writeAvatarPhoto(avatarPhoto); }, [avatarPhoto]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    fetchMyProfile()
+      .then((profile) => {
+        if (cancelled || !profile) return;
+        if (profile.full_name) setDbFullName(profile.full_name);
+        if (profile.username) setDbUsername(profile.username);
+      })
+      .catch((error) => console.error('Не удалось загрузить профиль из базы:', error));
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   useEffect(() => {
     if (!user?.id) return;

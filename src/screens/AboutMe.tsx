@@ -16,8 +16,7 @@ import {
   Share2,
   User as UserIcon,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { isValidUsernameFormat, upsertMyProfile, UsernameFormatError, UsernameTakenError, USERNAME_HINT } from '@/lib/messagingService';
+import { fetchMyProfile, isValidUsernameFormat, upsertMyProfile, UsernameFormatError, UsernameTakenError, USERNAME_HINT } from '@/lib/messagingService';
 
 const storageKey = 'sevchik-about-me';
 const profileStorageKey = 'sevchik-profile-data';
@@ -134,6 +133,35 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
   const [usernameError, setUsernameError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Локальный кэш/auth-метаданные (initialData выше) рисуются мгновенно при открытии
+  // экрана, но источник истины — profiles в Supabase: подгружаем его и, если там ЕСТЬ
+  // непустое значение поля, подменяем — иначе имя, сохранённое в прошлый раз (в т.ч. с
+  // другого устройства), маскировалось бы тем, что попало в auth-метаданные один раз при
+  // регистрации и с тех пор не менялось.
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    fetchMyProfile()
+      .then((profile) => {
+        if (cancelled || !profile) return;
+        setData((current) => {
+          const next = { ...current };
+          if (profile.full_name) {
+            const [firstName, ...rest] = profile.full_name.trim().split(/\s+/);
+            next.firstName = firstName;
+            next.lastName = rest.join(' ');
+          }
+          if (profile.username) next.username = profile.username;
+          if (profile.phone) next.phone = profile.phone;
+          return next;
+        });
+      })
+      .catch((error) => console.error('Не удалось загрузить профиль из базы:', error));
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   const update = <K extends keyof AboutData>(key: K, value: AboutData[K]) => {
     if (key === 'username') {
       setUsernameError('');
@@ -154,6 +182,12 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
     setSaving(true);
     setUsernameError('');
     setSaveSuccess(false);
+
+    // upsertMyProfile сохраняет имя/телефон отдельным запросом ДО проверки username и
+    // независимо от её результата — так что ошибка именно в нике (в т.ч. занятый только
+    // формально, но не по вине пользователя) не должна откатывать остальные поля: они уже
+    // на месте в БД к моменту этого catch.
+    let usernameFailed = false;
     try {
       await upsertMyProfile({
         full_name: `${data.firstName} ${data.lastName}`.trim(),
@@ -161,14 +195,15 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
         phone: data.phone,
       });
     } catch (error) {
-      setSaving(false);
       if (error instanceof UsernameTakenError || error instanceof UsernameFormatError) {
         setUsernameError(error.message);
+        usernameFailed = true;
       } else {
+        setSaving(false);
         setUsernameError('Не удалось сохранить. Попробуйте ещё раз.');
         console.error('Не удалось сохранить профиль:', error);
+        return;
       }
-      return;
     }
 
     localStorage.setItem(storageKey, JSON.stringify(data));
@@ -188,9 +223,10 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
     };
     localStorage.setItem(profileStorageKey, JSON.stringify(profileData));
     setProfileData(profileData);
-    if (user) await supabase.auth.updateUser({ data });
 
     setSaving(false);
+    if (usernameFailed) return; // остаёмся на экране — ошибка у поля уже показана, остальное сохранено
+
     setSaveSuccess(true);
     // Даём увидеть галочку успеха перед возвратом назад, а не уводим со экрана мгновенно.
     setTimeout(onBack, 900);

@@ -131,30 +131,65 @@ async function assertUsernameAvailable(username: string, myId: string): Promise<
   if (data) throw new UsernameTakenError();
 }
 
-/** Обновляет собственную запись в profiles (никнейм, телефон, имя) — вызывается при сохранении "О себе". */
+export interface MyProfileFields {
+  full_name: string | null;
+  username: string | null;
+  phone: string | null;
+}
+
+/**
+ * full_name/username/phone текущего пользователя из profiles — источник истины при
+ * загрузке "Информации о себе": localStorage и auth.user_metadata (заполняется один раз
+ * при регистрации и дальше не обновляется) не должны маскировать то, что пользователь
+ * реально сохранил в последний раз.
+ */
+export async function fetchMyProfile(): Promise<MyProfileFields | null> {
+  const { id: myId } = await requireSession();
+  const { data, error } = await supabase.from('profiles').select('full_name, username, phone').eq('id', myId).maybeSingle();
+  if (error || !data) return null;
+  return data as MyProfileFields;
+}
+
+/**
+ * Обновляет собственную запись в profiles (имя, телефон, никнейм) — вызывается при
+ * сохранении "О себе". full_name/phone сохраняются отдельным запросом ДО проверки
+ * username и независимо от её результата: ошибка в нике (например, "уже занят" — в т.ч.
+ * ложное срабатывание на собственном же нике) не должна откатывать остальные поля.
+ */
 export async function upsertMyProfile(fields: { full_name?: string; username?: string; phone?: string }): Promise<void> {
   const { id: myId, email } = await requireSession();
 
+  const { error: baseError } = await supabase.from('profiles').upsert({
+    id: myId,
+    email,
+    full_name: fields.full_name || null,
+    phone: fields.phone || null,
+  });
+  if (baseError) throw baseError;
+
   const username = fields.username?.trim() || null;
-  if (username) {
-    if (!isValidUsernameFormat(username)) throw new UsernameFormatError();
+  if (!username) return;
+
+  if (!isValidUsernameFormat(username)) throw new UsernameFormatError();
+
+  // Ник не менялся (совпадает с уже сохранённым, без учёта регистра) — это не смена ника,
+  // а просто повторное сохранение остальных полей. Проверка доступности здесь не нужна и
+  // не должна её блокировать: иначе любое сохранение с уже занятым (собой же!) ником падало
+  // бы с "занято", хотя реального конфликта нет.
+  const { data: current } = await supabase.from('profiles').select('username').eq('id', myId).maybeSingle();
+  const isUnchanged = typeof current?.username === 'string' && current.username.toLowerCase() === username.toLowerCase();
+  if (!isUnchanged) {
     // Предварительная проверка — для мгновенной обратной связи в UI. Финальная гарантия —
-    // уникальный индекс profiles_username_unique_idx в БД (см. ниже catch на 23505):
+    // уникальный индекс profiles_username_unique_idx в БД (см. catch на 23505 ниже):
     // между этой проверкой и записью два человека теоретически могут занять один
     // username одновременно, и тогда решает именно БД, а не порядок запросов клиента.
     await assertUsernameAvailable(username, myId);
   }
 
-  const { error } = await supabase.from('profiles').upsert({
-    id: myId,
-    email,
-    full_name: fields.full_name || null,
-    username,
-    phone: fields.phone || null,
-  });
-  if (error) {
-    if (error.code === '23505') throw new UsernameTakenError();
-    throw error;
+  const { error: usernameError } = await supabase.from('profiles').update({ username }).eq('id', myId);
+  if (usernameError) {
+    if (usernameError.code === '23505') throw new UsernameTakenError();
+    throw usernameError;
   }
 }
 
