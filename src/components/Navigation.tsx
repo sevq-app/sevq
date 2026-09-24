@@ -72,8 +72,11 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 h-20 px-3 bg-[var(--bg-card)] border-t border-[var(--bg-input)] transition-all duration-200">
-      <div className="h-full flex items-center justify-around">
+    <div
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pt-2 bg-[var(--bg-card)] border-t border-[var(--bg-input)] transition-all duration-200"
+      style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+    >
+      <div className="flex items-center justify-around">
         {items.map(({ key, label, icon: Icon }) => {
           const active = current === key;
           return (
@@ -81,19 +84,19 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               key={key}
               whileTap={{ scale: 0.9, y: 2 }}
               onClick={() => onNavigate(key)}
-              className="flex flex-col items-center gap-1 px-3 py-1.5 transition-all duration-200"
+              className="flex flex-col items-center gap-1 px-4 py-2 transition-all duration-200"
             >
               <div
-                className={`p-3 rounded-2xl transition-all duration-200 relative overflow-hidden ${active ? 'text-white opacity-100' : 'text-[var(--text-secondary)] opacity-70'}`}
+                className={`p-3.5 rounded-2xl transition-all duration-200 relative overflow-hidden ${active ? 'text-white opacity-100' : 'text-[var(--text-secondary)] opacity-70'}`}
                 style={
                   active
                     ? { background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }
                     : { background: 'var(--bg-input)' }
                 }
               >
-                <Icon size={24} />
+                <Icon size={32} />
               </div>
-              <span className={`text-[13px] font-heading font-bold transition-all duration-200 ${active ? 'text-sevchik-purple opacity-100' : 'text-[var(--text-secondary)] opacity-70'}`}>
+              <span className={`text-[15px] font-heading font-bold transition-all duration-200 ${active ? 'text-sevchik-purple opacity-100' : 'text-[var(--text-secondary)] opacity-70'}`}>
                 {label}
               </span>
             </motion.button>

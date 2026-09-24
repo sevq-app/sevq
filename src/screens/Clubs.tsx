@@ -32,7 +32,7 @@ export function Clubs({ onOpenClub }: ClubsProps) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-28 md:pb-0">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-6 pb-40 md:pb-0">
         <div className="space-y-3 mt-2">
           {mockClubs.map((club, i) => (
             <motion.button

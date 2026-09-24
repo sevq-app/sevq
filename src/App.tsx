@@ -182,7 +182,7 @@ function App() {
 
   if (authLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[var(--bg-main)]">
+      <div className="h-dvh w-screen flex items-center justify-center bg-[var(--bg-main)]">
         <span className="text-sevchik-text">Загрузка...</span>
       </div>
     );
@@ -197,10 +197,10 @@ function App() {
   }
 
   return (
-    <div className={`h-screen w-screen overflow-hidden ${grayMode ? 'gray-theme' : ''}`}>
+    <div className={`h-dvh w-screen overflow-hidden ${grayMode ? 'gray-theme' : ''}`}>
       <div className="h-full w-full flex bg-[var(--bg-main)]">
         {showTabBar && <Sidebar current={screen} onNavigate={handleTabNavigate} grayMode={grayMode} />}
-        <div className="h-full w-full flex flex-col overflow-hidden">
+        <div className="h-full w-full flex flex-col overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <AnimatePresence mode="wait">
           <motion.div
             key={screen}
