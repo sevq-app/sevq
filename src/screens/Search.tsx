@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Search as SearchIcon, Clock, TrendingUp, Loader2 } from 'lucide-react';
-import { searchProfiles, getOrCreateDirectChat, type RemoteProfile } from '@/lib/messagingService';
+import { displayNameOf, searchProfiles, getOrCreateDirectChat, type RemoteProfile } from '@/lib/messagingService';
 import { useChatStore } from '@/store/chatStore';
 import type { Chat } from '@/data/mock';
 
@@ -56,7 +56,7 @@ export function Search({ onBack, onWriteMessage, onOpenChat }: SearchProps) {
     setOpeningId(profile.id);
     try {
       const remoteChatId = await getOrCreateDirectChat(profile.id);
-      const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
+      const name = displayNameOf(profile);
       const chat: Chat = {
         id: `real-${remoteChatId}`,
         name,
@@ -118,7 +118,7 @@ export function Search({ onBack, onWriteMessage, onOpenChat }: SearchProps) {
             {!searching && results.length > 0 && (
               <div className="bg-white rounded-3xl overflow-hidden" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
                 {results.map((profile, i) => {
-                  const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
+                  const name = displayNameOf(profile);
                   const subtitleParts = [profile.username && `@${profile.username}`, profile.phone, profile.email].filter(Boolean);
                   return (
                     <motion.button

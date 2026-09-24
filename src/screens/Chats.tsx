@@ -5,7 +5,7 @@ import { Avatar } from '@/components/Avatar';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
 import { previewText } from '@/lib/messagePreview';
-import { getOrCreateDirectChat, searchProfiles, type RemoteProfile } from '@/lib/messagingService';
+import { displayNameOf, getOrCreateDirectChat, searchProfiles, type RemoteProfile } from '@/lib/messagingService';
 import { supabase } from '@/lib/supabase';
 import type { Chat } from '@/data/mock';
 
@@ -122,7 +122,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
     setProfileOpenError('');
     try {
       const remoteChatId = await getOrCreateDirectChat(profile.id);
-      const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
+      const name = displayNameOf(profile);
       const chat: Chat = {
         id: `real-${remoteChatId}`,
         name,
@@ -292,7 +292,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 </div>
               ) : (
                 profileResults.map((profile, index) => {
-                  const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
+                  const name = displayNameOf(profile);
                   const details = profile.username ? `@${profile.username}` : '';
                   return (
                     <motion.button

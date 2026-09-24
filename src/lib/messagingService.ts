@@ -13,6 +13,16 @@ export interface RemoteProfile {
   phone: string | null;
 }
 
+/**
+ * Имя для отображения: full_name → username → email → заглушка "Пользователь".
+ * username сейчас NULL почти у всех (заполняется позже в "О себе"), так что
+ * full_name всегда проверяется первым — эта функция не должна падать и не
+ * должна оставлять чат безымянным, даже если все поля профиля пустые.
+ */
+export function displayNameOf(profile: Pick<RemoteProfile, 'full_name' | 'username' | 'email'>): string {
+  return profile.full_name?.trim() || profile.username?.trim() || profile.email?.trim() || 'Пользователь';
+}
+
 export interface RemoteMessage {
   id: string;
   chat_id: string;
