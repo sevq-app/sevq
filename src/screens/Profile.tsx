@@ -1,9 +1,13 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { Camera, Copy, Link, QrCode, Share2, ChevronRight, Settings, Sparkles, Users, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, Copy, Download, Link, MoreVertical, QrCode, Share2, ChevronRight, Settings, Sparkles, Trash2, Users, X } from 'lucide-react';
+import { AvatarCropper } from '@/components/AvatarCropper';
 import type { Screen } from '@/data/mock';
 import type { ProfileData } from '@/screens/AboutMe';
+
+const MAX_PHOTO_SIZE = 8 * 1024 * 1024;
 
 const photosKey = 'sevchik-profile-photos';
 const profileStorageKey = 'sevchik-profile-data';
@@ -49,6 +53,9 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [isPhotoAccessOpen, setPhotoAccessOpen] = useState(false);
   const [isInviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'menu' | 'qr'>('menu');
+  const [cropSource, setCropSource] = useState<string | null>(null);
+  const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { name, username, avatarUrl, groups } = getMetadata(user, profileData);
   const savedProfile = profileData.name || profileData.username ? profileData : readSavedProfile();
@@ -65,11 +72,66 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
 
   const handlePhotoUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => { if (typeof reader.result === 'string') setPhotos((current) => [reader.result as string, ...current]); };
-    reader.readAsDataURL(file);
     event.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Этот файл не является изображением. Выберите файл в формате JPG, PNG или похожем.');
+      return;
+    }
+    if (file.size > MAX_PHOTO_SIZE) {
+      setUploadError('Файл слишком большой. Максимальный размер — 8 МБ.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => { if (typeof reader.result === 'string') setCropSource(reader.result); };
+    reader.onerror = () => setUploadError('Не удалось прочитать файл. Попробуйте другое изображение.');
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropSave = (dataUrl: string) => {
+    setPhotos((current) => [dataUrl, ...current]);
+    setCropSource(null);
+  };
+
+  const requestReplacePhoto = () => {
+    setSelectedPhoto(null);
+    openFilePicker();
+  };
+
+  const requestDeletePhoto = () => {
+    setSelectedPhoto(null);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeletePhoto = () => {
+    setPhotos([]);
+    setDeleteConfirmOpen(false);
+  };
+
+  const saveToGallery = (dataUrl: string) => {
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `sevchik-avatar-${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const sharePhoto = async (dataUrl: string) => {
+    try {
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], 'avatar.jpg', { type: blob.type || 'image/jpeg' });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Фото профиля' });
+      } else {
+        setUploadError('Поделиться не поддерживается в этом браузере.');
+      }
+    } catch (error) {
+      if ((error as Error)?.name !== 'AbortError') {
+        setUploadError('Не удалось поделиться фото.');
+      }
+    }
   };
 
   const inviteUrl = `${window.location.origin}/profile/${user?.id || 'user'}`;
@@ -132,7 +194,34 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
         <div className="pb-6" />
       </div>
 
-      {selectedPhoto && <Modal onClose={() => setSelectedPhoto(null)}><img src={selectedPhoto} alt="Увеличенное фото" className="max-h-[85vh] max-w-full rounded-2xl object-contain" /></Modal>}
+      {selectedPhoto && (
+        <PhotoViewer
+          src={selectedPhoto}
+          onClose={() => setSelectedPhoto(null)}
+          onShare={() => sharePhoto(selectedPhoto)}
+          onSaveToGallery={() => saveToGallery(selectedPhoto)}
+          onReplace={requestReplacePhoto}
+          onDeleteRequest={requestDeletePhoto}
+        />
+      )}
+      {cropSource && <AvatarCropper imageSrc={cropSource} onCancel={() => setCropSource(null)} onSave={handleCropSave} />}
+      {isDeleteConfirmOpen && (
+        <Modal onClose={() => setDeleteConfirmOpen(false)}>
+          <h2 className="font-heading font-extrabold text-xl">Удалить фото?</h2>
+          <p className="text-sm text-sevchik-textSecondary mt-2">Вы уверены, что хотите удалить фото профиля?</p>
+          <div className="space-y-2 mt-5">
+            <button onClick={confirmDeletePhoto} className="w-full rounded-xl bg-red-500 text-white py-3 font-heading font-bold">Да, удалить</button>
+            <button onClick={() => setDeleteConfirmOpen(false)} className="w-full rounded-xl bg-[var(--bg-input)] py-3 font-heading font-bold">Отмена</button>
+          </div>
+        </Modal>
+      )}
+      {uploadError && (
+        <Modal onClose={() => setUploadError(null)}>
+          <h2 className="font-heading font-extrabold text-xl">Не получилось</h2>
+          <p className="text-sm text-sevchik-textSecondary mt-2">{uploadError}</p>
+          <button onClick={() => setUploadError(null)} className="w-full rounded-xl bg-sevchik-purple text-white py-3 font-heading font-bold mt-5">Понятно</button>
+        </Modal>
+      )}
       {isPhotoAccessOpen && <Modal onClose={() => setPhotoAccessOpen(false)}><h2 className="font-heading font-extrabold text-xl">Разрешите доступ</h2><p className="text-sm text-sevchik-textSecondary mt-2">Выберите, какие фотографии можно использовать.</p><div className="space-y-2 mt-5"><button onClick={openFilePicker} className="w-full rounded-xl bg-sevchik-purple text-white py-3 font-heading font-bold">Разрешить полный доступ</button><button onClick={openFilePicker} className="w-full rounded-xl bg-sevchik-orange text-white py-3 font-heading font-bold">Разрешить один раз</button><button onClick={() => setPhotoAccessOpen(false)} className="w-full rounded-xl bg-[var(--bg-input)] py-3 font-heading font-bold">Запретить</button></div></Modal>}
       {isInviteOpen && <Modal onClose={() => setInviteOpen(false)}>{inviteMode === 'qr' ? <><h2 className="font-heading font-extrabold text-xl">QR-код</h2><QrCodeVisual value={inviteUrl} /><button onClick={() => setInviteMode('menu')} className="w-full rounded-xl bg-[var(--bg-input)] py-3 font-heading font-bold">Назад</button></> : <><h2 className="font-heading font-extrabold text-xl">Пригласить друзей</h2><div className="space-y-2 mt-5"><ShareAction icon={Copy} text="Скопировать ссылку" onClick={() => navigator.clipboard?.writeText(inviteUrl)} /><ShareAction icon={Link} text="Реферальная ссылка" onClick={() => navigator.clipboard?.writeText(referralUrl)} /><ShareAction icon={QrCode} text="QR-код" onClick={() => setInviteMode('qr')} /><ShareAction icon={Share2} text="Поделиться в других приложениях" onClick={() => { if (navigator.share) navigator.share({ title: 'Профиль', url: inviteUrl }); }} /></div></>}</Modal>}
     </div>
@@ -145,6 +234,92 @@ function GroupIcon({ group }: { group: ProfileGroup }) {
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-5" onClick={onClose}><div className="relative w-full max-w-sm rounded-2xl bg-[var(--bg-card)] p-5" onClick={(event) => event.stopPropagation()}><button onClick={onClose} className="absolute top-3 right-3 text-sevchik-textSecondary" aria-label="Закрыть"><X size={20} /></button>{children}</div></div>;
+}
+
+/** Полноэкранный просмотр фото профиля на тёмном фоне с меню действий («три точки»). */
+function PhotoViewer({
+  src,
+  onClose,
+  onShare,
+  onSaveToGallery,
+  onReplace,
+  onDeleteRequest,
+}: {
+  src: string;
+  onClose: () => void;
+  onShare: () => void;
+  onSaveToGallery: () => void;
+  onReplace: () => void;
+  onDeleteRequest: () => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center" onClick={onClose}>
+      <button
+        onClick={(event) => { event.stopPropagation(); onClose(); }}
+        className="absolute top-4 left-4 w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white z-10"
+        aria-label="Закрыть"
+      >
+        <X size={22} />
+      </button>
+
+      <div className="absolute top-4 right-4 z-10" onClick={(event) => event.stopPropagation()}>
+        <button
+          onClick={() => setMenuOpen((value) => !value)}
+          className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center text-white"
+          aria-label="Ещё"
+        >
+          <MoreVertical size={22} />
+        </button>
+        <AnimatePresence>
+          {menuOpen && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setMenuOpen(false)}
+                className="fixed inset-0 z-10"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+                className="absolute right-0 top-14 w-60 bg-[var(--bg-card)] rounded-2xl overflow-hidden z-20"
+                style={{ boxShadow: '0 12px 32px rgba(0,0,0,0.3)' }}
+              >
+                <button onClick={() => { setMenuOpen(false); onShare(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
+                  <Share2 size={19} className="text-sevchik-purple" />
+                  <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Поделиться</span>
+                </button>
+                <button onClick={() => { setMenuOpen(false); onSaveToGallery(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
+                  <Download size={19} className="text-sevchik-purple" />
+                  <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Сохранить в галерею</span>
+                </button>
+                <button onClick={() => { setMenuOpen(false); onReplace(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
+                  <Camera size={19} className="text-sevchik-purple" />
+                  <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Заменить фото</span>
+                </button>
+                <button onClick={() => { setMenuOpen(false); onDeleteRequest(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
+                  <Trash2 size={19} className="text-red-500" />
+                  <span className="font-heading font-semibold text-sm text-red-500">Удалить</span>
+                </button>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
+
+      <img
+        src={src}
+        alt="Фото профиля"
+        className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
+        onClick={(event) => event.stopPropagation()}
+      />
+    </div>
+  );
 }
 
 function ShareAction({ icon: Icon, text, onClick }: { icon: typeof Copy; text: string; onClick: () => void }) {
