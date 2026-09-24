@@ -37,7 +37,7 @@ export interface RemoteMessage {
  * дело не в клиенте, а в настройках самого проекта Supabase (например,
  * JWT-ключ/роль в токене) — это уже нужно смотреть в Dashboard.
  */
-async function requireUserId(): Promise<string> {
+async function requireSession(): Promise<{ id: string; email: string | null }> {
   const { data, error } = await supabase.auth.getSession();
   const session = data.session;
   const id = session?.user?.id;
@@ -46,7 +46,16 @@ async function requireUserId(): Promise<string> {
     throw new Error('Не авторизован');
   }
   console.debug('[auth] сессия есть, отправляем запрос как:', decodeJwtRoleAndExp(session.access_token));
-  return id;
+  return { id, email: session.user.email ?? null };
+}
+
+async function requireUserId(): Promise<string> {
+  return (await requireSession()).id;
+}
+
+/** Экранирует спецсимволы LIKE/ILIKE (% и _ имеют смысл wildcard'ов в SQL, но не должны в пользовательском вводе). */
+function escapeIlikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
 }
 
 /** Только для диагностики в консоли: достаёт role/exp из access_token, ничего не проверяет и не хранит. */
@@ -71,35 +80,125 @@ export async function findProfileByEmail(email: string): Promise<RemoteProfile |
   return data as RemoteProfile;
 }
 
-/** Обновляет собственную запись в profiles (никнейм, телефон, имя) — вызывается при сохранении "О себе". */
-export async function upsertMyProfile(fields: { full_name?: string; username?: string; phone?: string }): Promise<void> {
-  const { data: userData } = await supabase.auth.getUser();
-  const me = userData.user;
-  if (!me) return;
-  await supabase.from('profiles').upsert({
-    id: me.id,
-    email: me.email,
-    full_name: fields.full_name || null,
-    username: fields.username || null,
-    phone: fields.phone || null,
-  });
+/** Только латиница, цифры и подчёркивание, 5-32 символа — проверяется и на клиенте, и в БД (check-constraint). */
+export const USERNAME_PATTERN = /^[A-Za-z0-9_]{5,32}$/;
+export const USERNAME_HINT = 'Только латиница, цифры и _. Минимум 5 символов';
+
+export function isValidUsernameFormat(username: string): boolean {
+  return USERNAME_PATTERN.test(username);
 }
 
-/** Ищет реальных пользователей по имени, никнейму, телефону или email (частичное совпадение). */
-export async function searchProfiles(query: string): Promise<RemoteProfile[]> {
-  const q = query.trim();
-  if (!q) return [];
-  const myId = await requireUserId().catch(() => null);
-  const pattern = `%${q}%`;
-  let request = supabase
+export class UsernameTakenError extends Error {
+  constructor() {
+    super('Этот username уже занят. Попробуй другой');
+    this.name = 'UsernameTakenError';
+  }
+}
+
+export class UsernameFormatError extends Error {
+  constructor() {
+    super(USERNAME_HINT);
+    this.name = 'UsernameFormatError';
+  }
+}
+
+async function assertUsernameAvailable(username: string, myId: string): Promise<void> {
+  const { data, error } = await supabase
     .from('profiles')
-    .select('id, email, full_name, username, phone')
-    .or(`full_name.ilike.${pattern},username.ilike.${pattern},phone.ilike.${pattern},email.ilike.${pattern}`)
-    .limit(20);
-  if (myId) request = request.neq('id', myId);
-  const { data, error } = await request;
-  if (error || !data) return [];
-  return data as RemoteProfile[];
+    .select('id')
+    .ilike('username', escapeIlikePattern(username))
+    .neq('id', myId)
+    .maybeSingle();
+  if (error) throw error;
+  if (data) throw new UsernameTakenError();
+}
+
+/** Обновляет собственную запись в profiles (никнейм, телефон, имя) — вызывается при сохранении "О себе". */
+export async function upsertMyProfile(fields: { full_name?: string; username?: string; phone?: string }): Promise<void> {
+  const { id: myId, email } = await requireSession();
+
+  const username = fields.username?.trim() || null;
+  if (username) {
+    if (!isValidUsernameFormat(username)) throw new UsernameFormatError();
+    // Предварительная проверка — для мгновенной обратной связи в UI. Финальная гарантия —
+    // уникальный индекс profiles_username_unique_idx в БД (см. ниже catch на 23505):
+    // между этой проверкой и записью два человека теоретически могут занять один
+    // username одновременно, и тогда решает именно БД, а не порядок запросов клиента.
+    await assertUsernameAvailable(username, myId);
+  }
+
+  const { error } = await supabase.from('profiles').upsert({
+    id: myId,
+    email,
+    full_name: fields.full_name || null,
+    username,
+    phone: fields.phone || null,
+  });
+  if (error) {
+    if (error.code === '23505') throw new UsernameTakenError();
+    throw error;
+  }
+}
+
+/**
+ * Ищет зарегистрированных пользователей по имени/фамилии (full_name хранится одним
+ * полем "Имя Фамилия", поэтому ilike-подстрока естественно матчит и фамилию тоже)
+ * и по @username. Запрос, начинающийся с "@", ищет ТОЛЬКО по username — остальные
+ * поля не трогаем (как в Telegram). Сортировка: сначала точное совпадение username,
+ * потом префиксное совпадение username, затем всё остальное — по алфавиту.
+ */
+export async function searchProfiles(rawQuery: string): Promise<RemoteProfile[]> {
+  const trimmed = rawQuery.trim();
+  if (!trimmed) return [];
+  const myId = await requireUserId().catch(() => null);
+
+  const usernameOnly = trimmed.startsWith('@');
+  const q = usernameOnly ? trimmed.slice(1).trim() : trimmed;
+  if (!q) return [];
+  const pattern = `%${escapeIlikePattern(q)}%`;
+
+  const baseQuery = () => {
+    let req = supabase.from('profiles').select('id, email, full_name, username, phone').limit(30);
+    if (myId) req = req.neq('id', myId);
+    return req;
+  };
+
+  let rows: RemoteProfile[];
+  if (usernameOnly) {
+    const { data, error } = await baseQuery().ilike('username', pattern);
+    if (error || !data) return [];
+    rows = data as RemoteProfile[];
+  } else {
+    // Два отдельных запроса вместо .or(`full_name.ilike.${pattern},...`): значение
+    // пользовательского ввода нельзя безопасно подставлять в сырую строку фильтра
+    // PostgREST (там запятая/скобки — служебные символы синтаксиса .or()).
+    const [byName, byUsername] = await Promise.all([
+      baseQuery().ilike('full_name', pattern),
+      baseQuery().ilike('username', pattern),
+    ]);
+    const merged = new Map<string, RemoteProfile>();
+    for (const row of [...(byName.data ?? []), ...(byUsername.data ?? [])] as RemoteProfile[]) {
+      merged.set(row.id, row);
+    }
+    rows = Array.from(merged.values());
+  }
+
+  const qLower = q.toLowerCase();
+  const rank = (p: RemoteProfile) => {
+    const uname = p.username?.toLowerCase() ?? '';
+    if (uname === qLower) return 0;
+    if (uname.startsWith(qLower)) return 1;
+    return 2;
+  };
+  return rows
+    .sort((a, b) => {
+      const diff = rank(a) - rank(b);
+      if (diff !== 0) return diff;
+      const nameA = a.full_name?.trim() || a.username || a.email;
+      const nameB = b.full_name?.trim() || b.username || b.email;
+      return nameA.localeCompare(nameB, 'ru');
+    })
+    .slice(0, 20);
 }
 
 /** Возвращает id уже существующего личного чата с пользователем либо создаёт новый. */

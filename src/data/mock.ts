@@ -49,6 +49,9 @@ export interface Chat {
   /** Настоящий чат с зарегистрированным пользователем (хранится в Supabase),
    * в отличие от остальных чатов, которые целиком собраны из моковых данных. */
   isReal?: boolean;
+  /** Групповой чат (несколько участников) — используется, чтобы отделить секцию
+   * "Группы" от личных чатов в результатах поиска на вкладке "Чаты". */
+  isGroup?: boolean;
   /** id чата в таблице public.chats — нужен для отправки/подписки на сообщения. */
   remoteChatId?: string;
   /** id собеседника в таблице public.profiles. */
@@ -154,6 +157,7 @@ export const chats: Chat[] = [
     unread: 12,
     online: false,
     isNew: true,
+    isGroup: true,
     messages: [
       { id: 'm1', senderId: 'c3', text: 'Лена: Кто-нибудь был в Грузии недавно?', time: '12:40', date: isoDaysAgo(0) },
       { id: 'm2', senderId: 'me', text: 'Я был в прошлом месяце, классно!', time: '12:42', date: isoDaysAgo(0), status: 'delivered' },

@@ -79,9 +79,19 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
     };
   }, [query]);
 
-  // Чат "Избранное" всегда закреплён первым, независимо от порядка в сторе
+  const trimmedQuery = query.trim();
+  // "@..." — поиск только по username (как в Task 3.2), у групп его не бывает,
+  // так что секция "Группы" в этом случае просто пустая, а не бессмысленно ищет по имени.
+  const isUsernameQuery = trimmedQuery.startsWith('@');
+  const groupResults = isUsernameQuery || !trimmedQuery
+    ? []
+    : chats.filter((c) => c.isGroup && c.name.toLowerCase().includes(trimmedQuery.toLowerCase()));
+  const groupResultIds = new Set(groupResults.map((c) => c.id));
+
+  // Чат "Избранное" всегда закреплён первым, независимо от порядка в сторе.
+  // Группы, уже показанные отдельной секцией выше (пока идёт поиск), тут не дублируем.
   const filtered = chats
-    .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()))
+    .filter((c) => c.name.toLowerCase().includes(query.toLowerCase()) && !groupResultIds.has(c.id))
     .slice()
     .sort((a, b) => Number(!!b.isFavorites) - Number(!!a.isFavorites));
 
@@ -283,7 +293,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
               ) : (
                 profileResults.map((profile, index) => {
                   const name = profile.full_name?.trim() || profile.username?.trim() || profile.email;
-                  const details = [profile.username && `@${profile.username}`, profile.phone].filter(Boolean).join(' · ');
+                  const details = profile.username ? `@${profile.username}` : '';
                   return (
                     <motion.button
                       key={profile.id}
@@ -306,6 +316,29 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
             {profileOpenError && (
               <p className="mt-2 ml-1 text-sm font-body text-red-500">{profileOpenError}</p>
             )}
+          </div>
+        )}
+        {!selectMode && trimmedQuery && groupResults.length > 0 && (
+          <div className="mb-4">
+            <h2 className="mb-2 ml-1 text-xs font-bold uppercase tracking-wider text-sevchik-textSecondary">Группы</h2>
+            <div className="overflow-hidden rounded-2xl bg-white" style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.06)' }}>
+              {groupResults.map((chat, index) => (
+                <motion.button
+                  key={chat.id}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    setQuery('');
+                    onOpenChat(chat.id);
+                  }}
+                  className={`flex w-full items-center gap-4 px-4 py-3 text-left ${index !== groupResults.length - 1 ? 'border-b border-[#F3F4F6]' : ''}`}
+                >
+                  <Avatar initials={chat.initials} color={chat.avatarColor} size="lg" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-heading font-bold text-sevchik-text">{chat.name}</p>
+                  </div>
+                </motion.button>
+              ))}
+            </div>
           </div>
         )}
         <div className="space-y-3">

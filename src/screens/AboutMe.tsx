@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   AtSign,
   Calendar,
+  Check,
   ChevronDown,
   Globe,
   Lock,
@@ -16,7 +17,7 @@ import {
   User as UserIcon,
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
-import { upsertMyProfile } from '@/lib/messagingService';
+import { isValidUsernameFormat, upsertMyProfile, UsernameFormatError, UsernameTakenError, USERNAME_HINT } from '@/lib/messagingService';
 
 const storageKey = 'sevchik-about-me';
 const profileStorageKey = 'sevchik-profile-data';
@@ -130,13 +131,46 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
   const [data, setData] = useState<AboutData>(() => initialData(user));
   const [openVisibility, setOpenVisibility] = useState<keyof AboutData | null>(null);
   const [saving, setSaving] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const update = <K extends keyof AboutData>(key: K, value: AboutData[K]) => {
+    if (key === 'username') {
+      setUsernameError('');
+      setSaveSuccess(false);
+    }
     setData((current) => ({ ...current, [key]: value }));
   };
 
+  // Формат проверяем сразу при вводе (без обращения к БД — это бесплатно), а не только по клику
+  // "Сохранить": пункт 5 задачи требует подсвечивать поле сразу, как только формат неверный.
+  const usernameFormatInvalid = data.username.trim().length > 0 && !isValidUsernameFormat(data.username.trim());
+
   const handleSave = async () => {
+    if (usernameFormatInvalid) {
+      setUsernameError(USERNAME_HINT);
+      return;
+    }
     setSaving(true);
+    setUsernameError('');
+    setSaveSuccess(false);
+    try {
+      await upsertMyProfile({
+        full_name: `${data.firstName} ${data.lastName}`.trim(),
+        username: data.username.trim(),
+        phone: data.phone,
+      });
+    } catch (error) {
+      setSaving(false);
+      if (error instanceof UsernameTakenError || error instanceof UsernameFormatError) {
+        setUsernameError(error.message);
+      } else {
+        setUsernameError('Не удалось сохранить. Попробуйте ещё раз.');
+        console.error('Не удалось сохранить профиль:', error);
+      }
+      return;
+    }
+
     localStorage.setItem(storageKey, JSON.stringify(data));
     const profileData: ProfileData = {
       name: data.firstName,
@@ -154,16 +188,12 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
     };
     localStorage.setItem(profileStorageKey, JSON.stringify(profileData));
     setProfileData(profileData);
-    if (user) {
-      await supabase.auth.updateUser({ data });
-      await upsertMyProfile({
-        full_name: `${data.firstName} ${data.lastName}`.trim(),
-        username: data.username,
-        phone: data.phone,
-      });
-    }
+    if (user) await supabase.auth.updateUser({ data });
+
     setSaving(false);
-    onBack();
+    setSaveSuccess(true);
+    // Даём увидеть галочку успеха перед возвратом назад, а не уводим со экрана мгновенно.
+    setTimeout(onBack, 900);
   };
 
   return (
@@ -178,7 +208,16 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
       <div className="space-y-3">
         <Field label="Имя" icon={UserIcon} iconColor="#6546C7"><input type="text" value={data.firstName} onChange={(event) => update('firstName', event.target.value)} placeholder="Введите имя" /></Field>
         <Field label="Фамилия" icon={UserIcon} iconColor="#FF9848"><input type="text" value={data.lastName} onChange={(event) => update('lastName', event.target.value)} placeholder="Введите фамилию" /></Field>
-        <Field label="Никнейм" icon={AtSign} iconColor="#4FD3C8"><input type="text" value={data.username} onChange={(event) => update('username', event.target.value)} placeholder="Введите никнейм" /></Field>
+        <Field
+          label="Никнейм"
+          icon={AtSign}
+          iconColor="#4FD3C8"
+          help={USERNAME_HINT}
+          error={usernameError || (usernameFormatInvalid ? USERNAME_HINT : '')}
+          success={saveSuccess && !usernameFormatInvalid && !usernameError}
+        >
+          <input type="text" value={data.username} onChange={(event) => update('username', event.target.value)} placeholder="Введите никнейм" maxLength={32} />
+        </Field>
         <Field label="Номер телефона" icon={Phone} iconColor="#FF9848"><input type="tel" value={data.phone} onChange={(event) => update('phone', event.target.value)} placeholder="Добавьте номер телефона" /></Field>
         <VisibilityField label="Дата рождения" icon={Calendar} iconColor="#A78BFA" value={data.birthDate} placeholder="ДД.ММ.ГГГГ" isDate visibility={data.birthDateVisibility} isOpen={openVisibility === 'birthDateVisibility'} onChange={(value) => update('birthDate', value)} onToggle={() => setOpenVisibility(openVisibility === 'birthDateVisibility' ? null : 'birthDateVisibility')} onVisibilityChange={(value) => { update('birthDateVisibility', value); setOpenVisibility(null); }} />
         <Field label="О себе" icon={MessageSquare} iconColor="#4FD3C8"><textarea rows={3} value={data.about} onChange={(event) => update('about', event.target.value)} placeholder="Расскажите о себе" /></Field>
@@ -187,22 +226,33 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
         <VisibilityField label="Сайт" icon={Globe} iconColor="#4FD3C8" value={data.website} placeholder="Добавьте ссылку на сайт" visibility={data.websiteVisibility} isOpen={openVisibility === 'websiteVisibility'} onChange={(value) => update('website', value)} onToggle={() => setOpenVisibility(openVisibility === 'websiteVisibility' ? null : 'websiteVisibility')} onVisibilityChange={(value) => { update('websiteVisibility', value); setOpenVisibility(null); }} />
       </div>
 
-      <button onClick={handleSave} disabled={saving} className="w-full mt-6 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(101,70,199,0.18)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(101,70,199,0.22)] active:scale-95 disabled:opacity-60">
+      <button onClick={handleSave} disabled={saving || usernameFormatInvalid} className="w-full mt-6 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(101,70,199,0.18)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(101,70,199,0.22)] active:scale-95 disabled:opacity-60">
         {saving ? 'Сохранение...' : 'Сохранить'}
       </button>
     </div>
   );
 }
 
-function Field({ label, icon: Icon, iconColor, help, children }: { label: string; icon: typeof UserIcon; iconColor: string; help?: string; children: ReactNode }) {
+function Field({ label, icon: Icon, iconColor, help, error, success, children }: { label: string; icon: typeof UserIcon; iconColor: string; help?: string; error?: string; success?: boolean; children: ReactNode }) {
   return (
-    <label className="group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-purple-500/50">
+    <label className={`group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] ${error ? 'border-red-400 focus-within:border-red-500' : 'border-transparent focus-within:border-purple-500/50'}`}>
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}><Icon size={19} /></div>
         <div className="min-w-0 flex-1">
           <span className="block text-sm font-heading font-bold mb-2">{label}</span>
-          <div className="field-input [&_input]:w-full [&_input]:border-0 [&_input]:!bg-transparent [&_input]:shadow-none [&_input]:appearance-none [&_input]:outline-none [&_input]:pointer-events-auto [&_input]:cursor-text [&_input]:touch-manipulation [&_input]:transition-all [&_input]:duration-200 [&_input]:text-[var(--text-main)] [&_input]:placeholder:text-[var(--text-secondary)] [&_textarea]:w-full [&_textarea]:border-0 [&_textarea]:!bg-transparent [&_textarea]:shadow-none [&_textarea]:appearance-none [&_textarea]:outline-none [&_textarea]:pointer-events-auto [&_textarea]:cursor-text [&_textarea]:touch-manipulation [&_textarea]:resize-none [&_textarea]:transition-all [&_textarea]:duration-200 [&_textarea]:text-[var(--text-main)] [&_textarea]:placeholder:text-[var(--text-secondary)]">{children}</div>
-          {help && <span className="block text-xs text-[var(--text-secondary)] mt-2">{help}</span>}
+          <div className="flex items-center gap-2">
+            <div className="field-input flex-1 [&_input]:w-full [&_input]:border-0 [&_input]:!bg-transparent [&_input]:shadow-none [&_input]:appearance-none [&_input]:outline-none [&_input]:pointer-events-auto [&_input]:cursor-text [&_input]:touch-manipulation [&_input]:transition-all [&_input]:duration-200 [&_input]:text-[var(--text-main)] [&_input]:placeholder:text-[var(--text-secondary)] [&_textarea]:w-full [&_textarea]:border-0 [&_textarea]:!bg-transparent [&_textarea]:shadow-none [&_textarea]:appearance-none [&_textarea]:outline-none [&_textarea]:pointer-events-auto [&_textarea]:cursor-text [&_textarea]:touch-manipulation [&_textarea]:resize-none [&_textarea]:transition-all [&_textarea]:duration-200 [&_textarea]:text-[var(--text-main)] [&_textarea]:placeholder:text-[var(--text-secondary)]">{children}</div>
+            {success && (
+              <span className="shrink-0 w-6 h-6 rounded-full bg-[#4FD3C8] flex items-center justify-center">
+                <Check size={14} className="text-white" strokeWidth={3} />
+              </span>
+            )}
+          </div>
+          {error ? (
+            <span className="block text-xs text-red-500 font-medium mt-2">{error}</span>
+          ) : (
+            help && <span className="block text-xs text-[var(--text-secondary)] mt-2">{help}</span>
+          )}
         </div>
       </div>
     </label>
