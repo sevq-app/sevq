@@ -58,9 +58,6 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  // Чем вызван выбор файла: обычная загрузка в галерею («Добавить фото» на пустой аватарке)
-  // или замена аватарки («Заменить фото» из просмотра) — от этого зависит, откроется ли кроппер.
-  const uploadIntentRef = useRef<'gallery' | 'avatar'>('gallery');
   const { name, username, avatarUrl, groups } = getMetadata(user, profileData);
   const savedProfile = profileData.name || profileData.username ? profileData : readSavedProfile();
   const displayName = [savedProfile.name || name, savedProfile.lastName].filter(Boolean).join(' ') || user?.email?.split('@')[0] || 'Пользователь';
@@ -71,12 +68,11 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   useEffect(() => { localStorage.setItem(photosKey, JSON.stringify(photos)); }, [photos]);
   useEffect(() => { writeAvatarPhoto(avatarPhoto); }, [avatarPhoto]);
 
-  const openFilePicker = (intent: 'gallery' | 'avatar') => {
+  const openFilePicker = () => {
     // <input type="file"> не запрашивает у браузера никакого «разрешения» — это всегда
     // немедленный вызов системного выбора файла по жесту пользователя, поэтому нет смысла
     // держать перед ним свой собственный (симулированный) экран «Разрешите доступ»: он не
     // соответствовал ничему в Permissions API и просто спрашивал заново каждый раз.
-    uploadIntentRef.current = intent;
     fileInputRef.current?.click();
   };
 
@@ -92,15 +88,14 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
       setUploadError('Файл слишком большой. Максимальный размер — 8 МБ.');
       return;
     }
-    const intent = uploadIntentRef.current;
     const reader = new FileReader();
     reader.onload = () => {
       if (typeof reader.result !== 'string') return;
       const dataUrl = reader.result;
-      // Оригинал всегда целиком и без сжатия попадает в «Фотографии» — независимо от того,
-      // зачем выбирали файл. Кроп (если он вообще нужен) — это отдельный шаг только для аватарки.
+      // Оригинал всегда целиком и без сжатия попадает в «Фотографии», а следом сразу
+      // открывается кроппер — им же задаётся итоговая аватарка (см. handleCropSave).
       setPhotos((current) => [dataUrl, ...current]);
-      if (intent === 'avatar') setCropSource(dataUrl);
+      setCropSource(dataUrl);
     };
     reader.onerror = () => setUploadError('Не удалось прочитать файл. Попробуйте другое изображение.');
     reader.readAsDataURL(file);
@@ -113,7 +108,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
 
   const requestReplacePhoto = () => {
     setSelectedPhoto(null);
-    openFilePicker('avatar');
+    openFilePicker();
   };
 
   const requestDeletePhoto = () => {
@@ -191,7 +186,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
           {/* Внешний ореол вместо звезды/кружка-статуса — светится только внешняя
               окантовка вокруг круга, отражая online */}
           <button
-            onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : openFilePicker('gallery')}
+            onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : openFilePicker()}
             className="block rounded-full transition-shadow duration-300"
             aria-label={profilePhoto ? 'Открыть фото профиля' : 'Добавить фото профиля'}
             style={{
