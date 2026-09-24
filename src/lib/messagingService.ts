@@ -1,7 +1,7 @@
 // Реальный обмен сообщениями между зарегистрированными пользователями.
 // Вся работа с бэкендом (сейчас — Supabase: таблицы profiles/chats/chat_members/messages
 // + Realtime) спрятана за этими функциями, чтобы при смене бэкенда экраны
-// (Search.tsx, Conversation.tsx) менять не пришлось — только реализацию здесь.
+// (Chats.tsx, Conversation.tsx) менять не пришлось — только реализацию здесь.
 
 import { supabase } from '@/lib/supabase';
 
@@ -21,6 +21,14 @@ export interface RemoteProfile {
  */
 export function displayNameOf(profile: Pick<RemoteProfile, 'full_name' | 'username' | 'email'>): string {
   return profile.full_name?.trim() || profile.username?.trim() || profile.email?.trim() || 'Пользователь';
+}
+
+/** Инициалы для аватарки-заглушки — первая буква первых двух слов имени. */
+export function initialsOf(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
 }
 
 export interface RemoteMessage {
@@ -249,6 +257,62 @@ export async function getOrCreateDirectChat(otherUserId: string): Promise<string
   if (membersError) throw membersError;
 
   return chat.id as string;
+}
+
+export interface RemoteChatSummary {
+  chatId: string;
+  profile: RemoteProfile;
+  lastMessageText: string | null;
+  lastMessageAt: string | null;
+}
+
+/**
+ * Личные чаты текущего пользователя (только 1:1 — для групповых чатов пока
+ * негде хранить название, поэтому они здесь не участвуют) с последним
+ * сообщением для превью. Вызывается один раз при входе: до этого чат
+ * появлялся в интерфейсе только через явный клик по результату поиска, так
+ * что уже существующая переписка (например, с Ульяной) пропадала из списка
+ * при каждой перезагрузке страницы, хотя сами данные в Supabase никуда не
+ * девались.
+ */
+export async function listMyChats(): Promise<RemoteChatSummary[]> {
+  const myId = await requireUserId();
+
+  const { data: myMemberships } = await supabase.from('chat_members').select('chat_id').eq('user_id', myId);
+  const chatIds = (myMemberships ?? []).map((r) => r.chat_id as string);
+  if (chatIds.length === 0) return [];
+
+  const [{ data: chatsData }, { data: allMembers }] = await Promise.all([
+    supabase.from('chats').select('id').in('id', chatIds).eq('is_group', false),
+    supabase.from('chat_members').select('chat_id, user_id').in('chat_id', chatIds),
+  ]);
+
+  const otherIdByChatId = new Map<string, string>();
+  for (const m of allMembers ?? []) {
+    if (m.user_id !== myId) otherIdByChatId.set(m.chat_id, m.user_id);
+  }
+  const otherIds = Array.from(new Set(otherIdByChatId.values()));
+  if (otherIds.length === 0) return [];
+
+  const [{ data: profiles }, { data: lastMessages }] = await Promise.all([
+    supabase.from('profiles').select('id, email, full_name, username, phone').in('id', otherIds),
+    supabase.from('messages').select('chat_id, text, created_at').in('chat_id', chatIds).order('created_at', { ascending: false }).limit(500),
+  ]);
+  const profileById = new Map((profiles ?? []).map((p) => [p.id as string, p as RemoteProfile]));
+  const lastByChatId = new Map<string, { text: string; created_at: string }>();
+  for (const m of lastMessages ?? []) {
+    if (!lastByChatId.has(m.chat_id)) lastByChatId.set(m.chat_id, { text: m.text, created_at: m.created_at });
+  }
+
+  const summaries: RemoteChatSummary[] = [];
+  for (const chat of chatsData ?? []) {
+    const otherId = otherIdByChatId.get(chat.id);
+    const profile = otherId ? profileById.get(otherId) : undefined;
+    if (!profile) continue;
+    const last = lastByChatId.get(chat.id);
+    summaries.push({ chatId: chat.id, profile, lastMessageText: last?.text ?? null, lastMessageAt: last?.created_at ?? null });
+  }
+  return summaries;
 }
 
 export async function fetchMessages(chatId: string): Promise<RemoteMessage[]> {

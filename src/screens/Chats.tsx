@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star, Loader2 } from 'lucide-react';
+import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star, Loader2, MessageCircle } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
@@ -476,9 +476,23 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
               </motion.button>
             );
           })}
-          {filtered.length === 0 && (
+          {filtered.length === 0 && trimmedQuery && (
             <div className="text-center py-12 text-sevchik-textSecondary font-body">
               Ничего не найдено
+            </div>
+          )}
+          {!trimmedQuery && chats.every((c) => c.isFavorites) && (
+            <div className="flex flex-col items-center text-center py-16 px-6">
+              <div
+                className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
+                style={{ background: '#F2F2F7' }}
+              >
+                <MessageCircle size={32} className="text-sevchik-purple" />
+              </div>
+              <h2 className="font-heading font-extrabold text-lg text-sevchik-text mb-2">Пока нет чатов</h2>
+              <p className="text-sevchik-textSecondary font-body text-sm max-w-xs">
+                Найдите человека через поиск выше и напишите ему первым — переписка появится здесь.
+              </p>
             </div>
           )}
         </div>

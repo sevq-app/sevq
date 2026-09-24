@@ -1,13 +1,28 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Users, Link, Phone, Camera, ChevronLeft, X } from 'lucide-react';
-import { friendsData } from '@/data/mock';
 
 interface FriendsProps {
   onWriteMessage: (name: string) => void;
 }
 
 type FriendsView = 'main' | 'selectMembers' | 'createGroup';
+
+interface Contact {
+  id: string;
+  name: string;
+  phone: string;
+  avatarColor: string;
+  initials: string;
+  online: boolean;
+}
+
+// У приложения пока нет своей "телефонной книги" (нет таблицы контактов в
+// Supabase — есть только зарегистрированные profiles) — раньше здесь был
+// набор демо-контактов вместо этого. Список остаётся пустым, пока не
+// подключена реальная адресная книга; найти зарегистрированного человека
+// и написать ему по-прежнему можно через поиск на вкладке "Чаты".
+const contacts: Contact[] = [];
 
 export function Friends({ onWriteMessage }: FriendsProps) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,12 +33,12 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   const [groupName, setGroupName] = useState('');
   const [groupSearch, setGroupSearch] = useState('');
 
-  const filteredFriends = friendsData.filter(friend =>
+  const filteredFriends = contacts.filter(friend =>
     friend.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     friend.phone.includes(searchQuery)
   );
 
-  const filteredForSelection = friendsData.filter(friend =>
+  const filteredForSelection = contacts.filter(friend =>
     friend.name.toLowerCase().includes(groupSearch.toLowerCase()) ||
     friend.phone.includes(groupSearch)
   );
@@ -230,7 +245,11 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             </div>
           ) : (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-              <p className="text-[#6B7280] font-body text-sm">Ничего не найдено</p>
+              <p className="text-[#6B7280] font-body text-sm">
+                {contacts.length === 0
+                  ? 'Пока нет контактов. Найти зарегистрированного человека и написать ему можно через поиск на вкладке «Чаты».'
+                  : 'Ничего не найдено'}
+              </p>
             </motion.div>
           )}
         </div>
@@ -389,6 +408,11 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               </motion.div>
             );
           })}
+          {filteredForSelection.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-[#6B7280] font-body text-sm">Пока нет контактов для выбора — можно создать пустую группу и добавить людей позже.</p>
+            </div>
+          )}
         </div>
 
         {/* Кнопка "Создать пустую группу" внизу */}
@@ -493,7 +517,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                 Участники ({selectedMembers.length})
               </label>
               <div className="bg-white rounded-2xl p-4" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                {friendsData
+                {contacts
                   .filter(f => selectedMembers.includes(f.id))
                   .map(friend => (
                     <div key={friend.id} className="flex items-center gap-3 py-2">
