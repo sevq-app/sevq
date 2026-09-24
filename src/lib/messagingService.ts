@@ -21,10 +21,19 @@ export interface RemoteMessage {
   created_at: string;
 }
 
+/**
+ * Специально getSession(), а не getUser(): getSession() при устаревшем
+ * access_token сам обновляет его перед возвратом (если это возможно по
+ * refresh_token), тогда как getUser() просто шлёт текущий токен на сервер
+ * как есть — если фоновый автообновляющий таймер клиента не успел сработать
+ * (например, вкладка долго была в фоне), запрос к базе ушёл бы с протухшим
+ * токеном, и RLS увидел бы auth.uid() = null, хотя пользователь по факту
+ * авторизован.
+ */
 async function requireUserId(): Promise<string> {
-  const { data } = await supabase.auth.getUser();
-  const id = data.user?.id;
-  if (!id) throw new Error('Не авторизован');
+  const { data, error } = await supabase.auth.getSession();
+  const id = data.session?.user?.id;
+  if (error || !id) throw new Error('Не авторизован');
   return id;
 }
 

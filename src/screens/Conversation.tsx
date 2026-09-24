@@ -288,16 +288,18 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     });
 
     (async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const myId = userData.user?.id;
+      // getSession(), не getUser(): getSession() сам обновляет протухший токен при
+      // необходимости, тогда как getUser() просто шлёт текущий как есть.
+      const { data: sessionData } = await supabase.auth.getSession();
+      const myId = sessionData.session?.user?.id;
       const history = await fetchMessages(remoteChatId);
       if (cancelled) return;
       setChatMessages(chat.id, history.map((m) => toLocalMessage(m, myId)));
     })();
 
     const unsubscribe = subscribeToChatMessages(remoteChatId, async (m) => {
-      const { data: userData } = await supabase.auth.getUser();
-      const myId = userData.user?.id;
+      const { data: sessionData } = await supabase.auth.getSession();
+      const myId = sessionData.session?.user?.id;
       appendIncomingMessage(chat.id, toLocalMessage(m, myId));
       if (m.sender_id === contactSenderId && soundsEnabled) playSound('receive');
     });

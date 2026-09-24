@@ -6,6 +6,7 @@ import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
 import { previewText } from '@/lib/messagePreview';
 import { getOrCreateDirectChat, searchProfiles, type RemoteProfile } from '@/lib/messagingService';
+import { supabase } from '@/lib/supabase';
 import type { Chat } from '@/data/mock';
 
 interface ChatsProps {
@@ -132,8 +133,17 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
     } catch (error) {
       // Раньше ошибка только логировалась в консоль, и при сбое (например, если RLS/схема
       // Supabase не позволяет создать чат) клик по карточке визуально не делал вообще ничего.
-      setProfileOpenError('Не удалось открыть чат. Попробуйте ещё раз.');
-      console.error(error);
+      if (error instanceof Error && error.message === 'Не авторизован') {
+        // Сессия недействительна (истекла и не обновилась, например после долгого простоя
+        // вкладки) — auth.uid() на сервере будет NULL для любого запроса. Разлогиниваем,
+        // чтобы верхнеуровневый экран приложения показал экран входа, а не тихо ничего не делал.
+        setProfileOpenError('Вы не авторизованы. Сейчас вернём вас на экран входа — войдите заново.');
+        console.error(error);
+        setTimeout(() => supabase.auth.signOut(), 1500);
+      } else {
+        setProfileOpenError('Не удалось открыть чат. Попробуйте ещё раз.');
+        console.error(error);
+      }
     } finally {
       setOpeningProfileId(null);
     }
