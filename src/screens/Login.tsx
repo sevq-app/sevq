@@ -249,7 +249,7 @@ export function Register({ onRegister, onLogin }: AuthProps) {
 // --- Вспомогательные компоненты ---
 function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle: string }) {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'radial-gradient(circle at 50% 50%, #FFF8ED 0%, #FFF0DB 100%)' }}>
+    <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'radial-gradient(circle at 50% 20%, #FFF8ED 0%, #F6EFF6 55%, #ECE2F5 100%)' }}>
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#6546C7]/10 rounded-full blur-3xl" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#FF9848]/10 rounded-full blur-3xl" />
       <motion.div initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-md relative z-10">
