@@ -127,6 +127,35 @@ exception
   when duplicate_object then null;
 end $$;
 
+-- Username: код приложения (messagingService.ts) уже читает/пишет profiles.username
+-- и profiles.phone, но этот скрипт раньше их не создавал — добавляем идемпотентно
+-- на случай, если колонок ещё нет.
+alter table public.profiles add column if not exists username text;
+alter table public.profiles add column if not exists phone text;
+
+-- Уникальность + формат username (латиница/цифры/_, 5-32 символа, регистронезависимо).
+-- Пустой (ещё не заданный) username разрешён — его заполняют позже в "Информации о себе".
+-- Сначала чистим уже сохранённые значения, которые не пройдут новые правила, —
+-- иначе ALTER TABLE ADD CONSTRAINT / CREATE UNIQUE INDEX упадут на существующих данных.
+update public.profiles set username = null
+where username is not null and username !~ '^[A-Za-z0-9_]{5,32}$';
+
+-- При регистронезависимых дублях оставляем более раннюю запись (по id), у остальных обнуляем.
+update public.profiles p set username = null
+where username is not null
+  and exists (
+    select 1 from public.profiles p2
+    where p2.id < p.id and lower(p2.username) = lower(p.username)
+  );
+
+alter table public.profiles drop constraint if exists profiles_username_format;
+alter table public.profiles add constraint profiles_username_format
+  check (username is null or username ~ '^[A-Za-z0-9_]{5,32}$');
+
+create unique index if not exists profiles_username_unique_idx
+  on public.profiles (lower(username))
+  where username is not null;
+
 -- ПРОВЕРКА: выполните отдельно после миграции, чтобы своими глазами увидеть
 -- итоговый список политик на этих трёх таблицах.
 -- select schemaname, tablename, policyname, cmd, qual, with_check
