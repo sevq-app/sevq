@@ -4,6 +4,7 @@ import type { User } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Copy, Download, Link, MoreVertical, QrCode, Share2, ChevronRight, Settings, Sparkles, Trash2, Users, X } from 'lucide-react';
 import { AvatarCropper } from '@/components/AvatarCropper';
+import { readAvatarPhoto, writeAvatarPhoto } from '@/lib/avatarPhoto';
 import type { Screen } from '@/data/mock';
 import type { ProfileData } from '@/screens/AboutMe';
 
@@ -49,6 +50,7 @@ export function getProfileGroups(user: ProfileUser | null): ProfileGroup[] {
 export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [online, setOnline] = useState(true);
   const [photos, setPhotos] = useState<string[]>(readPhotos);
+  const [avatarPhoto, setAvatarPhoto] = useState<string | null>(readAvatarPhoto);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isInviteOpen, setInviteOpen] = useState(false);
   const [inviteMode, setInviteMode] = useState<'menu' | 'qr'>('menu');
@@ -56,19 +58,25 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Чем вызван выбор файла: обычная загрузка в галерею («Добавить фото» на пустой аватарке)
+  // или замена аватарки («Заменить фото» из просмотра) — от этого зависит, откроется ли кроппер.
+  const uploadIntentRef = useRef<'gallery' | 'avatar'>('gallery');
   const { name, username, avatarUrl, groups } = getMetadata(user, profileData);
   const savedProfile = profileData.name || profileData.username ? profileData : readSavedProfile();
   const displayName = [savedProfile.name || name, savedProfile.lastName].filter(Boolean).join(' ') || user?.email?.split('@')[0] || 'Пользователь';
   const displayUsername = savedProfile.username || username || user?.email?.split('@')[0] || '';
-  const profilePhoto = photos[0] || avatarUrl;
+  // Аватарка (кроп) больше не берётся из галереи — это отдельная, независимая сущность.
+  const profilePhoto = avatarPhoto || avatarUrl;
 
   useEffect(() => { localStorage.setItem(photosKey, JSON.stringify(photos)); }, [photos]);
+  useEffect(() => { writeAvatarPhoto(avatarPhoto); }, [avatarPhoto]);
 
-  const openFilePicker = () => {
+  const openFilePicker = (intent: 'gallery' | 'avatar') => {
     // <input type="file"> не запрашивает у браузера никакого «разрешения» — это всегда
     // немедленный вызов системного выбора файла по жесту пользователя, поэтому нет смысла
     // держать перед ним свой собственный (симулированный) экран «Разрешите доступ»: он не
     // соответствовал ничему в Permissions API и просто спрашивал заново каждый раз.
+    uploadIntentRef.current = intent;
     fileInputRef.current?.click();
   };
 
@@ -84,20 +92,28 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
       setUploadError('Файл слишком большой. Максимальный размер — 8 МБ.');
       return;
     }
+    const intent = uploadIntentRef.current;
     const reader = new FileReader();
-    reader.onload = () => { if (typeof reader.result === 'string') setCropSource(reader.result); };
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') return;
+      const dataUrl = reader.result;
+      // Оригинал всегда целиком и без сжатия попадает в «Фотографии» — независимо от того,
+      // зачем выбирали файл. Кроп (если он вообще нужен) — это отдельный шаг только для аватарки.
+      setPhotos((current) => [dataUrl, ...current]);
+      if (intent === 'avatar') setCropSource(dataUrl);
+    };
     reader.onerror = () => setUploadError('Не удалось прочитать файл. Попробуйте другое изображение.');
     reader.readAsDataURL(file);
   };
 
   const handleCropSave = (dataUrl: string) => {
-    setPhotos((current) => [dataUrl, ...current]);
+    setAvatarPhoto(dataUrl);
     setCropSource(null);
   };
 
   const requestReplacePhoto = () => {
     setSelectedPhoto(null);
-    openFilePicker();
+    openFilePicker('avatar');
   };
 
   const requestDeletePhoto = () => {
@@ -106,7 +122,8 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   };
 
   const confirmDeletePhoto = () => {
-    setPhotos([]);
+    // Удаляется только аватарка — сама фотография в галерее остаётся нетронутой.
+    setAvatarPhoto(null);
     setDeleteConfirmOpen(false);
   };
 
@@ -174,7 +191,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
           {/* Внешний ореол вместо звезды/кружка-статуса — светится только внешняя
               окантовка вокруг круга, отражая online */}
           <button
-            onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : openFilePicker()}
+            onClick={() => profilePhoto ? setSelectedPhoto(profilePhoto) : openFilePicker('gallery')}
             className="block rounded-full transition-shadow duration-300"
             aria-label={profilePhoto ? 'Открыть фото профиля' : 'Добавить фото профиля'}
             style={{
