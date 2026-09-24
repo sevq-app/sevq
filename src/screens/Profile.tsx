@@ -5,22 +5,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Copy, Download, Link, MoreVertical, QrCode, Share2, ChevronRight, Settings, Sparkles, Trash2, Users, X } from 'lucide-react';
 import { AvatarCropper } from '@/components/AvatarCropper';
 import { clearMyAvatar, fetchMyAvatarUrl, readAvatarPhoto, uploadMyAvatar, writeAvatarPhoto } from '@/lib/avatarPhoto';
+import { listMyPhotos, uploadMyPhoto, type RemotePhoto } from '@/lib/photoGallery';
 import type { Screen } from '@/data/mock';
 import type { ProfileData } from '@/screens/AboutMe';
 
 const MAX_PHOTO_SIZE = 8 * 1024 * 1024;
 
-const photosKey = 'sevchik-profile-photos';
 const profileStorageKey = 'sevchik-profile-data';
 
 export type ProfileGroup = { id: string; name: string; initials?: string; avatarUrl?: string };
 type ProfileUser = User & { name?: string; username?: string; avatarUrl?: string };
 
 type ProfileProps = { user: ProfileUser | null; profileData: ProfileData; onNavigate?: (screen: Screen) => void };
-
-function readPhotos() {
-  try { return JSON.parse(localStorage.getItem(photosKey) || '[]') as string[]; } catch { return []; }
-}
 
 function readSavedProfile(): Partial<ProfileData> {
   try {
@@ -49,7 +45,7 @@ export function getProfileGroups(user: ProfileUser | null): ProfileGroup[] {
 
 export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   const [online, setOnline] = useState(true);
-  const [photos, setPhotos] = useState<string[]>(readPhotos);
+  const [photos, setPhotos] = useState<RemotePhoto[]>([]);
   const [avatarPhoto, setAvatarPhoto] = useState<string | null>(readAvatarPhoto);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [isInviteOpen, setInviteOpen] = useState(false);
@@ -65,8 +61,20 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
   // Аватарка (кроп) больше не берётся из галереи — это отдельная, независимая сущность.
   const profilePhoto = avatarPhoto || avatarUrl;
 
-  useEffect(() => { localStorage.setItem(photosKey, JSON.stringify(photos)); }, [photos]);
   useEffect(() => { writeAvatarPhoto(avatarPhoto); }, [avatarPhoto]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    listMyPhotos()
+      .then((remote) => {
+        if (!cancelled) setPhotos(remote);
+      })
+      .catch((error) => console.error('Не удалось загрузить фотографии:', error));
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   // Локальный кэш аватарки (readAvatarPhoto выше) рисуется мгновенно при заходе на экран,
   // но источник истины — profiles.avatar_url в Supabase: подгружаем его и, если он отличается
@@ -109,10 +117,13 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
     reader.onload = () => {
       if (typeof reader.result !== 'string') return;
       const dataUrl = reader.result;
-      // Оригинал всегда целиком и без сжатия попадает в «Фотографии», а следом сразу
-      // открывается кроппер — им же задаётся итоговая аватарка (см. handleCropSave).
-      setPhotos((current) => [dataUrl, ...current]);
+      // Оригинал целиком и без сжатия уходит в «Фотографии» (в фоне, не блокируя кроппер —
+      // ниже), а следом сразу открывается сам кроппер — им же задаётся итоговая аватарка
+      // (см. handleCropSave). Кроп и сохранение оригинала в галерею — независимые операции.
       setCropSource(dataUrl);
+      uploadMyPhoto(dataUrl)
+        .then((photo) => setPhotos((current) => [photo, ...current]))
+        .catch((error) => console.error('Не удалось сохранить оригинал в «Фотографии»:', error));
     };
     reader.onerror = () => setUploadError('Не удалось прочитать файл. Попробуйте другое изображение.');
     reader.readAsDataURL(file);
@@ -253,7 +264,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
         <section className="bg-[var(--bg-card)] rounded-2xl p-5 flex items-center justify-between shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><div><h3 className="font-heading font-bold">Статус</h3><p className="text-sm text-sevchik-textSecondary font-body mt-0.5 flex items-center gap-1.5"><span className={`w-2 h-2 rounded-full ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/50'}`} />{online ? 'В сети' : 'Не в сети'}</p></div><button onClick={() => setOnline(!online)} aria-label="Изменить статус" className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/20'}`}><span className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-[left] ${online ? 'left-7' : 'left-1'} shadow-[0_2px_8px_rgba(0,0,0,0.15)]`} /></button></section>
         <button onClick={() => onNavigate?.('about')} className="w-full bg-[var(--bg-card)] rounded-2xl p-5 flex items-center justify-between text-left shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><span className="font-heading font-bold">Укажите информацию о себе</span><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>
 
-        <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><button onClick={() => onNavigate?.('photos')} className="w-full flex items-center justify-between mb-3 text-left"><h3 className="font-heading font-bold">Фотографии</h3><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>{photos.length === 0 ? <p className="text-sm text-sevchik-textSecondary font-body">Фото ещё не загрузили</p> : <div className="grid grid-cols-3 gap-2">{photos.slice(0, 6).map((photo) => <button key={photo} onClick={() => onNavigate?.('photos')} className="aspect-square overflow-hidden rounded-xl"><img src={photo} alt="" className="w-full h-full object-cover" /></button>)}</div>}</section>
+        <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><button onClick={() => onNavigate?.('photos')} className="w-full flex items-center justify-between mb-3 text-left"><h3 className="font-heading font-bold">Фотографии</h3><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>{photos.length === 0 ? <p className="text-sm text-sevchik-textSecondary font-body">Фото ещё не загрузили</p> : <div className="grid grid-cols-3 gap-2">{photos.slice(0, 6).map((photo) => <button key={photo.id} onClick={() => onNavigate?.('photos')} className="aspect-square overflow-hidden rounded-xl"><img src={photo.url} alt="" className="w-full h-full object-cover" /></button>)}</div>}</section>
 
         <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><button onClick={() => onNavigate?.('my-groups')} className="w-full flex items-center justify-between text-left"><h3 className="font-heading font-bold">Мои группы</h3><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>{groups.length === 0 ? <p className="text-sm text-sevchik-textSecondary mt-4">Вы ещё не состоите в группах</p> : <><div className="grid grid-cols-3 gap-3 mt-4">{groups.slice(0, 3).map((group) => <button key={group.id} onClick={() => onNavigate?.('my-groups')} className="min-w-0 text-left"><GroupIcon group={group} /><span className="block text-xs font-heading font-bold truncate mt-2">{group.name}</span></button>)}</div><button onClick={() => onNavigate?.('my-groups')} className="mt-4 text-sm font-heading font-bold text-sevchik-purple">Показать все</button></>}</section>
 

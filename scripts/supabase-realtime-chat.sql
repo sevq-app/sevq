@@ -190,6 +190,61 @@ create policy "Users can delete their own avatar"
   to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 
+-- Галерея "Фотографии": раньше тоже хранилась только в localStorage. public.photos — список
+-- фото пользователя (по одной строке на файл), сами файлы — в бакете photos.
+create table if not exists public.photos (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  path text not null,
+  url text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.photos enable row level security;
+
+drop policy if exists "Users can view own photos" on public.photos;
+create policy "Users can view own photos"
+  on public.photos for select
+  to authenticated
+  using (user_id = auth.uid());
+
+drop policy if exists "Users can insert own photos" on public.photos;
+create policy "Users can insert own photos"
+  on public.photos for insert
+  to authenticated
+  with check (user_id = auth.uid());
+
+drop policy if exists "Users can delete own photos" on public.photos;
+create policy "Users can delete own photos"
+  on public.photos for delete
+  to authenticated
+  using (user_id = auth.uid());
+
+-- Бакет для самих файлов галереи — тот же прагматичный выбор, что и для avatars выше:
+-- публичный на чтение (путь содержит случайный UUID — угадать чужую ссылку по факту
+-- невозможно), без чего пришлось бы подписывать каждую ссылку отдельно и продлевать их
+-- по истечении срока. Запись/удаление — только в свою же папку {user_id}/...
+insert into storage.buckets (id, name, public)
+values ('photos', 'photos', true)
+on conflict (id) do nothing;
+
+drop policy if exists "Photos are publicly readable" on storage.objects;
+create policy "Photos are publicly readable"
+  on storage.objects for select
+  using (bucket_id = 'photos');
+
+drop policy if exists "Users can upload their own photos" on storage.objects;
+create policy "Users can upload their own photos"
+  on storage.objects for insert
+  to authenticated
+  with check (bucket_id = 'photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "Users can delete their own photos" on storage.objects;
+create policy "Users can delete their own photos"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'photos' and (storage.foldername(name))[1] = auth.uid()::text);
+
 -- ПРОВЕРКА: выполните отдельно после миграции, чтобы своими глазами увидеть
 -- итоговый список политик на этих трёх таблицах.
 -- select schemaname, tablename, policyname, cmd, qual, with_check
