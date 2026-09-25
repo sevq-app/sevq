@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Phone, User } from 'lucide-react';
 // Иконки только для нижней (мобильной) навигации — финальный смешанный стиль:
@@ -79,6 +80,23 @@ export function Sidebar({ current, onNavigate, grayMode = false }: SidebarProps)
   );
 }
 
+// Определяет поддержку настоящего hover (мышка/трекпад), а не тач-экран —
+// @media (hover: hover) and (pointer: fine) НЕ совпадает с тапом на
+// телефоне, поэтому hover-эффекты (см. TabBarButton) там просто не
+// подключаются вовсе (а не "залипают" после тапа, как было бы при
+// hover-состоянии, завязанном на обычные pointer-события).
+function useHoverCapable() {
+  const [hoverCapable, setHoverCapable] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(hover: hover) and (pointer: fine)');
+    setHoverCapable(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setHoverCapable(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return hoverCapable;
+}
+
 interface TabBarProps {
   current: Screen;
   onNavigate: (s: Screen) => void;
@@ -98,9 +116,12 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
   // экране «Чаты» (см. Chats.tsx), только по всем чатам сразу.
   const totalUnread = useChatStore((s) => s.chats.reduce((sum, c) => sum + Math.max(c.unread, 0), 0));
 
+  const hoverCapable = useHoverCapable();
+
   // Короткая тактильная вибрация на само нажатие (не только на смену вкладки) —
   // navigator.vibrate не поддерживается в PWA на iOS, поэтому вызов должен
-  // молча ничего не делать там, где его нет, без ошибок в консоли.
+  // молча ничего не делать там, где его нет, без ошибок в консоли. Срабатывает
+  // на любую вкладку, включая уже активную — handleTabTap не проверяет active.
   const handleTabTap = (key: Screen) => {
     try {
       navigator.vibrate?.(10);
@@ -150,85 +171,127 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
           margin: '0 auto',
           background: 'var(--tabbar-surface-bg)',
           boxShadow: 'var(--tabbar-shadow)',
+          // Заливка капсулы теперь полупрозрачная (см. --tabbar-surface-bg) —
+          // blur на самой капсуле размывает фон приложения под ней, чтобы
+          // это читалось как матовое стекло, а не просто как выцветшая
+          // панель. Иконки/подписи рисуются отдельным непрозрачным слоем
+          // поверх (см. TabBarButton) и под этот blur не попадают.
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
         }}
       >
-        {items.map(({ key, label, icon: Icon }) => {
-          const active = current === key;
-          const badge = key === 'chats' ? totalUnread : 0;
-          return (
-            <motion.button
-              key={key}
-              whileTap={{ scale: 0.93 }}
-              transition={{ type: 'spring', stiffness: 700, damping: 22, mass: 0.5 }}
-              onClick={() => handleTabTap(key)}
-              className="relative flex-1 flex flex-col items-center justify-center"
-            >
-              {active && (
-                // Стеклянная "капля" ЛЕЖИТ ПОД иконкой и подписью (z-0, у них
-                // z-10) — задача пилюли чисто декоративная: полупрозрачный
-                // фон + backdrop-filter blur размывают то, что позади НЕЁ
-                // САМОЙ (поверхность капсулы), а не иконку — иконка рисуется
-                // отдельным непрозрачным слоем ПОВЕРХ и никогда не попадает
-                // под blur/градиент пилюли. (Раньше пилюля лежала НАД
-                // иконкой как "линза" — из-за этого сама иконка размывалась
-                // и "засвечивалась" белым градиентом; так делать нельзя.)
-                // layoutId — плавный перелёт между вкладками (не
-                // исчезновение/появление). Двойная анимация: layout —
-                // перелёт позиции (пружина с лёгким overshoot), scaleX/scaleY
-                // — "поверхностное натяжение": капля растягивается по
-                // горизонтали в полёте и сжимается обратно на месте
-                // прибытия.
-                <motion.div
-                  layoutId="tabbar-active-pill"
-                  className="absolute inset-1 rounded-full z-0 pointer-events-none"
-                  style={{
-                    background: 'var(--tabbar-active-bg)',
-                    boxShadow: 'var(--tabbar-active-shadow)',
-                    backdropFilter: 'blur(16px)',
-                    WebkitBackdropFilter: 'blur(16px)',
-                  }}
-                  initial={false}
-                  animate={{ scaleX: [1, 1.22, 1], scaleY: [1, 0.9, 1] }}
-                  transition={{
-                    layout: { type: 'spring', stiffness: 300, damping: 30, mass: 0.7 },
-                    scaleX: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
-                    scaleY: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
-                  }}
-                />
-              )}
-              <span className="relative z-10">
-                <motion.span
-                  className="inline-block"
-                  animate={{ scale: active ? 1.07 : 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.7 }}
-                  style={{ display: 'inline-block' }}
-                >
-                  <Icon
-                    size={28}
-                    weight="fill"
-                    className="transition-colors duration-200"
-                    style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
-                  />
-                </motion.span>
-                {badge > 0 && (
-                  <span
-                    className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-pill flex items-center justify-center text-white text-[10px] font-heading font-bold z-10"
-                    style={{ background: '#6546C7', boxShadow: '0 3px 10px rgba(101,70,199,0.18)' }}
-                  >
-                    {badge > 99 ? '99+' : badge}
-                  </span>
-                )}
-              </span>
-              <span
-                className="relative z-10 text-[14px] font-heading font-bold transition-colors duration-200 -mt-0.5"
-                style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
-              >
-                {label}
-              </span>
-            </motion.button>
-          );
-        })}
+        {items.map(({ key, label, icon: Icon }) => (
+          <TabBarButton
+            key={key}
+            label={label}
+            Icon={Icon}
+            active={current === key}
+            badge={key === 'chats' ? totalUnread : 0}
+            hoverCapable={hoverCapable}
+            onTap={() => handleTabTap(key)}
+          />
+        ))}
       </div>
     </div>
+  );
+}
+
+interface TabBarButtonProps {
+  label: string;
+  Icon: PhosphorIcon;
+  active: boolean;
+  badge: number;
+  hoverCapable: boolean;
+  onTap: () => void;
+}
+
+// Вынесена в отдельный компонент ради собственного локального состояния
+// isHovered на каждую кнопку (в .map() так не получится — правила хуков).
+function TabBarButton({ label, Icon, active, badge, hoverCapable, onTap }: TabBarButtonProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
+  // hoverCapable === false (тач-экран, "@media (hover: hover)" не совпал) —
+  // whileHover/onHoverStart/onHoverEnd вообще не передаются кнопке, поэтому
+  // isHovered гарантированно никогда не станет true от тапа — не может
+  // "залипнуть", в отличие от CSS :hover на тач-устройствах.
+  const hoverHandlers = hoverCapable
+    ? { onHoverStart: () => setIsHovered(true), onHoverEnd: () => setIsHovered(false) }
+    : {};
+  const iconHoverScale = active ? 1.07 : isHovered ? 1.1 : 1;
+
+  return (
+    <motion.button
+      whileHover={hoverCapable ? { y: -2, transition: { duration: 0.2, ease: 'easeInOut' } } : undefined}
+      onClick={onTap}
+      className="relative flex-1 flex flex-col items-center justify-center"
+      {...hoverHandlers}
+    >
+      {active && (
+        // Стеклянная "капля" ЛЕЖИТ ПОД иконкой и подписью (z-0, у них z-10) —
+        // задача пилюли чисто декоративная: полупрозрачный фон +
+        // backdrop-filter blur размывают то, что позади НЕЁ САМОЙ
+        // (поверхность капсулы), а не иконку — иконка рисуется отдельным
+        // непрозрачным слоем ПОВЕРХ и никогда не попадает под blur/градиент
+        // пилюли. (Раньше пилюля лежала НАД иконкой как "линза" — из-за
+        // этого сама иконка размывалась и "засвечивалась" белым градиентом;
+        // так делать нельзя.) layoutId — плавный перелёт между вкладками (не
+        // исчезновение/появление). Двойная анимация: layout — перелёт
+        // позиции (пружина с лёгким overshoot), scaleX/scaleY —
+        // "поверхностное натяжение": капля растягивается по горизонтали в
+        // полёте и сжимается обратно на месте прибытия.
+        <motion.div
+          layoutId="tabbar-active-pill"
+          className="absolute inset-1 rounded-full z-0 pointer-events-none"
+          style={{
+            background: 'var(--tabbar-active-bg)',
+            boxShadow: 'var(--tabbar-active-shadow)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
+          }}
+          initial={false}
+          animate={{ scaleX: [1, 1.22, 1], scaleY: [1, 0.9, 1] }}
+          transition={{
+            layout: { type: 'spring', stiffness: 300, damping: 30, mass: 0.7 },
+            scaleX: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
+            scaleY: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
+          }}
+        />
+      )}
+      <span className="relative z-10">
+        <motion.span
+          className="inline-block"
+          animate={{ scale: iconHoverScale }}
+          whileTap={{ scale: 0.9, transition: { duration: 0.09, ease: 'easeOut' } }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.7 }}
+          style={{ display: 'inline-block' }}
+        >
+          <Icon
+            size={28}
+            weight="fill"
+            className="transition-colors duration-200"
+            style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
+          />
+        </motion.span>
+        {badge > 0 && (
+          <span
+            className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-pill flex items-center justify-center text-white text-[10px] font-heading font-bold z-10"
+            style={{ background: '#6546C7', boxShadow: '0 3px 10px rgba(101,70,199,0.18)' }}
+          >
+            {badge > 99 ? '99+' : badge}
+          </span>
+        )}
+      </span>
+      <span
+        className="relative z-10 text-[14px] font-heading font-bold transition-all duration-200 -mt-0.5"
+        style={{
+          color: active ? 'var(--theme-primary)' : 'var(--text-secondary)',
+          // Лёгкое "свечение" акцентным цветом темы под курсором — только
+          // подпись, не меняя её базовый цвет.
+          textShadow: isHovered ? '0 0 10px rgba(var(--theme-primary-rgb), 0.45)' : '0 0 0 rgba(0, 0, 0, 0)',
+        }}
+      >
+        {label}
+      </span>
+    </motion.button>
   );
 }
