@@ -12,7 +12,7 @@ import { MessageCircle, Users, Phone, User } from 'lucide-react';
 // weight="fill" волны заливаются тем же цветом, что и трубка.
 // Остальные иконки в приложении (сайдбар, карточки, кнопки) специально не
 // трогали — задача касалась только нижней панели.
-import { PhoneCall, ChatTeardrop, type Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { PhoneCall, ChatCircleDots, type Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { ContactsHybridIcon, SevchikHybridIcon } from './TabBarIcons';
 import { QLogo } from './QLogo';
 import { useChatStore } from '@/store/chatStore';
@@ -82,7 +82,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
   const items: { key: Screen; label: string; icon: PhosphorIcon }[] = [
     { key: 'contacts', label: 'Контакты', icon: ContactsHybridIcon as unknown as PhosphorIcon },
     { key: 'calls', label: 'Звонки', icon: PhoneCall },
-    { key: 'chats', label: 'Чаты', icon: ChatTeardrop },
+    { key: 'chats', label: 'Чаты', icon: ChatCircleDots },
     { key: 'profile', label: 'Севчик', icon: SevchikHybridIcon as unknown as PhosphorIcon },
   ];
 
