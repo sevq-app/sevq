@@ -122,7 +122,12 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
     // обёртке — поэтому в них виден фон приложения (тот самый, который в предыдущих
     // правках уже доходит до истинного низа экрана), а не обрезанный угол панели.
     <div
-      className="md:hidden shrink-0 px-4"
+      // px-7 (было px-4) — капсула уже, заметные отступы от краёв экрана.
+      // Вкладки внутри — flex-1, делят ширину капсулы поровну, поэтому
+      // более узкая капсула автоматически подтягивает иконки друг к другу
+      // (без этого узкая капсула + прежние широкие слоты выглядели бы
+      // "сузившейся рамкой с разбросанными по краям иконками").
+      className="md:hidden shrink-0 px-7"
       // Капсула "парит" над нижним краем: сверх safe-area (полоска жестов
       // iOS) добавлен фиксированный зазор в 24px, чтобы под капсулой был
       // заметный воздух с фоном темы, а не панель впритык к краю экрана.
@@ -148,39 +153,55 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               className="relative flex-1 flex flex-col items-center justify-center"
             >
               {active && (
-                // "Капля жидкого стекла" — layoutId заставляет framer-motion плавно
-                // перетекать между позициями вкладок вместо исчезновения/появления;
-                // spring с заниженным damping даёт лёгкий overshoot ("догоняние" и
-                // "оседание"), background/blur/inset-блик — эффект полупрозрачного
-                // стекла, градиент светлее сверху/темнее снизу — эффект выпуклости.
-                // Инсет увеличен (был inset-1.5) — капля компактнее и плотнее
-                // прилегает к иконке+подписи, а не растягивается на весь слот
-                // вкладки (иначе выглядела "размазанной" по ширине; ширина
-                // подобрана так, чтобы самая длинная подпись — "Контакты" —
-                // помещалась с небольшим полем). z-0 держит каплю под иконкой
-                // и подписью (у них z-10), чтобы перетекание не задевало контент.
+                // Стеклянная "капля" ЛЕЖИТ ПОД иконкой и подписью (z-0, у них
+                // z-10) — задача пилюли чисто декоративная: полупрозрачный
+                // фон + backdrop-filter blur размывают то, что позади НЕЁ
+                // САМОЙ (поверхность капсулы), а не иконку — иконка рисуется
+                // отдельным непрозрачным слоем ПОВЕРХ и никогда не попадает
+                // под blur/градиент пилюли. (Раньше пилюля лежала НАД
+                // иконкой как "линза" — из-за этого сама иконка размывалась
+                // и "засвечивалась" белым градиентом; так делать нельзя.)
+                // layoutId — плавный перелёт между вкладками (не
+                // исчезновение/появление). Двойная анимация: layout —
+                // перелёт позиции (пружина с лёгким overshoot), scaleX/scaleY
+                // — "поверхностное натяжение": капля растягивается по
+                // горизонтали в полёте и сжимается обратно на месте
+                // прибытия.
                 <motion.div
                   layoutId="tabbar-active-pill"
-                  className="absolute inset-2 rounded-full z-0"
+                  className="absolute inset-1.5 rounded-full z-0 pointer-events-none"
                   style={{
                     background: 'var(--tabbar-active-bg)',
                     boxShadow: 'var(--tabbar-active-shadow)',
                     backdropFilter: 'blur(16px)',
                     WebkitBackdropFilter: 'blur(16px)',
                   }}
-                  transition={{ type: 'spring', stiffness: 320, damping: 17, mass: 0.65 }}
+                  initial={false}
+                  animate={{ scaleX: [1, 1.22, 1], scaleY: [1, 0.9, 1] }}
+                  transition={{
+                    layout: { type: 'spring', stiffness: 300, damping: 30, mass: 0.7 },
+                    scaleX: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
+                    scaleY: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
+                  }}
                 />
               )}
               <span className="relative z-10">
-                <Icon
-                  size={28}
-                  weight="fill"
-                  className="transition-colors duration-200"
-                  style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
-                />
+                <motion.span
+                  className="inline-block"
+                  animate={{ scale: active ? 1.07 : 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.7 }}
+                  style={{ display: 'inline-block' }}
+                >
+                  <Icon
+                    size={28}
+                    weight="fill"
+                    className="transition-colors duration-200"
+                    style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
+                  />
+                </motion.span>
                 {badge > 0 && (
                   <span
-                    className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-pill flex items-center justify-center text-white text-[10px] font-heading font-bold"
+                    className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-pill flex items-center justify-center text-white text-[10px] font-heading font-bold z-10"
                     style={{ background: '#6546C7', boxShadow: '0 3px 10px rgba(101,70,199,0.18)' }}
                   >
                     {badge > 99 ? '99+' : badge}
