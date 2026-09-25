@@ -1,5 +1,11 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Phone, User } from 'lucide-react';
+// Иконки только для нижней (мобильной) навигации — плотнее и "живее" lucide
+// при том же размере, вес duotone (основная форма акцентным цветом + едва
+// заметная фоновая часть тем же цветом) хорошо ложится на стеклянную капсулу.
+// Остальные иконки в приложении (сайдбар, карточки, кнопки) специально не
+// трогали — задача касалась только нижней панели.
+import { UsersThree, Phone as PhosphorPhone, ChatCircle, User as PhosphorUser, type Icon as PhosphorIcon } from '@phosphor-icons/react';
 import { QLogo } from './QLogo';
 import { useChatStore } from '@/store/chatStore';
 import type { Screen } from '@/data/mock';
@@ -64,12 +70,12 @@ interface TabBarProps {
 }
 
 export function TabBar({ current, onNavigate }: TabBarProps) {
-  // НОВЫЙ ПОРЯДОК для мобильной версии
-  const items = [
-    { key: 'contacts' as Screen, label: 'Контакты', icon: Users },
-    { key: 'calls' as Screen, label: 'Звонки', icon: Phone },
-    { key: 'chats' as Screen, label: 'Чаты', icon: MessageCircle },
-    { key: 'profile' as Screen, label: 'Севчик', icon: User },
+  // НОВЫЙ ПОРЯДОК для мобильной версии. Иконки — Phosphor (duotone), не lucide.
+  const items: { key: Screen; label: string; icon: PhosphorIcon }[] = [
+    { key: 'contacts', label: 'Контакты', icon: UsersThree },
+    { key: 'calls', label: 'Звонки', icon: PhosphorPhone },
+    { key: 'chats', label: 'Чаты', icon: ChatCircle },
+    { key: 'profile', label: 'Севчик', icon: PhosphorUser },
   ];
 
   // Суммарный бейдж непрочитанных на вкладке «Чаты» — то же число и тот же
@@ -139,7 +145,8 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               )}
               <span className="relative z-10">
                 <Icon
-                  size={32}
+                  size={28}
+                  weight="duotone"
                   className="transition-colors duration-200"
                   style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
                 />
