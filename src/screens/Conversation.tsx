@@ -146,7 +146,10 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
         style={{
           minWidth: 'min(220px, 65vw)',
           maxWidth: 'min(280px, 75vw)',
-          background: isMe ? 'rgba(var(--theme-primary-rgb), 0.55)' : 'rgba(255,255,255,0.55)',
+          // Исходящие — акцентный цвет темы (как текстовые облачка). Входящие —
+          // нейтральный фон (--bubble-incoming-bg), не завязанный на цветовую
+          // тему: меняется только со светлым/тёмным режимом, см. src/index.css.
+          background: isMe ? 'rgba(var(--theme-primary-rgb), 0.55)' : 'var(--bubble-incoming-bg)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
@@ -154,24 +157,25 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
       >
         {replyTo && <ReplyQuotePreview replyTo={replyTo} isMe={isMe} />}
         <div className="flex items-center gap-3">
-        {/* Кнопка Play/Pause — белая с цветной иконкой */}
+        {/* Кнопка Play/Pause — у исходящих белая с цветной (тема) иконкой, у
+            входящих нейтральная (--bg-card/--text-main), чтобы не зависеть от темы */}
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => setIsPlaying(!isPlaying)}
           className="shrink-0 w-11 h-11 rounded-full flex items-center justify-center"
           style={{
-            background: '#ffffff',
+            background: isMe ? '#ffffff' : 'var(--bg-card)',
             boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           }}
         >
           {isPlaying ? (
-            <Pause size={18} fill="currentColor" strokeWidth={0} style={{ color: 'var(--theme-primary)' }} />
+            <Pause size={18} fill="currentColor" strokeWidth={0} style={{ color: isMe ? 'var(--theme-primary)' : 'var(--text-main)' }} />
           ) : (
-            <Play size={18} fill="currentColor" strokeWidth={0} style={{ color: 'var(--theme-primary)', marginLeft: '2px' }} />
+            <Play size={18} fill="currentColor" strokeWidth={0} style={{ color: isMe ? 'var(--theme-primary)' : 'var(--text-main)', marginLeft: '2px' }} />
           )}
         </motion.button>
 
-        {/* Волна */}
+        {/* Волна — нейтральная (--text-secondary) у входящих, чтобы не зависела от темы */}
         <div className="flex-1 flex items-center gap-0.5 h-8">
           {[0.3, 0.6, 1, 0.7, 0.5, 0.8, 0.4, 0.9, 0.6, 0.7, 0.5, 0.8].map((height, i) => (
             <div
@@ -179,7 +183,7 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
               className="w-1 rounded-full"
               style={{
                 height: `${height * 100}%`,
-                background: isMe ? 'rgba(255,255,255,0.6)' : 'var(--theme-primary)',
+                background: isMe ? 'rgba(255,255,255,0.6)' : 'var(--text-secondary)',
               }}
             />
           ))}
@@ -187,7 +191,7 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
 
         {/* Таймер */}
         <span className={`text-xs font-mono font-bold shrink-0 ${isMe ? 'text-white/90' : ''}`}
-          style={{ color: isMe ? undefined : 'var(--theme-primary)' }}
+          style={{ color: isMe ? undefined : 'var(--text-main)' }}
         >
           {duration}
         </span>

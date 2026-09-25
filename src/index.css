@@ -42,7 +42,11 @@
     --theme-primary: #6546C7;
     --theme-primary-rgb: 101, 70, 199;
     --theme-message-gradient: #6546C7;
-    --theme-incoming-rgb: 215, 240, 209;
+    /* Фон входящих (чужих) сообщений — намеренно НЕ завязан на цветовую тему
+       (Весна/Лето/.../Море): в MAX и большинстве мессенджеров входящие
+       остаются нейтральными и меняются только вместе со светлым/тёмным
+       режимом, а не с выбором акцентного цвета. См. .gray-theme ниже. */
+    --bubble-incoming-bg: rgba(240, 240, 245, 0.55);
     --avatar-placeholder-bg: #EDEAF7;
     --avatar-placeholder-icon: #6546C7;
   }
@@ -187,7 +191,7 @@
 }
 
 .message-incoming-pattern {
-  background-color: rgba(var(--theme-incoming-rgb), 0.55);
+  background-color: var(--bubble-incoming-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--text-main);
@@ -213,44 +217,39 @@
     var(--bg-main);
 }
 
-/* Цветовые темы: задают --theme-primary (облачко своих сообщений) и
-   --theme-incoming-rgb (облачко чужих сообщений) для окраски переписки —
-   --theme-message-gradient использует другой код (кнопка отправки и т.п.). */
+/* Цветовые темы: задают только --theme-primary (облачко СВОИХ сообщений).
+   --theme-message-gradient использует другой код (кнопка отправки и т.п.).
+   Облачко чужих сообщений (--bubble-incoming-bg) сюда намеренно не входит —
+   оно нейтральное и зависит только от светлого/тёмного режима, см. ниже. */
 html.spring {
   --theme-primary: #FF9848;
   --theme-primary-rgb: 255, 152, 72;
   --theme-message-gradient: #FF9848;
-  --theme-incoming-rgb: 205, 235, 199; /* светло-зелёный */
 }
 html.summer {
   --theme-primary: #FFB848;
   --theme-primary-rgb: 255, 184, 72;
   --theme-message-gradient: #FFB848;
-  --theme-incoming-rgb: 197, 231, 249; /* голубой */
 }
 html.autumn {
   --theme-primary: #FF6B6B;
   --theme-primary-rgb: 255, 107, 107;
   --theme-message-gradient: #FF6B6B;
-  --theme-incoming-rgb: 240, 227, 200; /* кремовый */
 }
 html.winter {
   --theme-primary: #6546C7;
   --theme-primary-rgb: 101, 70, 199;
   --theme-message-gradient: #6546C7;
-  --theme-incoming-rgb: 236, 238, 241; /* белый с серым */
 }
 html.aurora {
   --theme-primary: #4FD3C8;
   --theme-primary-rgb: 79, 211, 200;
   --theme-message-gradient: #4FD3C8;
-  --theme-incoming-rgb: 199, 237, 219; /* изумрудный */
 }
 html.sea {
   --theme-primary: #38b2ac;
   --theme-primary-rgb: 56, 178, 172;
   --theme-message-gradient: #38b2ac;
-  --theme-incoming-rgb: 205, 233, 246; /* светло-синий */
 }
 
 /* Глобальная серая тема */
@@ -265,7 +264,7 @@ html.gray-theme {
   --theme-primary: #5967A8;
   --theme-primary-rgb: 89, 103, 168;
   --theme-message-gradient: #5967A8;
-  --theme-incoming-rgb: 66, 70, 78; /* тёмно-серый — темнее, чем в светлой теме */
+  --bubble-incoming-bg: rgba(42, 45, 51, 0.55);
   --avatar-placeholder-bg: #3A3E46;
   --avatar-placeholder-icon: #8F7AE0;
   color-scheme: dark;
