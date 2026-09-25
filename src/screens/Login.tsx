@@ -250,7 +250,7 @@ export function Register({ onRegister, onLogin }: AuthProps) {
 function AuthLayout({ children, title, subtitle }: { children: React.ReactNode; title: string; subtitle: string }) {
   return (
     <div
-      className="min-h-dvh w-full flex items-center justify-center p-4 relative overflow-hidden"
+      className="app-shell-min w-full flex items-center justify-center p-4 relative overflow-hidden"
       style={{
         background: 'radial-gradient(circle at 50% 20%, #FFF8ED 0%, #F6EFF6 55%, #ECE2F5 100%)',
         paddingTop: 'max(1rem, env(safe-area-inset-top))',

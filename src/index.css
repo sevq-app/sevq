@@ -52,16 +52,17 @@
   * {
     @apply border-border;
   }
-  /* height: 100% остаётся как фоллбэк для браузеров без поддержки dvh;
-     min-height: 100dvh идёт следом и побеждает, когда поддерживается —
-     в PWA на iOS (режим «На экран Домой») высота по проценту (100%) может
-     не дотягивать до нижней safe-area (домашняя полоска жестов), тогда как
-     100dvh всегда учитывает весь реальный видимый экран целиком. Без этого
-     фон обрывался чуть выше нижнего края, и в этом просвете была видна
-     чёрная заливка WKWebView по умолчанию. */
+  /* Три слоя высоты, каждый следующий побеждает там, где поддерживается:
+     100% (фоллбэк) -> 100vh (классический viewport) -> min-height: 100dvh
+     (динамический viewport, учитывает safe-area в PWA на iOS). Один слой
+     не всегда достаточен — на разных версиях iOS в режиме «На экран Домой»
+     по-разному наблюдались случаи, когда то % от родителя, то vh не
+     дотягивали до нижней safe-area (домашняя полоска жестов), давая
+     просвет с заливкой WKWebView по умолчанию. */
   html {
     overscroll-behavior-x: none;
     height: 100%;
+    height: 100vh;
     min-height: 100dvh;
     background: var(--bg-main);
   }
@@ -69,9 +70,13 @@
     @apply text-sevchik-text;
     font-family: 'Golos Text', sans-serif;
     height: 100%;
+    height: 100vh;
     min-height: 100dvh;
     background: var(--bg-main);
-    background-attachment: fixed;
+    /* background-attachment: fixed убран — body и так не скроллится сам
+       (overflow: hidden, скроллят только экраны внутри), а на iOS/WebKit
+       у этого свойства давние баги с рендерингом фона именно в динамически
+       пересчитываемых областях viewport (как раз safe-area в PWA). */
     overflow: hidden;
     overscroll-behavior-x: none;
   }
@@ -81,6 +86,7 @@
      браузера/системы по умолчанию вместо фона приложения. */
   #root {
     height: 100%;
+    height: 100vh;
     min-height: 100dvh;
     background: var(--bg-main);
   }
@@ -88,6 +94,24 @@
     font-family: 'Nunito', sans-serif;
     color: var(--text-main);
   }
+}
+
+/* Те же три слоя высоты, что у html/body/#root выше, но для React-компонентов —
+   через inline style с одинаковым JS-ключом (height/minHeight) второе объявление
+   просто перезаписало бы первое (это не CSS-каскад), поэтому здесь обычный класс.
+   .app-shell — точная высота экрана (App.tsx: корневые обёртки с overflow-hidden,
+   внутри которых скроллятся уже сами экраны). .app-shell-min — минимальная высота
+   для центрированных по контенту layout'ов (Login.tsx AuthLayout), которым нужно
+   расти вместе с содержимым, а не обрезаться. */
+.app-shell {
+  height: 100%;
+  height: 100vh;
+  min-height: 100dvh;
+}
+.app-shell-min {
+  min-height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Отключаем нативное выделение текста и вызов лупы/callout при
