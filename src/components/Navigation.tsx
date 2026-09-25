@@ -122,12 +122,10 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
     // обёртке — поэтому в них виден фон приложения (тот самый, который в предыдущих
     // правках уже доходит до истинного низа экрана), а не обрезанный угол панели.
     <div
-      // px-7 (было px-4) — капсула уже, заметные отступы от краёв экрана.
-      // Вкладки внутри — flex-1, делят ширину капсулы поровну, поэтому
-      // более узкая капсула автоматически подтягивает иконки друг к другу
-      // (без этого узкая капсула + прежние широкие слоты выглядели бы
-      // "сузившейся рамкой с разбросанными по краям иконками").
-      className="md:hidden shrink-0 px-7"
+      // Без бокового padding — ширину и центрирование капсулы целиком
+      // задаёт сама капсула через max-width + margin: auto (см. ниже), а
+      // не отступ обёртки.
+      className="md:hidden shrink-0"
       // Капсула "парит" над нижним краем: сверх safe-area (полоска жестов
       // iOS) добавлен фиксированный зазор в 24px, чтобы под капсулой был
       // заметный воздух с фоном темы, а не панель впритык к краю экрана.
@@ -137,6 +135,19 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
         className="relative flex items-stretch justify-around overflow-hidden rounded-full"
         style={{
           height: '76px',
+          // Раньше ширину капсулы регулировали только боковым padding
+          // обёртки (px-7) — на широких экранах эффект был почти незаметен
+          // (padding маленький относительно ширины экрана). Теперь у
+          // капсулы явный max-width + margin: auto — она превращается в
+          // компактную центрированную "таблетку" независимо от ширины
+          // экрана. min(320px, calc(100% - 32px)) — на обычных iPhone
+          // упирается в 320px (заметные поля по бокам), а на совсем
+          // маленьких экранах (iPhone SE и старее) гарантирует минимум 16px
+          // отступа с каждой стороны вместо того, чтобы сжиматься дальше
+          // вместе с шириной экрана (обычный процент от ширины делал бы
+          // именно это).
+          maxWidth: 'min(320px, calc(100% - 32px))',
+          margin: '0 auto',
           background: 'var(--tabbar-surface-bg)',
           boxShadow: 'var(--tabbar-shadow)',
         }}
@@ -169,7 +180,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
                 // прибытия.
                 <motion.div
                   layoutId="tabbar-active-pill"
-                  className="absolute inset-1.5 rounded-full z-0 pointer-events-none"
+                  className="absolute inset-1 rounded-full z-0 pointer-events-none"
                   style={{
                     background: 'var(--tabbar-active-bg)',
                     boxShadow: 'var(--tabbar-active-shadow)',
