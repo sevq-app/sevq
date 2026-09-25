@@ -1,12 +1,18 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Phone, User } from 'lucide-react';
-// Иконки только для нижней (мобильной) навигации — плотнее и "живее" lucide
-// при том же размере, вес fill (полностью залитые, без штрихового контура).
+// Иконки только для нижней (мобильной) навигации — "гибридный" стиль: главная
+// круглая форма (голова человечка) залита сплошным цветом, тело/линии — тонким
+// контуром. У Phosphor нет готового такого веса, поэтому для Контакты/Севчик
+// используются кастомные компоненты из TabBarIcons.tsx (контур weight="regular"
+// + голова из weight="duotone", оба — точные path из библиотеки, см. файл).
+// Чаты/Звонки — родной вес duotone: контур поверх едва залитой внутренней части
+// уже даёт ровно то же "лёгкое" ощущение без кастомной сборки.
 // PhoneCall — тот же силуэт трубки, что и Phone, но с волнами сбоку (эффект
-// "звонок идёт") — это часть самого SVG-глифа иконки, не отдельный элемент.
+// "звонок идёт") — часть самого SVG-глифа иконки, не отдельный элемент.
 // Остальные иконки в приложении (сайдбар, карточки, кнопки) специально не
 // трогали — задача касалась только нижней панели.
-import { UsersThree, PhoneCall, ChatCircle, User as PhosphorUser, type Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { PhoneCall, ChatCircle, type Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { ContactsHybridIcon, SevchikHybridIcon } from './TabBarIcons';
 import { QLogo } from './QLogo';
 import { useChatStore } from '@/store/chatStore';
 import type { Screen } from '@/data/mock';
@@ -71,12 +77,12 @@ interface TabBarProps {
 }
 
 export function TabBar({ current, onNavigate }: TabBarProps) {
-  // НОВЫЙ ПОРЯДОК для мобильной версии. Иконки — Phosphor (duotone), не lucide.
+  // НОВЫЙ ПОРЯДОК для мобильной версии. Иконки — гибридный стиль (см. импорты выше).
   const items: { key: Screen; label: string; icon: PhosphorIcon }[] = [
-    { key: 'contacts', label: 'Контакты', icon: UsersThree },
+    { key: 'contacts', label: 'Контакты', icon: ContactsHybridIcon as unknown as PhosphorIcon },
     { key: 'calls', label: 'Звонки', icon: PhoneCall },
     { key: 'chats', label: 'Чаты', icon: ChatCircle },
-    { key: 'profile', label: 'Севчик', icon: PhosphorUser },
+    { key: 'profile', label: 'Севчик', icon: SevchikHybridIcon as unknown as PhosphorIcon },
   ];
 
   // Суммарный бейдж непрочитанных на вкладке «Чаты» — то же число и тот же
@@ -147,7 +153,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               <span className="relative z-10">
                 <Icon
                   size={28}
-                  weight="fill"
+                  weight="duotone"
                   className="transition-colors duration-200"
                   style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
                 />
