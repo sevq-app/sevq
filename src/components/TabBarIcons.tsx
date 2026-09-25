@@ -7,10 +7,19 @@
 // было использовать этот же компонент по тому же вызову, что и обычные
 // Phosphor-иконки (<Icon size={..} weight="fill" style={{ color }} />).
 import type { SVGProps } from 'react';
+import { ChatBubbleOvalLeftIcon } from '@heroicons/react/24/solid';
 
 interface HybridIconProps extends SVGProps<SVGSVGElement> {
   size?: number | string;
   weight?: string;
+}
+
+// Heroicons-компоненты принимают обычные SVG-пропсы (width/height), а не
+// size/weight, как у Phosphor — тонкая обёртка, чтобы вызывать иконку «Чаты»
+// по тому же контракту, что и остальные три (<Icon size={..} weight=".." />).
+export function ChatsHeroIcon({ size = 24, weight, ...props }: HybridIconProps) {
+  void weight;
+  return <ChatBubbleOvalLeftIcon width={size} height={size} {...props} />;
 }
 
 function HybridIcon({ size = 24, weight, outline, heads, ...props }: HybridIconProps & { outline: string; heads: string }) {
