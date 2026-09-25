@@ -17,7 +17,7 @@ interface ChatStore {
   markAllMineRead: (chatId: string) => void;
   deleteMessage: (chatId: string, messageId: string) => void;
   deleteMessages: (chatId: string, messageIds: string[]) => void;
-  editMessage: (chatId: string, messageId: string, newText: string) => void;
+  editMessage: (chatId: string, messageId: string, newText: string, editedAt?: string) => void;
   toggleReaction: (chatId: string, messageId: string, emoji: string) => void;
   markChatsRead: (chatIds: string[]) => void;
   markChatUnread: (chatId: string) => void;
@@ -71,11 +71,16 @@ export const useChatStore = create<ChatStore>((set) => ({
       ),
     })),
 
-  editMessage: (chatId, messageId, newText) =>
+  editMessage: (chatId, messageId, newText, editedAt) =>
     set((state) => ({
       chats: state.chats.map((c) =>
         c.id === chatId
-          ? { ...c, messages: c.messages.map((m) => (m.id === messageId ? { ...m, text: newText, edited: true } : m)) }
+          ? {
+              ...c,
+              messages: c.messages.map((m) =>
+                m.id === messageId ? { ...m, text: newText, edited: true, editedAt: editedAt ?? m.editedAt } : m
+              ),
+            }
           : c
       ),
     })),
