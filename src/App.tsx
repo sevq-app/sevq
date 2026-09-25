@@ -193,7 +193,7 @@ function App() {
 
   if (authLoading) {
     return (
-      <div className="h-dvh w-screen flex items-center justify-center bg-[var(--bg-main)]">
+      <div className="app-shell w-screen flex items-center justify-center bg-[var(--bg-main)]">
         <span className="text-sevchik-text">Загрузка...</span>
       </div>
     );
@@ -208,7 +208,12 @@ function App() {
   }
 
   return (
-    <div className={`h-dvh w-screen overflow-hidden bg-[var(--bg-main)] ${grayMode ? 'gray-theme' : ''}`}>
+    // .app-shell (не Tailwind h-dvh) — если у dvh на конкретной версии iOS в
+    // режиме «На экран Домой» есть расхождение с реальной высотой экрана,
+    // оно проявится именно на этом уровне и обрежет всё дерево ниже, даже
+    // если html/body/#root выше по цепочке уже посчитаны правильно. Три
+    // слоя высоты (см. .app-shell в src/index.css) страхуют друг друга.
+    <div className={`app-shell w-screen overflow-hidden bg-[var(--bg-main)] ${grayMode ? 'gray-theme' : ''}`}>
       <div className="h-full w-full flex bg-[var(--bg-main)]">
         {showTabBar && <Sidebar current={screen} onNavigate={handleTabNavigate} grayMode={grayMode} />}
         <div className="h-full w-full flex flex-col overflow-hidden" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
