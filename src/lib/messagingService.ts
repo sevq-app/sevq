@@ -38,6 +38,7 @@ export interface RemoteMessage {
   text: string;
   created_at: string;
   edited_at: string | null;
+  reply_to_id: string | null;
 }
 
 /**
@@ -365,16 +366,28 @@ export async function listMyChats(): Promise<RemoteChatSummary[]> {
 export async function fetchMessages(chatId: string): Promise<RemoteMessage[]> {
   const { data, error } = await supabase
     .from('messages')
-    .select('id, chat_id, sender_id, text, created_at, edited_at')
+    .select('id, chat_id, sender_id, text, created_at, edited_at, reply_to_id')
     .eq('chat_id', chatId)
     .order('created_at', { ascending: true });
   if (error) throw error;
   return (data ?? []) as RemoteMessage[];
 }
 
-export async function sendRealMessage(chatId: string, text: string): Promise<void> {
+export async function sendRealMessage(chatId: string, text: string, replyToId?: string | null): Promise<void> {
   const myId = await requireUserId();
-  const { error } = await supabase.from('messages').insert({ chat_id: chatId, sender_id: myId, text });
+  const { error } = await supabase.from('messages').insert({ chat_id: chatId, sender_id: myId, text, reply_to_id: replyToId ?? null });
+  if (error) throw error;
+}
+
+/**
+ * Удаляет своё сообщение из Supabase — обычный DELETE, а не soft-delete: в этом чате
+ * нет UI-заглушки вида "сообщение удалено", поэтому хранить мёртвые строки незачем.
+ * .eq('sender_id', myId) — удалить можно только свои сообщения; дублирует RLS-политику
+ * messages_delete_own в БД (defense in depth), но не подменяет её.
+ */
+export async function deleteRealMessage(messageId: string): Promise<void> {
+  const myId = await requireUserId();
+  const { error } = await supabase.from('messages').delete().eq('id', messageId).eq('sender_id', myId);
   if (error) throw error;
 }
 
@@ -397,11 +410,12 @@ export async function editRealMessage(messageId: string, newText: string, edited
   if (error) throw error;
 }
 
-/** Подписка на новые и изменённые сообщения конкретного чата в реальном времени. Возвращает функцию отписки. */
+/** Подписка на новые, изменённые и удалённые сообщения конкретного чата в реальном времени. Возвращает функцию отписки. */
 export function subscribeToChatMessages(
   chatId: string,
   onInsert: (msg: RemoteMessage) => void,
-  onUpdate?: (msg: RemoteMessage) => void
+  onUpdate?: (msg: RemoteMessage) => void,
+  onDelete?: (messageId: string) => void
 ): () => void {
   const channel = supabase
     .channel(`messages:${chatId}`)
@@ -414,6 +428,11 @@ export function subscribeToChatMessages(
       'postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
       (payload) => onUpdate?.(payload.new as RemoteMessage)
+    )
+    .on(
+      'postgres_changes',
+      { event: 'DELETE', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
+      (payload) => onDelete?.((payload.old as RemoteMessage).id)
     )
     .subscribe();
 

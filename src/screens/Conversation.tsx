@@ -9,7 +9,7 @@ import { playSound, triggerHaptic } from '@/lib/feedback';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
 import { supabase } from '@/lib/supabase';
-import { editRealMessage, fetchMessages, sendRealMessage, subscribeToChatMessages, type RemoteMessage } from '@/lib/messagingService';
+import { deleteRealMessage, editRealMessage, fetchMessages, sendRealMessage, subscribeToChatMessages, type RemoteMessage } from '@/lib/messagingService';
 
 interface ConversationProps {
   chatId: string;
@@ -63,11 +63,13 @@ function DeliveryTicks({ status, size = 13 }: { status?: DeliveryStatus; size?: 
   return <Check size={size} />;
 }
 
-// Цитата отвечаемого сообщения — показывается внутри пузыря над контентом
-function ReplyQuotePreview({ replyTo, isMe }: { replyTo: NonNullable<Message['replyTo']>; isMe: boolean }) {
+// Цитата отвечаемого сообщения — показывается внутри пузыря над контентом.
+// onClick (если передан) прокручивает к оригинальному сообщению в этом же чате.
+function ReplyQuotePreview({ replyTo, isMe, onClick }: { replyTo: NonNullable<Message['replyTo']>; isMe: boolean; onClick?: () => void }) {
   return (
     <div
-      className={`mb-1.5 px-2.5 py-1.5 rounded-lg border-l-2 text-xs max-w-full ${isMe ? 'border-white/60 bg-white/10' : 'bg-black/5'}`}
+      onClick={onClick ? (e) => { e.stopPropagation(); onClick(); } : undefined}
+      className={`mb-1.5 px-2.5 py-1.5 rounded-lg border-l-2 text-xs max-w-full ${onClick ? 'cursor-pointer' : ''} ${isMe ? 'border-white/60 bg-white/10' : 'bg-black/5'}`}
       style={!isMe ? { borderColor: 'var(--theme-primary)' } : undefined}
     >
       <div className="font-heading font-bold truncate" style={{ color: isMe ? 'rgba(255,255,255,0.9)' : 'var(--theme-primary)' }}>
@@ -134,7 +136,7 @@ function ReactionBadge({ emoji, isMe, onClick }: { emoji: string; isMe: boolean;
 }
 
 // Компонент голосового сообщения
-function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, onToggleReaction }: { duration: string; time: string; isMe: boolean; status?: DeliveryStatus; replyTo?: Message['replyTo']; reaction?: string; onToggleReaction?: () => void }) {
+function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, onToggleReaction, onReplyClick }: { duration: string; time: string; isMe: boolean; status?: DeliveryStatus; replyTo?: Message['replyTo']; reaction?: string; onToggleReaction?: () => void; onReplyClick?: () => void }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
@@ -155,7 +157,7 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
           boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
         }}
       >
-        {replyTo && <ReplyQuotePreview replyTo={replyTo} isMe={isMe} />}
+        {replyTo && <ReplyQuotePreview replyTo={replyTo} isMe={isMe} onClick={onReplyClick} />}
         <div className="flex items-center gap-3">
         {/* Кнопка Play/Pause — у исходящих белая с цветной (тема) иконкой, у
             входящих нейтральная (--bg-card/--text-main), чтобы не зависеть от темы */}
@@ -226,6 +228,12 @@ function TypingDots() {
 
 export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEnabled, hapticsEnabled }: ConversationProps) {
   const chat = useChatStore((s) => s.chats.find((c) => c.id === chatId));
+  // Вычисляется сразу, а не после guard'а `if (!chat) return null` ниже,
+  // потому что нужен внутри эффекта, объявленного раньше этого guard'а —
+  // TS ругается на use-before-declaration при ссылке на const, объявленный
+  // синтаксически позже, даже если сам эффект безопасен в рантайме (он
+  // реально выполняется только после того, как весь рендер уже завершился).
+  const { name: displayName, initials: displayInitials } = chat ? getDisplayContact(chat) : { name: '', initials: '' };
   const sendMessage = useChatStore((s) => s.sendMessage);
   const updateMessageStatus = useChatStore((s) => s.updateMessageStatus);
   const markAllMineRead = useChatStore((s) => s.markAllMineRead);
@@ -235,6 +243,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const toggleReaction = useChatStore((s) => s.toggleReaction);
   const markChatUnread = useChatStore((s) => s.markChatUnread);
   const forwardMessageToChats = useChatStore((s) => s.forwardMessageToChats);
+  // Список всех чатов — нужен при пересылке, чтобы понять, куда слать
+  // сообщение: в Supabase (реальный чат, есть remoteChatId) или только в
+  // локальный стор (например, «Избранное»).
+  const allChats = useChatStore((s) => s.chats);
   const setChatMessages = useChatStore((s) => s.setChatMessages);
   const appendIncomingMessage = useChatStore((s) => s.appendIncomingMessage);
   const [input, setInput] = useState('');
@@ -283,7 +295,20 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     const contactSenderId = chat.remoteUserId;
     let cancelled = false;
 
-    const toLocalMessage = (m: RemoteMessage, myId: string | undefined): Message => ({
+    // Короткий снимок цитаты (id + текст + автор) — та же форма, что и у
+    // getReplySnapshot() для локальной отправки, только строится по уже
+    // известному родительскому сообщению вместо текущего состояния replyTo.
+    const snapshotOf = (parentId: string, parentText: string, parentSenderId: string, myId: string | undefined): Message['replyTo'] => ({
+      id: parentId,
+      text: replySnippet(parentText),
+      senderName: parentSenderId === myId ? 'Вы' : displayName,
+    });
+
+    const toLocalMessage = (
+      m: RemoteMessage,
+      myId: string | undefined,
+      resolveReply?: (replyToId: string | null) => Message['replyTo'] | undefined
+    ): Message => ({
       id: m.id,
       senderId: m.sender_id === myId ? 'me' : chat.id,
       text: m.text,
@@ -291,6 +316,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       date: m.created_at.slice(0, 10),
       edited: !!m.edited_at,
       editedAt: m.edited_at ? new Date(m.edited_at).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }) : undefined,
+      replyTo: resolveReply?.(m.reply_to_id),
     });
 
     (async () => {
@@ -300,7 +326,18 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       const myId = sessionData.session?.user?.id;
       const history = await fetchMessages(remoteChatId);
       if (cancelled) return;
-      setChatMessages(chat.id, history.map((m) => toLocalMessage(m, myId)));
+      // Родитель каждого reply_to_id ищется в этой же загруженной истории —
+      // fetchMessages() отдаёт её целиком с самого начала чата, так что
+      // родительское сообщение почти всегда уже здесь (кроме случая, когда
+      // его успели удалить, тогда цитата просто не восстановится).
+      const byId = new Map(history.map((h) => [h.id, h] as const));
+      const resolveReplyFromHistory = (replyToId: string | null): Message['replyTo'] | undefined => {
+        if (!replyToId) return undefined;
+        const parent = byId.get(replyToId);
+        if (!parent) return undefined;
+        return snapshotOf(parent.id, parent.text, parent.sender_id, myId);
+      };
+      setChatMessages(chat.id, history.map((m) => toLocalMessage(m, myId, resolveReplyFromHistory)));
     })();
 
     const unsubscribe = subscribeToChatMessages(
@@ -308,7 +345,21 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       async (m) => {
         const { data: sessionData } = await supabase.auth.getSession();
         const myId = sessionData.session?.user?.id;
-        appendIncomingMessage(chat.id, toLocalMessage(m, myId));
+        // useChatStore.getState() — берём актуальные уже загруженные сообщения
+        // чата напрямую из стора (а не messages/chat из замыкания рендера, в
+        // котором создавался этот эффект), чтобы найти родителя ответа, не
+        // добавляя chat.messages в зависимости эффекта (иначе он бы
+        // пересоздавал подписку на каждое новое сообщение).
+        const localMessages = useChatStore.getState().chats.find((c) => c.id === chat.id)?.messages ?? [];
+        const resolveReplyFromLocal = (replyToId: string | null): Message['replyTo'] | undefined => {
+          if (!replyToId) return undefined;
+          const parent = localMessages.find((lm) => lm.id === replyToId);
+          if (!parent) return undefined;
+          // parent — уже локальное сообщение (senderId тут 'me' либо chat.id, а не
+          // сырой sender_id из Supabase), поэтому сравнение с myId здесь не нужно.
+          return { id: parent.id, text: replySnippet(parent.text), senderName: parent.senderId === 'me' ? 'Вы' : displayName };
+        };
+        appendIncomingMessage(chat.id, toLocalMessage(m, myId, resolveReplyFromLocal));
         if (m.sender_id === contactSenderId && soundsEnabled) playSound('receive');
       },
       async (m) => {
@@ -316,6 +367,9 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         const myId = sessionData.session?.user?.id;
         const local = toLocalMessage(m, myId);
         editMessage(chat.id, m.id, local.text, local.editedAt);
+      },
+      (deletedId) => {
+        deleteMessage(chat.id, deletedId);
       }
     );
 
@@ -323,7 +377,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       cancelled = true;
       unsubscribe();
     };
-  }, [chat?.isReal, chat?.remoteChatId, chat?.remoteUserId, chat?.id, setChatMessages, appendIncomingMessage, editMessage, soundsEnabled]);
+  }, [chat?.isReal, chat?.remoteChatId, chat?.remoteUserId, chat?.id, setChatMessages, appendIncomingMessage, editMessage, deleteMessage, soundsEnabled, displayName]);
 
   useEffect(() => {
     if (isRecording) {
@@ -345,7 +399,6 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
 
   if (!chat) return null;
   const isFavoritesChat = !!chat.isFavorites;
-  const { name: displayName, initials: displayInitials } = getDisplayContact(chat);
 
   // Снимок цитируемого сообщения на момент отправки — хранится прямо в
   // новом сообщении (а не по ссылке на id), чтобы цитата не терялась,
@@ -353,11 +406,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const getReplySnapshot = (): Message['replyTo'] | undefined => {
     if (!replyTo) return undefined;
     const senderName = replyTo.senderId === 'me' ? 'Вы' : displayName;
-    let text = replyTo.text;
-    if (isImageMessage(text)) text = '📷 Фото';
-    else if (isVoiceMessage(text)) text = '🎤 Голосовое сообщение';
-    else if (isStickerMessage(text)) text = `${getStickerEmoji(text)} Стикер`;
-    return { text, senderName };
+    return { id: replyTo.id, text: replySnippet(replyTo.text), senderName };
   };
 
   const handleSend = () => {
@@ -381,15 +430,18 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     }
 
     const text = input.trim();
+    const replyToId = replyTo?.id ?? null;
     setInput('');
     setReplyTo(null);
     if (soundsEnabled) playSound('send');
     if (hapticsEnabled) triggerHaptic(12);
 
     // Реальный чат: сообщение уходит в Supabase, а не в мок-стор — оно
-    // появится у обеих сторон через realtime-подписку выше.
+    // появится у обеих сторон через realtime-подписку выше. replyToId раньше
+    // никуда не передавался — ответ долетал без ссылки на оригинал, поэтому
+    // после отправки выглядел как обычное сообщение, без цитаты.
     if (chat.isReal && chat.remoteChatId) {
-      sendRealMessage(chat.remoteChatId, text).catch((e) => console.error('Не удалось отправить сообщение:', e));
+      sendRealMessage(chat.remoteChatId, text, replyToId).catch((e) => console.error('Не удалось отправить сообщение:', e));
       return;
     }
 
@@ -619,7 +671,15 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const handleDeleteMessage = () => {
     menuHaptic();
     if (menuMessage) {
-      deleteMessage(chat.id, menuMessage.id);
+      const targetId = menuMessage.id;
+      deleteMessage(chat.id, targetId);
+      // "Удалить" в меню показывается только для своих сообщений (см. isMine
+      // ниже), так что здесь удаляются всегда свои — но .eq('sender_id', myId)
+      // внутри deleteRealMessage всё равно ограничивает это и на клиенте, а не
+      // только через RLS-политику messages_delete_own в БД.
+      if (chat.isReal) {
+        deleteRealMessage(targetId).catch((e) => console.error('Не удалось удалить сообщение:', e));
+      }
     }
     closeMenu();
   };
@@ -641,7 +701,14 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   const handleBulkDelete = () => {
-    deleteMessages(chat.id, selectedMessageIds);
+    const targetIds = selectedMessageIds;
+    deleteMessages(chat.id, targetIds);
+    if (chat.isReal) {
+      // Из выбранных удаляем в Supabase только свои — чужие деактивирует RLS
+      // всё равно, но нет смысла даже пытаться слать на них запрос.
+      const ownIds = messages.filter((m) => targetIds.includes(m.id) && m.senderId === 'me').map((m) => m.id);
+      ownIds.forEach((id) => deleteRealMessage(id).catch((e) => console.error('Не удалось удалить сообщение:', e)));
+    }
     exitMessageSelectMode();
   };
 
@@ -650,15 +717,29 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     setBulkForwardTexts(texts);
   };
 
+  // Пересылка в реальный чат (isReal, есть remoteChatId) должна реально
+  // отправлять сообщение в Supabase — раньше forwardMessageToChats() писала
+  // только в локальный стор, поэтому у получателя (и после перезахода у самого
+  // отправителя) пересланное сообщение никогда не появлялось. Для чатов без
+  // Supabase (сейчас это только «Избранное») пересылка остаётся локальной.
+  const forwardOne = (targetChatId: string, text: string) => {
+    const target = allChats.find((c) => c.id === targetChatId);
+    if (target?.isReal && target.remoteChatId) {
+      sendRealMessage(target.remoteChatId, text).catch((e) => console.error('Не удалось переслать сообщение:', e));
+    } else {
+      forwardMessageToChats([targetChatId], text);
+    }
+  };
+
   const handleSendForward = (chatIds: string[]) => {
     if (!forwardMessage) return;
-    forwardMessageToChats(chatIds, forwardMessage.text);
+    chatIds.forEach((id) => forwardOne(id, forwardMessage.text));
     setForwardMessage(null);
   };
 
   const handleSendBulkForward = (chatIds: string[]) => {
     if (!bulkForwardTexts) return;
-    bulkForwardTexts.forEach((text) => forwardMessageToChats(chatIds, text));
+    chatIds.forEach((id) => bulkForwardTexts.forEach((text) => forwardOne(id, text)));
     setBulkForwardTexts(null);
     exitMessageSelectMode();
   };
@@ -758,6 +839,25 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   const getStickerEmoji = (text: string) => text.replace('sticker:', '');
   const isImageMessage = (text: string) => text.startsWith('image:');
   const getImageSrc = (text: string) => text.replace('image:', '');
+
+  // Короткое превью для цитаты в ответе — общая логика для локального снимка
+  // при отправке (getReplySnapshot) и для восстановления цитаты у сообщений,
+  // загруженных/пришедших из Supabase (там reply_to_id хранится отдельно, а
+  // текст и автор родителя нужно сложить в такой же снимок при чтении).
+  const replySnippet = (text: string): string => {
+    if (isImageMessage(text)) return '📷 Фото';
+    if (isVoiceMessage(text)) return '🎤 Голосовое сообщение';
+    if (isStickerMessage(text)) return `${getStickerEmoji(text)} Стикер`;
+    return text;
+  };
+
+  // Клик по цитате в ответе — прокручивает к оригинальному сообщению, если оно
+  // есть в этом же чате (может не быть в DOM, если ещё не загружено или
+  // оригинал удалили — тогда просто ничего не происходит).
+  const scrollToMessage = (id?: string) => {
+    if (!id) return;
+    document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
 
   const handleSelectEmoji = (emoji: string) => {
     setInput((prev) => prev + emoji);
@@ -942,7 +1042,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           const showDateSeparator = !!msg.date && msg.date !== messages[i - 1]?.date;
 
           return (
-            <div key={msg.id}>
+            <div key={msg.id} id={`msg-${msg.id}`}>
             {showDateSeparator && <DateSeparator label={formatDateLabel(msg.date!)} />}
             <motion.div
               initial={isMe ? { scale: 0.95, opacity: 0 } : { y: 15, opacity: 0 }}
@@ -979,7 +1079,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 <div className={`relative flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                   {msg.replyTo && (
                     <div className="mb-1 max-w-[75%]">
-                      <ReplyQuotePreview replyTo={msg.replyTo} isMe={false} />
+                      <ReplyQuotePreview replyTo={msg.replyTo} isMe={false} onClick={() => scrollToMessage(msg.replyTo?.id)} />
                     </div>
                   )}
                   <span className="text-6xl leading-none">{getStickerEmoji(msg.text)}</span>
@@ -1000,12 +1100,13 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                   replyTo={msg.replyTo}
                   reaction={msg.reaction}
                   onToggleReaction={() => toggleReaction(chat.id, msg.id, msg.reaction!)}
+                  onReplyClick={() => scrollToMessage(msg.replyTo?.id)}
                 />
               ) : isImage ? (
                 <div className={`relative flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
                   {msg.replyTo && (
                     <div className="mb-1 max-w-[75%] w-full">
-                      <ReplyQuotePreview replyTo={msg.replyTo} isMe={isMe} />
+                      <ReplyQuotePreview replyTo={msg.replyTo} isMe={isMe} onClick={() => scrollToMessage(msg.replyTo?.id)} />
                     </div>
                   )}
                   <div className="relative max-w-[75%] rounded-2xl overflow-hidden" style={{ boxShadow: '0 4px 16px rgba(15,23,42,0.1)' }}>
@@ -1031,7 +1132,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                   >
                     {msg.replyTo && (
                       <div className="relative z-10">
-                        <ReplyQuotePreview replyTo={msg.replyTo} isMe={isMe} />
+                        <ReplyQuotePreview replyTo={msg.replyTo} isMe={isMe} onClick={() => scrollToMessage(msg.replyTo?.id)} />
                       </div>
                     )}
                     <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
@@ -1518,10 +1619,12 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 </motion.button>
               )}
 
-              <motion.button whileTap={{ scale: 0.97 }} onClick={handleDeleteMessage} className={actionRowClass}>
-                <Trash2 size={17} className="text-[#EF4444]" />
-                <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Удалить</span>
-              </motion.button>
+              {isMine && (
+                <motion.button whileTap={{ scale: 0.97 }} onClick={handleDeleteMessage} className={actionRowClass}>
+                  <Trash2 size={17} className="text-[#EF4444]" />
+                  <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Удалить</span>
+                </motion.button>
+              )}
 
               <motion.button whileTap={{ scale: 0.97 }} onClick={handleSelectMessage} className={actionRowClass}>
                 <CheckSquare size={17} style={{ color: 'var(--theme-primary)' }} />

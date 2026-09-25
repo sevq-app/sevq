@@ -29,7 +29,8 @@ export interface Message {
   edited?: boolean;
   /** Время последнего редактирования (тот же формат, что у time) — показывается вместо time рядом с пометкой "изменено". */
   editedAt?: string;
-  replyTo?: { text: string; senderName: string };
+  /** id родительского сообщения — нужен, чтобы клик по цитате прокручивал к оригиналу. */
+  replyTo?: { id?: string; text: string; senderName: string };
   reaction?: string;
 }
 
