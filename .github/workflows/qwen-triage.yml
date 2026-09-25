@@ -89,7 +89,8 @@ jobs:
                 ]
               }
             }
-          prompt: '/qwen-triage'
+          prompt: |-
+            /qwen-triage Важно: если в своём ответе ты используешь текстовые пояснения (например, поле explanation), пиши их на русском языке.
 
   label:
     runs-on: 'ubuntu-latest'

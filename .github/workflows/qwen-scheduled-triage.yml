@@ -121,7 +121,8 @@ jobs:
                 ]
               }
             }
-          prompt: '/qwen-scheduled-triage'
+          prompt: |-
+            /qwen-scheduled-triage Важно: если в своём ответе ты используешь текстовые пояснения (например, поле explanation), пиши их на русском языке.
 
   label:
     runs-on: 'ubuntu-latest'
