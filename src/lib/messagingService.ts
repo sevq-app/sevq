@@ -282,16 +282,27 @@ export async function getOrCreateDirectChat(otherUserId: string): Promise<string
     }
   }
 
-  const { data: chat, error: chatError } = await supabase.from('chats').insert({ is_group: false }).select('id').single();
-  if (chatError || !chat) throw chatError ?? new Error('Не удалось создать чат');
+  // Id генерируем на клиенте и НЕ вызываем .select() после этого insert. Раньше было
+  // .insert({...}).select('id').single() — supabase-js на .select() строит запрос
+  // INSERT ... RETURNING id, а Postgres проверяет для RETURNING ту же RLS-политику,
+  // что и для обычного SELECT (chats_select_members: is_chat_member(id, auth.uid())).
+  // В момент этой вставки строк в chat_members для нового чата ещё нет — то есть
+  // текущий пользователь формально ещё не "участник" — поэтому RETURNING падал с
+  // "new row violates row-level security policy for table \"chats\"", хотя сам INSERT
+  // политикой chats_insert_auth (auth.uid() is not null) разрешён. Без .select()
+  // supabase-js шлёт заголовок Prefer: return=minimal — PostgREST не строит RETURNING
+  // и не проверяет SELECT-политику вовсе, а id уже известен нам заранее.
+  const newChatId = crypto.randomUUID();
+  const { error: chatError } = await supabase.from('chats').insert({ id: newChatId, is_group: false });
+  if (chatError) throw chatError;
 
   const { error: membersError } = await supabase.from('chat_members').insert([
-    { chat_id: chat.id, user_id: myId },
-    { chat_id: chat.id, user_id: otherUserId },
+    { chat_id: newChatId, user_id: myId },
+    { chat_id: newChatId, user_id: otherUserId },
   ]);
   if (membersError) throw membersError;
 
-  return chat.id as string;
+  return newChatId;
 }
 
 export interface RemoteChatSummary {
