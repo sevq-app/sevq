@@ -77,6 +77,18 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
   // экране «Чаты» (см. Chats.tsx), только по всем чатам сразу.
   const totalUnread = useChatStore((s) => s.chats.reduce((sum, c) => sum + Math.max(c.unread, 0), 0));
 
+  // Короткая тактильная вибрация на само нажатие (не только на смену вкладки) —
+  // navigator.vibrate не поддерживается в PWA на iOS, поэтому вызов должен
+  // молча ничего не делать там, где его нет, без ошибок в консоли.
+  const handleTabTap = (key: Screen) => {
+    try {
+      navigator.vibrate?.(10);
+    } catch {
+      // на iOS/некоторых браузерах вызов может кидать исключение — игнорируем
+    }
+    onNavigate(key);
+  };
+
   return (
     // Не position: fixed — намеренно: на iOS в режиме PWA «На экран Домой» «fixed» с
     // bottom: 0 привязывается к «безопасной» области экрана и НЕ дотягивается до
@@ -93,7 +105,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
     >
       <div
-        className="relative flex items-stretch justify-around overflow-hidden rounded-[26px] bg-[var(--bg-card)]"
+        className="relative flex items-stretch justify-around overflow-hidden rounded-full bg-[var(--bg-card)]"
         style={{ height: '68px', boxShadow: 'var(--tabbar-shadow)' }}
       >
         {items.map(({ key, label, icon: Icon }) => {
@@ -103,18 +115,29 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
             <motion.button
               key={key}
               whileTap={{ scale: 0.95 }}
-              onClick={() => onNavigate(key)}
+              onClick={() => handleTabTap(key)}
               className="relative flex-1 flex flex-col items-center justify-center gap-0.5"
             >
               {active && (
+                // "Капля жидкого стекла" — layoutId заставляет framer-motion плавно
+                // перетекать между позициями вкладок вместо исчезновения/появления;
+                // spring с заниженным damping даёт лёгкий overshoot ("догоняние" и
+                // "оседание"), background/blur/inset-блик — эффект полупрозрачного
+                // стекла. z-0 держит каплю под иконкой и подписью (у них z-10),
+                // чтобы перетекание не задевало контент.
                 <motion.div
                   layoutId="tabbar-active-pill"
-                  className="absolute inset-1.5 rounded-[18px]"
-                  style={{ background: 'rgba(var(--theme-primary-rgb), 0.14)', boxShadow: 'var(--tabbar-active-shadow)' }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                  className="absolute inset-1.5 rounded-full z-0"
+                  style={{
+                    background: 'var(--tabbar-active-bg)',
+                    boxShadow: 'var(--tabbar-active-shadow)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                  }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.7 }}
                 />
               )}
-              <span className="relative">
+              <span className="relative z-10">
                 <Icon
                   size={32}
                   className="transition-colors duration-200"
@@ -130,7 +153,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
                 )}
               </span>
               <span
-                className="relative text-[15px] font-heading font-bold transition-colors duration-200"
+                className="relative z-10 text-[15px] font-heading font-bold transition-colors duration-200"
                 style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
               >
                 {label}
