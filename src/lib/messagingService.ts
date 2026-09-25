@@ -37,6 +37,7 @@ export interface RemoteMessage {
   sender_id: string;
   text: string;
   created_at: string;
+  edited_at: string | null;
 }
 
 /**
@@ -364,7 +365,7 @@ export async function listMyChats(): Promise<RemoteChatSummary[]> {
 export async function fetchMessages(chatId: string): Promise<RemoteMessage[]> {
   const { data, error } = await supabase
     .from('messages')
-    .select('id, chat_id, sender_id, text, created_at')
+    .select('id, chat_id, sender_id, text, created_at, edited_at')
     .eq('chat_id', chatId)
     .order('created_at', { ascending: true });
   if (error) throw error;
@@ -377,14 +378,42 @@ export async function sendRealMessage(chatId: string, text: string): Promise<voi
   if (error) throw error;
 }
 
-/** Подписка на новые сообщения конкретного чата в реальном времени. Возвращает функцию отписки. */
-export function subscribeToChatMessages(chatId: string, onInsert: (msg: RemoteMessage) => void): () => void {
+/**
+ * Сохраняет отредактированный текст сообщения в Supabase — раньше редактирование
+ * меняло только локальный стор (editMessage в chatStore), поэтому текст возвращался
+ * к старому при повторном открытии чата. editedAtIso передаётся извне (а не берётся
+ * здесь через new Date()), чтобы момент "изменено" в БД совпадал 1-в-1 с тем, что сразу
+ * же показывается в UI, без второго независимого вызова Date.now().
+ * .eq('sender_id', myId) — редактировать можно только свои сообщения; дублирует
+ * RLS-политику messages_update_own в БД (defense in depth), но не подменяет её.
+ */
+export async function editRealMessage(messageId: string, newText: string, editedAtIso: string): Promise<void> {
+  const myId = await requireUserId();
+  const { error } = await supabase
+    .from('messages')
+    .update({ text: newText, edited_at: editedAtIso })
+    .eq('id', messageId)
+    .eq('sender_id', myId);
+  if (error) throw error;
+}
+
+/** Подписка на новые и изменённые сообщения конкретного чата в реальном времени. Возвращает функцию отписки. */
+export function subscribeToChatMessages(
+  chatId: string,
+  onInsert: (msg: RemoteMessage) => void,
+  onUpdate?: (msg: RemoteMessage) => void
+): () => void {
   const channel = supabase
     .channel(`messages:${chatId}`)
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
       (payload) => onInsert(payload.new as RemoteMessage)
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'messages', filter: `chat_id=eq.${chatId}` },
+      (payload) => onUpdate?.(payload.new as RemoteMessage)
     )
     .subscribe();
 

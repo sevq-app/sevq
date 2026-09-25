@@ -9,7 +9,7 @@ import { playSound, triggerHaptic } from '@/lib/feedback';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
 import { supabase } from '@/lib/supabase';
-import { fetchMessages, sendRealMessage, subscribeToChatMessages, type RemoteMessage } from '@/lib/messagingService';
+import { editRealMessage, fetchMessages, sendRealMessage, subscribeToChatMessages, type RemoteMessage } from '@/lib/messagingService';
 
 interface ConversationProps {
   chatId: string;
@@ -289,6 +289,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       text: m.text,
       time: new Date(m.created_at).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }),
       date: m.created_at.slice(0, 10),
+      edited: !!m.edited_at,
+      editedAt: m.edited_at ? new Date(m.edited_at).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' }) : undefined,
     });
 
     (async () => {
@@ -301,18 +303,27 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
       setChatMessages(chat.id, history.map((m) => toLocalMessage(m, myId)));
     })();
 
-    const unsubscribe = subscribeToChatMessages(remoteChatId, async (m) => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const myId = sessionData.session?.user?.id;
-      appendIncomingMessage(chat.id, toLocalMessage(m, myId));
-      if (m.sender_id === contactSenderId && soundsEnabled) playSound('receive');
-    });
+    const unsubscribe = subscribeToChatMessages(
+      remoteChatId,
+      async (m) => {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const myId = sessionData.session?.user?.id;
+        appendIncomingMessage(chat.id, toLocalMessage(m, myId));
+        if (m.sender_id === contactSenderId && soundsEnabled) playSound('receive');
+      },
+      async (m) => {
+        const { data: sessionData } = await supabase.auth.getSession();
+        const myId = sessionData.session?.user?.id;
+        const local = toLocalMessage(m, myId);
+        editMessage(chat.id, m.id, local.text, local.editedAt);
+      }
+    );
 
     return () => {
       cancelled = true;
       unsubscribe();
     };
-  }, [chat?.isReal, chat?.remoteChatId, chat?.remoteUserId, chat?.id, setChatMessages, appendIncomingMessage, soundsEnabled]);
+  }, [chat?.isReal, chat?.remoteChatId, chat?.remoteUserId, chat?.id, setChatMessages, appendIncomingMessage, editMessage, soundsEnabled]);
 
   useEffect(() => {
     if (isRecording) {
@@ -353,9 +364,19 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     if (!input.trim()) return;
 
     if (editingMessageId) {
-      editMessage(chat.id, editingMessageId, input.trim());
+      const targetId = editingMessageId;
+      const newText = input.trim();
       setEditingMessageId(null);
       setInput('');
+      // editedAtIso идёт и в БД, и в локальное отображение — момент "изменено" в
+      // подписи под сообщением всегда совпадает с моментом нажатия "Сохранить",
+      // а не с временем отправки исходного сообщения.
+      const editedAtIso = new Date().toISOString();
+      const editedLabel = new Date(editedAtIso).toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
+      editMessage(chat.id, targetId, newText, editedLabel);
+      if (chat.isReal) {
+        editRealMessage(targetId, newText, editedAtIso).catch((e) => console.error('Не удалось сохранить изменение сообщения:', e));
+      }
       return;
     }
 
@@ -1016,7 +1037,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                     <p className="relative z-10" style={{ fontSize: `${fontSize}px` }}>{msg.text}</p>
                     <div className={`flex items-center justify-end gap-1 mt-1 relative z-10 ${isMe ? 'text-white/50' : 'text-sevchik-textSecondary'}`}>
                       {msg.edited && <span className="text-[11px] italic">изменено</span>}
-                      <span className="text-[11px]">{msg.time}</span>
+                      <span className="text-[11px]">{msg.edited && msg.editedAt ? msg.editedAt : msg.time}</span>
                       {isMe && <DeliveryTicks status={msg.status} size={13} />}
                     </div>
                   </div>

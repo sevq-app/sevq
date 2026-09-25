@@ -173,6 +173,21 @@ create policy "messages_insert_members"
     and public.is_chat_member(chat_id, auth.uid())
   );
 
+-- Редактирование сообщений: время правки хранится отдельно от created_at (времени
+-- отправки), чтобы подпись "изменено" в UI показывала момент правки, а не отправки.
+alter table public.messages add column if not exists edited_at timestamptz;
+
+-- Без этой политики UPDATE вообще запрещён RLS (deny by default) — редактирование
+-- падало бы так же, как раньше падало INSERT в chats без policy. sender_id = auth.uid()
+-- и в using, и в with_check — редактировать можно только свои сообщения, и нельзя
+-- перезаписать sender_id чужим при апдейте.
+drop policy if exists "messages_update_own" on public.messages;
+create policy "messages_update_own"
+  on public.messages for update
+  to authenticated
+  using ( sender_id = auth.uid() )
+  with check ( sender_id = auth.uid() );
+
 -- Включаем Realtime для мгновенной доставки новых сообщений (идемпотентно —
 -- ALTER PUBLICATION ... ADD TABLE падает с ошибкой, если таблица уже добавлена)
 do $$

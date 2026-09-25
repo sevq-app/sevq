@@ -27,6 +27,8 @@ export interface Message {
   date?: string;
   status?: DeliveryStatus;
   edited?: boolean;
+  /** Время последнего редактирования (тот же формат, что у time) — показывается вместо time рядом с пометкой "изменено". */
+  editedAt?: string;
   replyTo?: { text: string; senderName: string };
   reaction?: string;
 }
