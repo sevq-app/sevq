@@ -72,8 +72,14 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
   ];
 
   return (
+    // Не position: fixed — намеренно: на iOS в режиме PWA «На экран Домой» «fixed» с
+    // bottom: 0 привязывается к «безопасной» области экрана и НЕ дотягивается до
+    // истинного нижнего края под домашней полоской жестов, даже с viewport-fit=cover и
+    // 100dvh на предках — снизу оставалась чёрная полоса. Обычный поток (shrink-0
+    // последний элемент в flex-col родителе из App.tsx) кладёт панель ровно там, где
+    // реально заканчивается размеченный (100dvh) контейнер — без этой неоднозначности.
     <div
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pt-2 bg-[var(--bg-card)] border-t border-[var(--bg-input)] transition-all duration-200"
+      className="md:hidden shrink-0 px-3 pt-2 bg-[var(--bg-card)] border-t border-[var(--bg-input)] transition-all duration-200"
       style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
     >
       <div className="flex items-center justify-around">
