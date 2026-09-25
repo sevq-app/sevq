@@ -49,17 +49,23 @@
     --bubble-incoming-bg: rgba(240, 240, 245, 0.55);
     --avatar-placeholder-bg: #EDEAF7;
     --avatar-placeholder-icon: #6546C7;
-    /* Тень капсулы нижней навигации — мягкая, размытая, смещена только вниз
-       (эффект «парит над фоном»), два слоя: большой мягкий + маленький чёткий
-       для аккуратного края. В тёмной теме — заметнее (на тёмном фоне тени
-       «съедаются»), см. .gray-theme ниже. */
-    --tabbar-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
-    /* Активная "капля" внутри капсулы — эффект жидкого стекла: тонкий белый
-       блик сверху (inset) поверх лёгкой внешней тени. В светлой теме стекло
-       чуть темнее (ниже alpha самой капли и блика), в тёмной — чуть светлее
-       (выше alpha, ярче блик), см. .gray-theme ниже. */
-    --tabbar-active-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.5), 0 2px 8px rgba(0, 0, 0, 0.1);
-    --tabbar-active-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.04) 45%, transparent 70%), rgba(var(--theme-primary-rgb), 0.18);
+    /* Поверхность капсулы нижней навигации — лёгкий вертикальный градиент
+       поверх --bg-card (на 2-4% светлее сверху, темнее снизу) создаёт
+       ощущение изогнутой стеклянной поверхности вместо плоской заливки. */
+    --tabbar-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.03) 100%), var(--bg-card);
+    /* Тень капсулы нижней навигации: внешняя мягкая (эффект «парит над
+       фоном», смещена только вниз) + внутренний блик по верхнему краю +
+       внутренняя тень по нижнему краю — вместе дают капсуле объём стекла, а
+       не плоской панели. В тёмной теме — заметнее и с сероватым (не белым)
+       бликом, см. .gray-theme ниже. */
+    --tabbar-shadow: 0 10px 32px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 2px rgba(0, 0, 0, 0.06);
+    /* Активная "капля" внутри капсулы — эффект жидкого стекла: градиент
+       сверху-светлее/снизу-темнее (выпуклость) + блик сверху (inset) +
+       внешняя тень, чтобы капля визуально «выступала» над капсулой. В
+       светлой теме стекло чуть темнее (ниже alpha самой капли и блика), в
+       тёмной — чуть светлее и с сероватым бликом, см. .gray-theme ниже. */
+    --tabbar-active-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.55), 0 4px 14px rgba(0, 0, 0, 0.14);
+    --tabbar-active-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(255, 255, 255, 0.04) 45%, rgba(0, 0, 0, 0.05) 100%), rgba(var(--theme-primary-rgb), 0.18);
   }
 
 }
@@ -287,9 +293,10 @@ html.gray-theme {
   --bubble-incoming-bg: rgba(42, 45, 51, 0.55);
   --avatar-placeholder-bg: #3A3E46;
   --avatar-placeholder-icon: #8F7AE0;
-  --tabbar-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
-  --tabbar-active-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.16), 0 2px 8px rgba(0, 0, 0, 0.3);
-  --tabbar-active-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 45%, transparent 70%), rgba(var(--theme-primary-rgb), 0.26);
+  --tabbar-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.14) 100%), var(--bg-card);
+  --tabbar-shadow: 0 10px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(210, 214, 222, 0.1), inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+  --tabbar-active-shadow: inset 0 1px 1px rgba(220, 222, 228, 0.22), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --tabbar-active-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.03) 45%, rgba(0, 0, 0, 0.18) 100%), rgba(var(--theme-primary-rgb), 0.26);
   color-scheme: dark;
 }
 

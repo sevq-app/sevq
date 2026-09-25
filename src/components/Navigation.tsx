@@ -126,8 +126,12 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
       style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
     >
       <div
-        className="relative flex items-stretch justify-around overflow-hidden rounded-full bg-[var(--bg-card)]"
-        style={{ height: '68px', boxShadow: 'var(--tabbar-shadow)' }}
+        className="relative flex items-stretch justify-around overflow-hidden rounded-full"
+        style={{
+          height: '68px',
+          background: 'var(--tabbar-surface-bg)',
+          boxShadow: 'var(--tabbar-shadow)',
+        }}
       >
         {items.map(({ key, label, icon: Icon }) => {
           const active = current === key;
@@ -135,7 +139,8 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
           return (
             <motion.button
               key={key}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.93 }}
+              transition={{ type: 'spring', stiffness: 700, damping: 22, mass: 0.5 }}
               onClick={() => handleTabTap(key)}
               className="relative flex-1 flex flex-col items-center justify-center gap-0.5"
             >
@@ -144,18 +149,19 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
                 // перетекать между позициями вкладок вместо исчезновения/появления;
                 // spring с заниженным damping даёт лёгкий overshoot ("догоняние" и
                 // "оседание"), background/blur/inset-блик — эффект полупрозрачного
-                // стекла. z-0 держит каплю под иконкой и подписью (у них z-10),
-                // чтобы перетекание не задевало контент.
+                // стекла, градиент светлее сверху/темнее снизу — эффект выпуклости.
+                // z-0 держит каплю под иконкой и подписью (у них z-10), чтобы
+                // перетекание не задевало контент.
                 <motion.div
                   layoutId="tabbar-active-pill"
                   className="absolute inset-1.5 rounded-full z-0"
                   style={{
                     background: 'var(--tabbar-active-bg)',
                     boxShadow: 'var(--tabbar-active-shadow)',
-                    backdropFilter: 'blur(12px)',
-                    WebkitBackdropFilter: 'blur(12px)',
+                    backdropFilter: 'blur(16px)',
+                    WebkitBackdropFilter: 'blur(16px)',
                   }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20, mass: 0.7 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 17, mass: 0.65 }}
                 />
               )}
               <span className="relative z-10">
