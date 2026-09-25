@@ -156,18 +156,14 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
         className="relative flex items-stretch justify-around overflow-hidden rounded-full"
         style={{
           height: '76px',
-          // Раньше ширину капсулы регулировали только боковым padding
-          // обёртки (px-7) — на широких экранах эффект был почти незаметен
-          // (padding маленький относительно ширины экрана). Теперь у
-          // капсулы явный max-width + margin: auto — она превращается в
-          // компактную центрированную "таблетку" независимо от ширины
-          // экрана. min(320px, calc(100% - 32px)) — на обычных iPhone
-          // упирается в 320px (заметные поля по бокам), а на совсем
-          // маленьких экранах (iPhone SE и старее) гарантирует минимум 16px
-          // отступа с каждой стороны вместо того, чтобы сжиматься дальше
-          // вместе с шириной экрана (обычный процент от ширины делал бы
-          // именно это).
-          maxWidth: 'min(320px, calc(100% - 32px))',
+          // Явный max-width + margin: auto — компактная центрированная
+          // "таблетка" независимо от ширины экрана. min(368px, calc(100% -
+          // 24px)) — на обычных iPhone (375-390px) капсула занимает почти
+          // всю ширину с полями ~12px, на iPhone SE (320px) calc()
+          // гарантирует минимум 12px отступа с каждой стороны вместо того,
+          // чтобы сжиматься дальше вместе с экраном (было 320px/32px —
+          // капсула получалась заметно уже, чем нужно для контента).
+          maxWidth: 'min(368px, calc(100% - 24px))',
           margin: '0 auto',
           background: 'var(--tabbar-surface-bg)',
           boxShadow: 'var(--tabbar-shadow)',
@@ -235,7 +231,7 @@ function TabBarButton({ label, Icon, active, badge, hoverCapable, onTap }: TabBa
           к низу. Теперь пилюля — "absolute inset-0" ВНУТРИ этой обёртки, то
           есть всегда в точности равна контенту + padding — переполниться
           физически не может, независимо от реального рендера шрифта. */}
-      <div className="relative flex flex-col items-center justify-center rounded-full" style={{ padding: '5px 8px' }}>
+      <div className="relative flex flex-col items-center justify-center rounded-full" style={{ padding: '8px 14px' }}>
         {active && (
           // Стеклянная "капля" ЛЕЖИТ ПОД иконкой и подписью (z-0, у них
           // z-10) — задача пилюли чисто декоративная: полупрозрачный фон +
@@ -290,7 +286,7 @@ function TabBarButton({ label, Icon, active, badge, hoverCapable, onTap }: TabBa
           )}
         </span>
         <span
-          className="relative z-10 text-[14px] font-heading font-bold transition-all duration-200 -mt-0.5"
+          className="relative z-10 text-[13px] font-heading font-bold transition-all duration-200 -mt-0.5"
           style={{
             color: active ? 'var(--theme-primary)' : 'var(--text-secondary)',
             // Лёгкое "свечение" акцентным цветом темы под курсором — только
