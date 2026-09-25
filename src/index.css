@@ -252,7 +252,16 @@ html.sea {
   --theme-message-gradient: #38b2ac;
 }
 
-/* Глобальная серая тема */
+/* Глобальная серая (тёмная) тема — сама по себе не задаёт акцент
+   (--theme-primary и т.п.): раньше здесь был один общий приглушённый
+   цвет (#5967A8) для ВСЕХ 6 тем сразу, из-за чего переключение темы в
+   тёмном/системном режиме ничего не меняло — акцент темы просто
+   затирался этим фиксированным значением. Акцент для тёмного режима
+   теперь задаётся ниже отдельно на каждую тему через html.gray-theme.<тема>
+   (выше специфичность и html.gray-theme, и html.<тема> по отдельности —
+   срабатывает именно нужная пара классов). Здесь оставлен spring-вариант
+   как отфолбэк на случай, если html.gray-theme окажется без класса
+   темы (в норме такого не бывает — см. App.tsx). */
 html.gray-theme {
   --bg-main: radial-gradient(ellipse at top left, #34383f 0%, #24272b 60%, #1b1e22 100%);
   --bg-card: #35383d;
@@ -261,13 +270,48 @@ html.gray-theme {
   --text-secondary: #d6d9de;
   --text-placeholder: #aeb4bc;
   --border-color: rgba(255, 255, 255, 0.14);
-  --theme-primary: #5967A8;
-  --theme-primary-rgb: 89, 103, 168;
-  --theme-message-gradient: #5967A8;
+  --theme-primary: #FF9848;
+  --theme-primary-rgb: 255, 152, 72;
+  --theme-message-gradient: #FF9848;
   --bubble-incoming-bg: rgba(42, 45, 51, 0.55);
   --avatar-placeholder-bg: #3A3E46;
   --avatar-placeholder-icon: #8F7AE0;
   color-scheme: dark;
+}
+
+/* Акцент каждой темы в тёмном режиме — тот же цвет, что и в светлом (уже
+   хорошо читается на тёмном фоне), кроме «Зимы» и «Моря»: их светлые
+   значения (#6546C7 и #38b2ac) на почти чёрном фоне сливаются и плохо
+   выделяются, поэтому для тёмного режима они чуть светлее/ярче. */
+html.gray-theme.spring {
+  --theme-primary: #FF9848;
+  --theme-primary-rgb: 255, 152, 72;
+  --theme-message-gradient: #FF9848;
+}
+html.gray-theme.summer {
+  --theme-primary: #FFB848;
+  --theme-primary-rgb: 255, 184, 72;
+  --theme-message-gradient: #FFB848;
+}
+html.gray-theme.autumn {
+  --theme-primary: #FF6B6B;
+  --theme-primary-rgb: 255, 107, 107;
+  --theme-message-gradient: #FF6B6B;
+}
+html.gray-theme.winter {
+  --theme-primary: #8366D9;
+  --theme-primary-rgb: 131, 102, 217;
+  --theme-message-gradient: #8366D9;
+}
+html.gray-theme.aurora {
+  --theme-primary: #4FD3C8;
+  --theme-primary-rgb: 79, 211, 200;
+  --theme-message-gradient: #4FD3C8;
+}
+html.gray-theme.sea {
+  --theme-primary: #4DC4BE;
+  --theme-primary-rgb: 77, 196, 190;
+  --theme-message-gradient: #4DC4BE;
 }
 
 .gray-theme [class*="bg-sevchik-cream"] {
