@@ -52,25 +52,36 @@
   * {
     @apply border-border;
   }
+  /* height: 100% остаётся как фоллбэк для браузеров без поддержки dvh;
+     min-height: 100dvh идёт следом и побеждает, когда поддерживается —
+     в PWA на iOS (режим «На экран Домой») высота по проценту (100%) может
+     не дотягивать до нижней safe-area (домашняя полоска жестов), тогда как
+     100dvh всегда учитывает весь реальный видимый экран целиком. Без этого
+     фон обрывался чуть выше нижнего края, и в этом просвете была видна
+     чёрная заливка WKWebView по умолчанию. */
   html {
     overscroll-behavior-x: none;
     height: 100%;
+    min-height: 100dvh;
     background: var(--bg-main);
   }
   body {
     @apply text-sevchik-text;
     font-family: 'Golos Text', sans-serif;
     height: 100%;
+    min-height: 100dvh;
     background: var(--bg-main);
     background-attachment: fixed;
     overflow: hidden;
     overscroll-behavior-x: none;
   }
   /* viewport-fit=cover в index.html позволяет фону дотягиваться до самого
-     верха экрана (под статус-бар/чёлку) — без background здесь на этой
-     полосе оставалась бы белая заливка браузера/системы по умолчанию. */
+     верха и низа экрана (под статус-бар/чёлку и под домашнюю полоску) —
+     без background здесь на этих полосах оставалась бы заливка
+     браузера/системы по умолчанию вместо фона приложения. */
   #root {
     height: 100%;
+    min-height: 100dvh;
     background: var(--bg-main);
   }
   h1, h2, h3, h4, h5, h6 {
