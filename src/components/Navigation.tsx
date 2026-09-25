@@ -123,12 +123,15 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
     // правках уже доходит до истинного низа экрана), а не обрезанный угол панели.
     <div
       className="md:hidden shrink-0 px-4"
-      style={{ paddingBottom: 'max(0.75rem, env(safe-area-inset-bottom))' }}
+      // Капсула "парит" над нижним краем: сверх safe-area (полоска жестов
+      // iOS) добавлен фиксированный зазор в 24px, чтобы под капсулой был
+      // заметный воздух с фоном темы, а не панель впритык к краю экрана.
+      style={{ paddingBottom: 'calc(max(0.75rem, env(safe-area-inset-bottom)) + 24px)' }}
     >
       <div
         className="relative flex items-stretch justify-around overflow-hidden rounded-full"
         style={{
-          height: '68px',
+          height: '76px',
           background: 'var(--tabbar-surface-bg)',
           boxShadow: 'var(--tabbar-shadow)',
         }}
@@ -142,7 +145,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
               whileTap={{ scale: 0.93 }}
               transition={{ type: 'spring', stiffness: 700, damping: 22, mass: 0.5 }}
               onClick={() => handleTabTap(key)}
-              className="relative flex-1 flex flex-col items-center justify-center gap-0.5"
+              className="relative flex-1 flex flex-col items-center justify-center"
             >
               {active && (
                 // "Капля жидкого стекла" — layoutId заставляет framer-motion плавно
@@ -150,11 +153,15 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
                 // spring с заниженным damping даёт лёгкий overshoot ("догоняние" и
                 // "оседание"), background/blur/inset-блик — эффект полупрозрачного
                 // стекла, градиент светлее сверху/темнее снизу — эффект выпуклости.
-                // z-0 держит каплю под иконкой и подписью (у них z-10), чтобы
-                // перетекание не задевало контент.
+                // Инсет увеличен (был inset-1.5) — капля компактнее и плотнее
+                // прилегает к иконке+подписи, а не растягивается на весь слот
+                // вкладки (иначе выглядела "размазанной" по ширине; ширина
+                // подобрана так, чтобы самая длинная подпись — "Контакты" —
+                // помещалась с небольшим полем). z-0 держит каплю под иконкой
+                // и подписью (у них z-10), чтобы перетекание не задевало контент.
                 <motion.div
                   layoutId="tabbar-active-pill"
-                  className="absolute inset-1.5 rounded-full z-0"
+                  className="absolute inset-2 rounded-full z-0"
                   style={{
                     background: 'var(--tabbar-active-bg)',
                     boxShadow: 'var(--tabbar-active-shadow)',
@@ -181,7 +188,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
                 )}
               </span>
               <span
-                className="relative z-10 text-[15px] font-heading font-bold transition-colors duration-200"
+                className="relative z-10 text-[14px] font-heading font-bold transition-colors duration-200 -mt-0.5"
                 style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
               >
                 {label}
