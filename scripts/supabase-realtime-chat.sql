@@ -188,6 +188,28 @@ create policy "messages_update_own"
   using ( sender_id = auth.uid() )
   with check ( sender_id = auth.uid() );
 
+-- Удаление сообщений: обычный DELETE (не soft-delete), ограничен своими сообщениями
+-- и в клиентском коде (.eq('sender_id', myId)), и здесь на уровне RLS.
+drop policy if exists "messages_delete_own" on public.messages;
+create policy "messages_delete_own"
+  on public.messages for delete
+  to authenticated
+  using ( sender_id = auth.uid() );
+
+-- По умолчанию Postgres кладёт в DELETE-событие Realtime только первичный ключ
+-- (id) — этого недостаточно, чтобы подписка отфильтровала событие по
+-- chat_id=eq.<chatId> (фильтр просто не сработает, и удаление не долетит до
+-- собеседника). REPLICA IDENTITY FULL заставляет класть в событие всю
+-- удаляемую строку целиком.
+alter table public.messages replica identity full;
+
+-- Ответы на сообщения: reply_to_id — id сообщения, на которое отвечают.
+-- on delete set null — если оригинал удалят, ссылка у ответа просто обнулится
+-- (сам ответ и его текст никуда не денутся); цитата на клиенте всё равно
+-- рендерится по собственному сохранённому снимку (текст+автор), а не через
+-- live join на этот столбец.
+alter table public.messages add column if not exists reply_to_id uuid references public.messages(id) on delete set null;
+
 -- Включаем Realtime для мгновенной доставки новых сообщений (идемпотентно —
 -- ALTER PUBLICATION ... ADD TABLE падает с ошибкой, если таблица уже добавлена)
 do $$
