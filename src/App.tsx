@@ -106,12 +106,22 @@ function App() {
     };
   }, [currentUser, upsertRealChat]);
 
-  // Восстановление темы при загрузке (не трогаем class gray-theme)
+  // Применение выбранной цветовой темы к <html> (не трогаем class gray-theme).
+  // Раньше класс темы выставлялся только один раз при монтировании (из
+  // localStorage) и никогда не обновлялся при смене темы в «Оформлении» —
+  // setSelectedTheme() исправно менял React state и localStorage, но ни один
+  // эффект не реагировал на само изменение selectedTheme, поэтому CSS-класс
+  // на <html> оставался прежним и переменные (--theme-primary и т.д., от
+  // которых зависит цвет облачек сообщений) не менялись до перезагрузки
+  // страницы — да и то не менялись, ведь старый класс от предыдущей темы
+  // тоже никогда не удалялся. Теперь эффект зависит от selectedTheme: удаляет
+  // все возможные классы тем и добавляет текущую — применяется сразу и при
+  // монтировании, и при каждой смене темы.
   useEffect(() => {
-    const savedTheme = localStorage.getItem('selectedTheme') || 'spring';
-    document.documentElement.classList.add(savedTheme);
-    setSelectedTheme(savedTheme);
-  }, []);
+    const THEME_CLASSES = ['spring', 'summer', 'autumn', 'winter', 'aurora', 'sea'];
+    document.documentElement.classList.remove(...THEME_CLASSES);
+    document.documentElement.classList.add(selectedTheme);
+  }, [selectedTheme]);
 
   // Применение тёмного/серого режима при изменении вычисленного значения
   useEffect(() => {
