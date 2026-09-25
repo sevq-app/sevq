@@ -49,6 +49,12 @@
     --bubble-incoming-bg: rgba(240, 240, 245, 0.55);
     --avatar-placeholder-bg: #EDEAF7;
     --avatar-placeholder-icon: #6546C7;
+    /* Тень капсулы нижней навигации — мягкая, размытая, смещена только вниз
+       (эффект «парит над фоном»), два слоя: большой мягкий + маленький чёткий
+       для аккуратного края. В тёмной теме — заметнее (на тёмном фоне тени
+       «съедаются»), см. .gray-theme ниже. */
+    --tabbar-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.04);
+    --tabbar-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
 }
@@ -276,6 +282,8 @@ html.gray-theme {
   --bubble-incoming-bg: rgba(42, 45, 51, 0.55);
   --avatar-placeholder-bg: #3A3E46;
   --avatar-placeholder-icon: #8F7AE0;
+  --tabbar-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 2px 6px rgba(0, 0, 0, 0.2);
+  --tabbar-active-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   color-scheme: dark;
 }
 

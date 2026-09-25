@@ -94,7 +94,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
     >
       <div
         className="relative flex items-stretch justify-around overflow-hidden rounded-[26px] bg-[var(--bg-card)]"
-        style={{ height: '68px', boxShadow: '0 12px 28px rgba(0,0,0,0.18)' }}
+        style={{ height: '68px', boxShadow: 'var(--tabbar-shadow)' }}
       >
         {items.map(({ key, label, icon: Icon }) => {
           const active = current === key;
@@ -110,7 +110,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
                 <motion.div
                   layoutId="tabbar-active-pill"
                   className="absolute inset-1.5 rounded-[18px]"
-                  style={{ background: 'rgba(var(--theme-primary-rgb), 0.14)' }}
+                  style={{ background: 'rgba(var(--theme-primary-rgb), 0.14)', boxShadow: 'var(--tabbar-active-shadow)' }}
                   transition={{ type: 'spring', stiffness: 380, damping: 32 }}
                 />
               )}
