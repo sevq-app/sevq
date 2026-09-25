@@ -156,18 +156,14 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
         className="relative flex items-stretch justify-around overflow-hidden rounded-full"
         style={{
           height: '76px',
-          // Раньше ширину капсулы регулировали только боковым padding
-          // обёртки (px-7) — на широких экранах эффект был почти незаметен
-          // (padding маленький относительно ширины экрана). Теперь у
-          // капсулы явный max-width + margin: auto — она превращается в
-          // компактную центрированную "таблетку" независимо от ширины
-          // экрана. min(320px, calc(100% - 32px)) — на обычных iPhone
-          // упирается в 320px (заметные поля по бокам), а на совсем
-          // маленьких экранах (iPhone SE и старее) гарантирует минимум 16px
-          // отступа с каждой стороны вместо того, чтобы сжиматься дальше
-          // вместе с шириной экрана (обычный процент от ширины делал бы
-          // именно это).
-          maxWidth: 'min(320px, calc(100% - 32px))',
+          // Явный max-width + margin: auto — компактная центрированная
+          // "таблетка" независимо от ширины экрана. min(368px, calc(100% -
+          // 24px)) — на обычных iPhone (375-390px) капсула занимает почти
+          // всю ширину с полями ~12px, на iPhone SE (320px) calc()
+          // гарантирует минимум 12px отступа с каждой стороны вместо того,
+          // чтобы сжиматься дальше вместе с экраном (было 320px/32px —
+          // капсула получалась заметно уже, чем нужно для контента).
+          maxWidth: 'min(368px, calc(100% - 24px))',
           margin: '0 auto',
           background: 'var(--tabbar-surface-bg)',
           boxShadow: 'var(--tabbar-shadow)',
@@ -226,72 +222,81 @@ function TabBarButton({ label, Icon, active, badge, hoverCapable, onTap }: TabBa
       className="relative flex-1 flex flex-col items-center justify-center"
       {...hoverHandlers}
     >
-      {active && (
-        // Стеклянная "капля" ЛЕЖИТ ПОД иконкой и подписью (z-0, у них z-10) —
-        // задача пилюли чисто декоративная: полупрозрачный фон +
-        // backdrop-filter blur размывают то, что позади НЕЁ САМОЙ
-        // (поверхность капсулы), а не иконку — иконка рисуется отдельным
-        // непрозрачным слоем ПОВЕРХ и никогда не попадает под blur/градиент
-        // пилюли. (Раньше пилюля лежала НАД иконкой как "линза" — из-за
-        // этого сама иконка размывалась и "засвечивалась" белым градиентом;
-        // так делать нельзя.) layoutId — плавный перелёт между вкладками (не
-        // исчезновение/появление). Двойная анимация: layout — перелёт
-        // позиции (пружина с лёгким overshoot), scaleX/scaleY —
-        // "поверхностное натяжение": капля растягивается по горизонтали в
-        // полёте и сжимается обратно на месте прибытия.
-        <motion.div
-          layoutId="tabbar-active-pill"
-          className="absolute inset-1 rounded-full z-0 pointer-events-none"
-          style={{
-            background: 'var(--tabbar-active-bg)',
-            boxShadow: 'var(--tabbar-active-shadow)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
-          }}
-          initial={false}
-          animate={{ scaleX: [1, 1.22, 1], scaleY: [1, 0.9, 1] }}
-          transition={{
-            layout: { type: 'spring', stiffness: 300, damping: 30, mass: 0.7 },
-            scaleX: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
-            scaleY: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
-          }}
-        />
-      )}
-      <span className="relative z-10">
-        <motion.span
-          className="inline-block"
-          animate={{ scale: iconHoverScale }}
-          whileTap={{ scale: 0.9, transition: { duration: 0.09, ease: 'easeOut' } }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.7 }}
-          style={{ display: 'inline-block' }}
-        >
-          <Icon
-            size={28}
-            weight="fill"
-            className="transition-colors duration-200"
-            style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
+      {/* Обёртка контента без явных width/height — её размер задаёт padding
+          вокруг иконки+подписи (реальный контент, а не константа). Раньше
+          пилюля была "absolute inset-1" от ПОЛНОЙ высоты кнопки (76px) —
+          подгонка держалась на том, что контент случайно оказывался близко
+          к этой высоте; из-за реальных метрик шрифта на телефоне иконка
+          "Контакты" вылезала за верхний край пилюли, а подпись прижималась
+          к низу. Теперь пилюля — "absolute inset-0" ВНУТРИ этой обёртки, то
+          есть всегда в точности равна контенту + padding — переполниться
+          физически не может, независимо от реального рендера шрифта. */}
+      <div className="relative flex flex-col items-center justify-center rounded-full" style={{ padding: '8px 14px' }}>
+        {active && (
+          // Стеклянная "капля" ЛЕЖИТ ПОД иконкой и подписью (z-0, у них
+          // z-10) — задача пилюли чисто декоративная: полупрозрачный фон +
+          // backdrop-filter blur размывают то, что позади НЕЁ САМОЙ
+          // (поверхность капсулы), а не иконку — иконка рисуется отдельным
+          // непрозрачным слоем ПОВЕРХ и никогда не попадает под
+          // blur/градиент пилюли. layoutId — плавный перелёт между
+          // вкладками (не исчезновение/появление). Двойная анимация:
+          // layout — перелёт позиции (пружина с лёгким overshoot),
+          // scaleX/scaleY — "поверхностное натяжение": капля растягивается
+          // по горизонтали в полёте и сжимается обратно на месте прибытия.
+          <motion.div
+            layoutId="tabbar-active-pill"
+            className="absolute inset-0 rounded-full z-0 pointer-events-none"
+            style={{
+              background: 'var(--tabbar-active-bg)',
+              boxShadow: 'var(--tabbar-active-shadow)',
+              backdropFilter: 'blur(16px)',
+              WebkitBackdropFilter: 'blur(16px)',
+            }}
+            initial={false}
+            animate={{ scaleX: [1, 1.22, 1], scaleY: [1, 0.9, 1] }}
+            transition={{
+              layout: { type: 'spring', stiffness: 300, damping: 30, mass: 0.7 },
+              scaleX: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
+              scaleY: { duration: 0.36, times: [0, 0.45, 1], ease: 'easeOut' },
+            }}
           />
-        </motion.span>
-        {badge > 0 && (
-          <span
-            className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-pill flex items-center justify-center text-white text-[10px] font-heading font-bold z-10"
-            style={{ background: '#6546C7', boxShadow: '0 3px 10px rgba(101,70,199,0.18)' }}
-          >
-            {badge > 99 ? '99+' : badge}
-          </span>
         )}
-      </span>
-      <span
-        className="relative z-10 text-[14px] font-heading font-bold transition-all duration-200 -mt-0.5"
-        style={{
-          color: active ? 'var(--theme-primary)' : 'var(--text-secondary)',
-          // Лёгкое "свечение" акцентным цветом темы под курсором — только
-          // подпись, не меняя её базовый цвет.
-          textShadow: isHovered ? '0 0 10px rgba(var(--theme-primary-rgb), 0.45)' : '0 0 0 rgba(0, 0, 0, 0)',
-        }}
-      >
-        {label}
-      </span>
+        <span className="relative z-10">
+          <motion.span
+            className="inline-block"
+            animate={{ scale: iconHoverScale }}
+            whileTap={{ scale: 0.9, transition: { duration: 0.09, ease: 'easeOut' } }}
+            transition={{ type: 'spring', stiffness: 300, damping: 30, mass: 0.7 }}
+            style={{ display: 'inline-block' }}
+          >
+            <Icon
+              size={28}
+              weight="fill"
+              className="transition-colors duration-200"
+              style={{ color: active ? 'var(--theme-primary)' : 'var(--text-secondary)' }}
+            />
+          </motion.span>
+          {badge > 0 && (
+            <span
+              className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-pill flex items-center justify-center text-white text-[10px] font-heading font-bold z-10"
+              style={{ background: '#6546C7', boxShadow: '0 3px 10px rgba(101,70,199,0.18)' }}
+            >
+              {badge > 99 ? '99+' : badge}
+            </span>
+          )}
+        </span>
+        <span
+          className="relative z-10 text-[13px] font-heading font-bold transition-all duration-200 -mt-0.5"
+          style={{
+            color: active ? 'var(--theme-primary)' : 'var(--text-secondary)',
+            // Лёгкое "свечение" акцентным цветом темы под курсором — только
+            // подпись, не меняя её базовый цвет.
+            textShadow: isHovered ? '0 0 10px rgba(var(--theme-primary-rgb), 0.45)' : '0 0 0 rgba(0, 0, 0, 0)',
+          }}
+        >
+          {label}
+        </span>
+      </div>
     </motion.button>
   );
 }
