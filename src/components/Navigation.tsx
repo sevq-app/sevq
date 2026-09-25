@@ -5,15 +5,22 @@ import { MessageCircle, Users, Phone, User } from 'lucide-react';
 // тело/линии — тонким контуром (Контакты, Севчик — кастомные компоненты из
 // TabBarIcons.tsx: контур weight="regular" + голова из weight="duotone", оба —
 // точные path из библиотеки, см. файл). Там, где иконка = один символ без
-// отдельной "головы" (трубка, облачко) — залита целиком, weight="fill"
-// (Чаты, Звонки), чтобы по плотности не выбивалась из общего ряда.
-// PhoneCall — тот же силуэт трубки, что и Phone, но с волнами сбоку (эффект
-// "звонок идёт") — часть самого SVG-глифа иконки, не отдельный элемент; на
-// weight="fill" волны заливаются тем же цветом, что и трубка.
+// отдельной "головы" (трубка, облачко) — залита целиком, чтобы по плотности
+// не выбивалась из общего ряда.
+// PhoneCall (Phosphor, weight="fill") — тот же силуэт трубки, что и Phone, но
+// с волнами сбоку (эффект "звонок идёт") — часть самого SVG-глифа иконки, не
+// отдельный элемент; на weight="fill" волны заливаются тем же цветом, что и
+// трубка.
+// Чаты — ChatBubbleOvalLeft из Heroicons (solid), не Phosphor: после
+// нескольких раундов (ChatCircle/ChatCircleDots — слишком толстый хвост,
+// ChatTeardrop — бесформенная капля) у Phosphor не нашлось варианта с
+// аккуратным тонким хвостиком слева-снизу, а у Heroicons он ровно такой.
+// ChatsHeroIcon в TabBarIcons.tsx — тонкая обёртка под тот же вызов
+// (size/weight), что у остальных трёх иконок.
 // Остальные иконки в приложении (сайдбар, карточки, кнопки) специально не
 // трогали — задача касалась только нижней панели.
-import { PhoneCall, ChatCircle, type Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ContactsHybridIcon, SevchikHybridIcon } from './TabBarIcons';
+import { PhoneCall, type Icon as PhosphorIcon } from '@phosphor-icons/react';
+import { ContactsHybridIcon, SevchikHybridIcon, ChatsHeroIcon } from './TabBarIcons';
 import { QLogo } from './QLogo';
 import { useChatStore } from '@/store/chatStore';
 import type { Screen } from '@/data/mock';
@@ -82,7 +89,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
   const items: { key: Screen; label: string; icon: PhosphorIcon }[] = [
     { key: 'contacts', label: 'Контакты', icon: ContactsHybridIcon as unknown as PhosphorIcon },
     { key: 'calls', label: 'Звонки', icon: PhoneCall },
-    { key: 'chats', label: 'Чаты', icon: ChatCircle },
+    { key: 'chats', label: 'Чаты', icon: ChatsHeroIcon as unknown as PhosphorIcon },
     { key: 'profile', label: 'Севчик', icon: SevchikHybridIcon as unknown as PhosphorIcon },
   ];
 
