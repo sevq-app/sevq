@@ -933,22 +933,22 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           <ArrowLeft size={22} />
         </motion.button>
 
-        {/* Имя/аватарка/статус — отдельная стеклянная капсула */}
+        {/* Имя/аватарка/статус — отдельная стеклянная капсула, компактная */}
         <div className="flex-1 min-w-0 rounded-full overflow-hidden" style={headerGlassStyle}>
         {isFavoritesChat ? (
-          <div className="flex items-center gap-3 min-w-0 text-left px-3 py-2.5">
-            <Avatar initials="" size="sm" icon={<BookmarkTag size={16} />} />
+          <div className="flex items-center gap-2 min-w-0 text-left px-2 py-1.5">
+            <Avatar initials="" size="xs" icon={<BookmarkTag size={13} />} />
             <div className="flex-1 min-w-0">
-              <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
-              <p className="text-sm font-body text-sevchik-textSecondary">Сохранённые сообщения</p>
+              <h2 className="font-heading font-bold text-sm text-sevchik-text truncate leading-tight">{displayName}</h2>
+              <p className="text-[11px] font-body text-sevchik-textSecondary leading-tight">Сохранённые сообщения</p>
             </div>
           </div>
         ) : (
-          <button onClick={onOpenProfile} className="w-full flex items-center gap-3 min-w-0 text-left px-3 py-2.5">
-            <Avatar initials={displayInitials} size="sm" online={chat.online} />
+          <button onClick={onOpenProfile} className="w-full flex items-center gap-2 min-w-0 text-left px-2 py-1.5">
+            <Avatar initials={displayInitials} size="xs" online={chat.online} />
             <div className="flex-1 min-w-0">
-              <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
-              <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
+              <h2 className="font-heading font-bold text-sm text-sevchik-text truncate leading-tight">{displayName}</h2>
+              <p className={`text-[11px] font-body flex items-center gap-1 leading-tight ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>
                 {isTyping ? (
                   <>
                     печатает
@@ -972,10 +972,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
-            className="w-12 h-12 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center shrink-0"
             style={headerGlassStyle}
           >
-            <Phone size={22} />
+            <Phone size={19} />
           </motion.button>
         )}
 
@@ -985,10 +985,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={() => setShowMenu(!showMenu)}
-            className="w-12 h-12 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center"
+            className="w-10 h-10 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center"
             style={headerGlassStyle}
           >
-            <MoreVertical size={22} />
+            <MoreVertical size={19} />
           </motion.button>
 
           <AnimatePresence>

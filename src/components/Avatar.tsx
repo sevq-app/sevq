@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface AvatarProps {
   initials: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
   online?: boolean;
   className?: string;
   /** Иконка вместо инициалов — для системных "чатов" вроде "Избранное" */
@@ -14,6 +14,7 @@ const MINT = '#4DC3C8';
 const MINT_RGB = '77, 195, 200';
 
 const sizeMap = {
+  xs: 'w-8 h-8 text-[10px]',
   sm: 'w-11 h-11 text-sm',
   md: 'w-14 h-14 text-base',
   lg: 'w-16 h-16 text-lg',
@@ -22,6 +23,7 @@ const sizeMap = {
 };
 
 const iconSizeMap = {
+  xs: 15,
   sm: 20,
   md: 24,
   lg: 28,

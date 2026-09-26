@@ -32,7 +32,10 @@
     --chart-5: 27 87% 67%;
     
     /* Кастомные переменные для Севчик */
-    --bg-main: radial-gradient(ellipse at top left, #FAFAFF 0%, #F4F1FF 55%, #EEEBFF 100%);
+    /* Нейтральный светло-серый, без цветных оттенков и без градиента —
+       одинаковый для всех 6 тем оформления, меняется только со сменой
+       светлого/тёмного режима (см. .gray-theme ниже). */
+    --bg-main: #FAFAFA;
     --bg-card: #FFFFFF;
     --bg-input: #F9FAFB;
     --text-main: #1A1A1A;
@@ -256,15 +259,11 @@
     radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
 }
 
-/* Цветная «сетка»-подложка для экрана переписки — фон, который красиво
-   просвечивает сквозь стеклянные пузыри сообщений и панели */
+/* Фон экрана переписки — тот же нейтральный --bg-main, что и везде в
+   приложении, без цветных пятен: не должен зависеть от выбранной из 6 тем
+   (в отличие от облачка своих сообщений, см. --bubble-outgoing-bg). */
 .chat-wallpaper {
-  background:
-    radial-gradient(circle at 12% 12%, rgba(77, 195, 200, 0.35) 0%, transparent 42%),
-    radial-gradient(circle at 88% 8%, rgba(255, 152, 72, 0.32) 0%, transparent 42%),
-    radial-gradient(circle at 15% 88%, rgba(79, 211, 200, 0.3) 0%, transparent 42%),
-    radial-gradient(circle at 92% 80%, rgba(77, 195, 200, 0.22) 0%, transparent 42%),
-    var(--bg-main);
+  background: var(--bg-main);
 }
 
 /* Цветовые темы: задают только --theme-primary(-rgb) — через него же берёт
@@ -316,7 +315,9 @@ html.sea {
    как отфолбэк на случай, если html.gray-theme окажется без класса
    темы (в норме такого не бывает — см. App.tsx). */
 html.gray-theme {
-  --bg-main: radial-gradient(ellipse at top left, #34383f 0%, #24272b 60%, #1b1e22 100%);
+  /* Нейтральный тёмно-серый, без цветных оттенков и без градиента —
+     одинаковый для всех 6 тем. */
+  --bg-main: #1A1A1A;
   --bg-card: #35383d;
   --bg-input: #2b2e33;
   --text-main: #ffffff;
