@@ -157,13 +157,15 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
         style={{
           minWidth: 'min(220px, 65vw)',
           maxWidth: 'min(280px, 75vw)',
-          // Оба варианта — нейтральный фон (--bubble-outgoing-bg/--bubble-incoming-bg),
-          // не завязанный на цветовую тему: меняется только со светлым/тёмным
-          // режимом, см. src/index.css.
-          background: isMe ? 'var(--bubble-outgoing-bg)' : 'var(--bubble-incoming-bg)',
+          // Свои — цвет текущей темы (--bubble-outgoing-bg). Чужие — нейтральная
+          // база (--bubble-incoming-bg, меняется только со светлым/тёмным
+          // режимом) с лёгким оттенком темы поверх, см. src/index.css.
+          background: isMe
+            ? 'var(--bubble-outgoing-bg)'
+            : 'linear-gradient(rgba(var(--theme-primary-rgb), 0.08), rgba(var(--theme-primary-rgb), 0.08)), var(--bubble-incoming-bg)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          boxShadow: isMe ? '0 4px 16px rgba(77,195,200,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
+          boxShadow: isMe ? '0 4px 16px rgba(var(--theme-primary-rgb), 0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
         }}
       >
         {replyTo && <ReplyQuotePreview replyTo={replyTo} isMe={isMe} onClick={onReplyClick} />}
@@ -932,7 +934,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         </motion.button>
 
         {/* Имя/аватарка/статус — отдельная стеклянная капсула */}
-        <div className="flex-1 min-w-0 rounded-[22px]" style={headerGlassStyle}>
+        <div className="flex-1 min-w-0 rounded-full overflow-hidden" style={headerGlassStyle}>
         {isFavoritesChat ? (
           <div className="flex items-center gap-3 min-w-0 text-left px-3 py-2.5">
             <Avatar initials="" size="sm" icon={<BookmarkTag size={16} />} />
