@@ -48,7 +48,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
   };
 
   const handleAllowContacts = () => {
-    alert('✅ Доступ к контактам разрешен! Теперь мы ищем ваших друзей...');
+    alert('✅ Доступ к контактам разрешён! Теперь мы ищем ваших друзей...');
     setShowConnectPrompt(false);
   };
 

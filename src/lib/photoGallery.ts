@@ -45,7 +45,16 @@ export async function uploadMyPhoto(dataUrl: string): Promise<RemotePhoto> {
     .insert({ user_id: myId, path, url: publicUrlData.publicUrl })
     .select('id, created_at')
     .single();
-  if (insertError || !row) throw insertError ?? new Error('Не удалось сохранить фото');
+  if (insertError || !row) {
+    const originalError = insertError ?? new Error('Не удалось сохранить фото');
+    try {
+      const { error: cleanupError } = await supabase.storage.from(PHOTOS_BUCKET).remove([path]);
+      if (cleanupError) console.error('Не удалось удалить файл после ошибки сохранения фото:', cleanupError);
+    } catch (cleanupError) {
+      console.error('Не удалось удалить файл после ошибки сохранения фото:', cleanupError);
+    }
+    throw originalError;
+  }
 
   return { id: row.id as string, path, url: publicUrlData.publicUrl, createdAt: row.created_at as string };
 }

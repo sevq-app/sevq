@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="756" height="220" viewBox="-12 0 756 220" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc" style="color:#4DC3C8">
+<title id="title">Логотип «Севчик», вариант C</title>
+<desc id="desc">Нарисованный вручную округлый наклонный леттеринг и четырёхлучевая звезда.</desc>
+<g transform="translate(34 0) skewX(-16)" fill="none" stroke="currentColor" stroke-width="40" stroke-linecap="round" stroke-linejoin="round">
+<path d="M119 57C91 34 53 45 43 83C29 133 65 174 116 156"/>
+<path d="M157 109H217C218 77 193 63 170 75C136 94 142 151 175 160C194 165 213 155 224 143"/>
+<path d="M256 69V160M258 71H288C314 71 315 107 287 111H258M288 111C323 111 324 157 289 160H258"/>
+<path d="M358 70V106C358 130 399 133 417 107M421 67V160"/>
+<path d="M466 70V160L528 72V160"/>
+<path d="M570 67V160M576 115L628 70M580 112L637 160"/>
+</g>
+<path d="M687 62C687 82 679 91 660 91C679 91 687 100 687 120C687 100 695 91 714 91C695 91 687 82 687 62Z" fill="currentColor"/>
+</svg>
