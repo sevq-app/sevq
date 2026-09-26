@@ -914,6 +914,18 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     color: 'var(--text-main)',
   };
 
+  // Поле ввода использует тот же адаптивный матовый материал, что и
+  // капсула имени, но собственные более тонкие обводку и тень, чтобы оно
+  // оставалось самостоятельным элементом рядом с круглыми кнопками.
+  const composerGlassStyle: CSSProperties = {
+    background: 'var(--header-glass-bg)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid var(--composer-glass-border)',
+    boxShadow: 'var(--composer-glass-shadow)',
+    color: 'var(--text-main)',
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden chat-wallpaper">
       {/* Header */}
@@ -1337,7 +1349,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Написать сообщение..."
-                className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-accent/30 font-body text-sm"
+                className="h-10 min-w-0 flex-1 rounded-full px-3.5 font-body text-sm placeholder:text-[var(--text-secondary)] focus:outline-none focus:ring-2 focus:ring-sevchik-accent/30"
+                style={composerGlassStyle}
               />
 
               <motion.button
@@ -1839,4 +1852,3 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     </div>
   );
 }
-
