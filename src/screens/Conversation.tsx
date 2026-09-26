@@ -21,17 +21,20 @@ interface ConversationProps {
   hapticsEnabled: boolean;
 }
 
-// Разделитель по датам между сообщениями разных дней
+// Разделитель по датам между сообщениями разных дней — тёмная плашка,
+// не зависит от темы приложения (как контекстное меню/шапка), чтобы не
+// теряться на фоне переписки ни в светлой, ни в тёмной теме.
 function DateSeparator({ label }: { label: string }) {
   return (
     <div className="flex justify-center my-1">
       <span
-        className="text-xs font-heading font-semibold px-3 py-1 rounded-full"
+        className="text-xs font-heading font-bold px-3.5 py-1.5 rounded-full"
         style={{
-          background: 'rgba(255,255,255,0.55)',
+          background: 'rgba(20, 22, 28, 0.72)',
           backdropFilter: 'blur(8px)',
           WebkitBackdropFilter: 'blur(8px)',
-          color: 'var(--text-secondary)',
+          color: 'rgba(255,255,255,0.92)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
         }}
       >
         {label}
@@ -40,7 +43,8 @@ function DateSeparator({ label }: { label: string }) {
   );
 }
 
-// "Сегодня" / "Вчера" / полная дата — относительно текущего момента
+// "Сегодня" / "Вчера" / день недели (в пределах последней недели) / полная
+// дата — относительно текущего момента.
 function formatDateLabel(dateStr: string): string {
   const msgDate = new Date(`${dateStr}T00:00:00`);
   const today = new Date();
@@ -48,6 +52,10 @@ function formatDateLabel(dateStr: string): string {
   const diffDays = Math.round((today.getTime() - msgDate.getTime()) / 86400000);
   if (diffDays === 0) return 'Сегодня';
   if (diffDays === 1) return 'Вчера';
+  if (diffDays > 1 && diffDays < 7) {
+    const weekday = msgDate.toLocaleDateString('ru', { weekday: 'long' });
+    return weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  }
   const sameYear = msgDate.getFullYear() === today.getFullYear();
   return msgDate.toLocaleDateString('ru', sameYear ? { day: 'numeric', month: 'long' } : { day: 'numeric', month: 'long', year: 'numeric' });
 }
@@ -149,10 +157,10 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
         style={{
           minWidth: 'min(220px, 65vw)',
           maxWidth: 'min(280px, 75vw)',
-          // Исходящие — акцентный цвет темы (как текстовые облачка). Входящие —
-          // нейтральный фон (--bubble-incoming-bg), не завязанный на цветовую
-          // тему: меняется только со светлым/тёмным режимом, см. src/index.css.
-          background: isMe ? 'rgba(var(--theme-primary-rgb), 0.55)' : 'var(--bubble-incoming-bg)',
+          // Оба варианта — нейтральный фон (--bubble-outgoing-bg/--bubble-incoming-bg),
+          // не завязанный на цветовую тему: меняется только со светлым/тёмным
+          // режимом, см. src/index.css.
+          background: isMe ? 'var(--bubble-outgoing-bg)' : 'var(--bubble-incoming-bg)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
           boxShadow: isMe ? '0 4px 16px rgba(77,195,200,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
@@ -884,6 +892,16 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
     }, 500);
   };
 
+  // Общий стиль стеклянной капсулы для отдельных элементов шапки (имя,
+  // звонок, меню) — стрелка "Назад" сознательно НЕ стеклянная, см. ниже.
+  const headerGlassStyle: CSSProperties = {
+    background: 'var(--header-glass-bg)',
+    backdropFilter: 'blur(16px)',
+    WebkitBackdropFilter: 'blur(16px)',
+    border: '1px solid rgba(255,255,255,0.15)',
+    boxShadow: `inset 0 1px 0 rgba(255,255,255,0.2), var(--header-glass-shadow)`,
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden chat-wallpaper">
       {/* Header */}
@@ -902,27 +920,21 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           </span>
         </div>
       ) : (
-      <div className="shrink-0 sticky top-0 z-10 px-3 pt-2 sm:px-4 sm:pt-3">
-      <div
-        className="flex items-center gap-3 px-3 py-2.5 rounded-[22px]"
-        style={{
-          background: 'var(--header-glass-bg)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(255,255,255,0.15)',
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.2), var(--header-glass-shadow)`,
-        }}
-      >
+      <div className="shrink-0 sticky top-0 z-10 px-3 pt-2 sm:px-4 sm:pt-3 flex items-center gap-3">
+        {/* Стрелка "Назад" — отдельный сплошной чёрный кружок, не стекло */}
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
           onClick={onBack}
-          className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-text btn-3d flex items-center justify-center"
-          style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+          className="w-12 h-12 rounded-full bg-[#1A1A1A] text-white btn-3d flex items-center justify-center shrink-0"
+          style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}
         >
           <ArrowLeft size={22} />
         </motion.button>
+
+        {/* Имя/аватарка/статус — отдельная стеклянная капсула */}
+        <div className="flex-1 min-w-0 rounded-[22px]" style={headerGlassStyle}>
         {isFavoritesChat ? (
-          <div className="flex items-center gap-3 flex-1 min-w-0 text-left">
+          <div className="flex items-center gap-3 min-w-0 text-left px-3 py-2.5">
             <Avatar initials="" size="sm" icon={<BookmarkTag size={16} />} />
             <div className="flex-1 min-w-0">
               <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
@@ -930,7 +942,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             </div>
           </div>
         ) : (
-          <button onClick={onOpenProfile} className="flex items-center gap-3 flex-1 min-w-0 text-left">
+          <button onClick={onOpenProfile} className="w-full flex items-center gap-3 min-w-0 text-left px-3 py-2.5">
             <Avatar initials={displayInitials} size="sm" online={chat.online} />
             <div className="flex-1 min-w-0">
               <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
@@ -950,26 +962,29 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             </div>
           </button>
         )}
+        </div>
 
+        {/* Звонок — отдельная стеклянная капсула */}
         {!isFavoritesChat && (
           <motion.button
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
-            className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
-            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+            className="w-12 h-12 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center shrink-0"
+            style={headerGlassStyle}
           >
             <Phone size={22} />
           </motion.button>
         )}
 
-        <div className="relative">
+        {/* Меню "три точки" — отдельная стеклянная капсула */}
+        <div className="relative shrink-0">
           <motion.button
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={() => setShowMenu(!showMenu)}
-            className="w-12 h-12 rounded-full bg-sevchik-cream text-sevchik-textSecondary btn-3d flex items-center justify-center"
-            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+            className="w-12 h-12 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center"
+            style={headerGlassStyle}
           >
             <MoreVertical size={22} />
           </motion.button>
@@ -1036,7 +1051,6 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             )}
           </AnimatePresence>
         </div>
-      </div>
       </div>
       )}
 
@@ -1218,20 +1232,14 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         )}
       </AnimatePresence>
 
-      {/* Input Panel — стеклянный контейнер статичен и не пересоздаётся,
-          чтобы backdrop-filter не «глючил» на iOS Safari во время
-          анимации перехода между состояниями (баг с блюр-артефактом).
-          Скрыт в режиме выбора сообщений — вместо него снизу появляется
-          панель массовых действий. */}
+      {/* Input Panel — без собственного фона: кнопки и поле лежат прямо на
+          фоне переписки (chat-wallpaper), никакой плашки под ними. Контейнер
+          статичен и не пересоздаётся между состояниями (запись/обычный ввод) —
+          так спокойнее для анимации перехода. Скрыт в режиме выбора
+          сообщений — вместо него снизу появляется панель массовых действий. */}
       <div
         className="shrink-0 px-4 py-2.5 pb-4"
-        style={{
-          display: messageSelectMode ? 'none' : undefined,
-          background: 'rgba(255,255,255,0.65)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          boxShadow: '0 -4px 16px rgba(15,23,42,0.04)',
-        }}
+        style={{ display: messageSelectMode ? 'none' : undefined }}
       >
         <AnimatePresence mode="wait">
           {isRecording ? (
