@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle, Users, Phone, User } from 'lucide-react';
-// Иконки только для нижней (мобильной) навигации — финальный смешанный стиль:
+// Иконки только для нижней (мобильной) навигации — смешанный стиль:
 // там, где иконка = человечек (голова + тело), голова залита сплошным цветом,
-// тело/линии — тонким контуром (Контакты, Севчик — кастомные компоненты из
+// тело/линии — тонким контуром (Контакты — кастомный компонент из
 // TabBarIcons.tsx: контур weight="regular" + голова из weight="duotone", оба —
 // точные path из библиотеки, см. файл). Там, где иконка = один символ без
 // отдельной "головы" (трубка, облачко) — залита целиком, чтобы по плотности
-// не выбивалась из общего ряда.
+// не выбивалась из общего ряда. Севчик — компактная версия логотипа-буквы
+// «С» (SevchikCIcon в TabBarIcons.tsx, без хвостика облачка — не читается на
+// таком размере), обводка через currentColor вместо заливки.
 // PhoneCall (Phosphor, weight="fill") — тот же силуэт трубки, что и Phone, но
 // с волнами сбоку (эффект "звонок идёт") — часть самого SVG-глифа иконки, не
 // отдельный элемент; на weight="fill" волны заливаются тем же цветом, что и
@@ -21,7 +23,7 @@ import { MessageCircle, Users, Phone, User } from 'lucide-react';
 // Остальные иконки в приложении (сайдбар, карточки, кнопки) специально не
 // трогали — задача касалась только нижней панели.
 import { PhoneCall, type Icon as PhosphorIcon } from '@phosphor-icons/react';
-import { ContactsHybridIcon, SevchikHybridIcon, ChatsHeroIcon } from './TabBarIcons';
+import { ContactsHybridIcon, SevchikCIcon, ChatsHeroIcon } from './TabBarIcons';
 import { QLogo } from './QLogo';
 import { useChatStore } from '@/store/chatStore';
 import type { Screen } from '@/data/mock';
@@ -108,7 +110,7 @@ export function TabBar({ current, onNavigate }: TabBarProps) {
     { key: 'contacts', label: 'Контакты', icon: ContactsHybridIcon as unknown as PhosphorIcon },
     { key: 'calls', label: 'Звонки', icon: PhoneCall },
     { key: 'chats', label: 'Чаты', icon: ChatsHeroIcon as unknown as PhosphorIcon },
-    { key: 'profile', label: 'Севчик', icon: SevchikHybridIcon as unknown as PhosphorIcon },
+    { key: 'profile', label: 'Севчик', icon: SevchikCIcon as unknown as PhosphorIcon },
   ];
 
   // Суммарный бейдж непрочитанных на вкладке «Чаты» — то же число и тот же
