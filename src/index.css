@@ -57,6 +57,11 @@
        белёсая дымка поверх уже тёмного фона, почти сливается с ним. */
     --avatar-glass-bg: rgba(24, 26, 32, 0.82);
     --avatar-glass-border: rgba(255, 255, 255, 0.06);
+    /* Шапка переписки — плавающая стеклянная капсула. Фон и внешняя тень
+       завязаны на тему (светлое/тёмное стекло), обводка и внутренний блик —
+       общие для обеих, см. использование в Conversation.tsx. */
+    --header-glass-bg: rgba(255, 255, 255, 0.6);
+    --header-glass-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
     /* Поверхность капсулы нижней навигации — лёгкий вертикальный градиент
        (на 2-4% светлее сверху, темнее снизу, ощущение изогнутой стеклянной
        поверхности) поверх ПОЛУПРОЗРАЧНОЙ (не сплошной var(--bg-card),
@@ -314,6 +319,8 @@ html.gray-theme {
   --avatar-placeholder-icon: #8BD8DB;
   --avatar-glass-bg: rgba(255, 255, 255, 0.05);
   --avatar-glass-border: rgba(255, 255, 255, 0.1);
+  --header-glass-bg: rgba(30, 32, 38, 0.72);
+  --header-glass-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
   --tabbar-surface-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, 0.14) 100%), rgba(53, 56, 61, 0.55);
   --tabbar-shadow: 0 10px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(210, 214, 222, 0.1), inset 0 -1px 2px rgba(0, 0, 0, 0.3);
   --tabbar-active-shadow: inset 0 1px 1px rgba(220, 222, 228, 0.22), 0 4px 16px rgba(0, 0, 0, 0.4);
