@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Test
+        run: npm test
+
       - name: Build
         # VITE_* читаются Vite на этапе сборки и запекаются в бандл — раньше тут не было
         # ни одной переменной, поэтому в собранном на GitHub Pages приложении
