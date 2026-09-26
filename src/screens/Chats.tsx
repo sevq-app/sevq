@@ -126,7 +126,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
       const chat: Chat = {
         id: `real-${remoteChatId}`,
         name,
-        avatarColor: '#6546C7',
+        avatarColor: '#4DC3C8',
         initials: initialsOf(name),
         lastMessage: '',
         time: '',
@@ -178,8 +178,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
               onClick={exitSelectMode}
               className="px-4 py-2 rounded-2xl font-heading font-bold text-sm text-white"
               style={{
-                background: '#6546C7',
-                boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
+                background: '#4DC3C8',
+                boxShadow: '0 4px 12px rgba(77,195,200,0.2)',
               }}
             >
               Готово
@@ -253,8 +253,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 onClick={() => onStartChat?.()}
                 className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: '#6546C7',
-                  boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
+                  background: '#4DC3C8',
+                  boxShadow: '0 4px 12px rgba(77,195,200,0.2)',
                 }}
               >
                 <Plus size={24} />
@@ -302,12 +302,12 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       disabled={openingProfileId === profile.id}
                       className={`flex w-full items-center gap-4 px-4 py-3 text-left disabled:opacity-60 ${index !== profileResults.length - 1 ? 'border-b border-[#F3F4F6]' : ''}`}
                     >
-                      <Avatar initials={initialsOf(name)} color="#6546C7" size="lg" />
+                      <Avatar initials={initialsOf(name)} color="#4DC3C8" size="lg" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-heading font-bold text-sevchik-text">{name}</p>
                         {details && <p className="truncate text-xs font-body text-sevchik-textSecondary">{details}</p>}
                       </div>
-                      {openingProfileId === profile.id && <Loader2 size={18} className="animate-spin text-sevchik-purple" />}
+                      {openingProfileId === profile.id && <Loader2 size={18} className="animate-spin text-sevchik-accent" />}
                     </motion.button>
                   );
                 })
@@ -376,7 +376,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   backdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
                   WebkitBackdropFilter: cardsBlurred ? 'blur(16px)' : 'none',
                   boxShadow: isSelected
-                    ? '0 0 0 2px #6546C7, 0 10px 30px rgba(15,23,42,0.12)'
+                    ? '0 0 0 2px #4DC3C8, 0 10px 30px rgba(15,23,42,0.12)'
                     : '0 10px 30px rgba(15,23,42,0.12)',
                 }}
               >
@@ -397,7 +397,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                     >
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-                          isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
+                          isSelected ? 'bg-[#4DC3C8]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
                         }`}
                       >
                         {isSelected && (
@@ -453,8 +453,8 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       <span
                         className="shrink-0 text-white text-xs font-heading font-bold rounded-pill min-w-[26px] h-[26px] px-2 flex items-center justify-center"
                         style={{
-                          background: '#6546C7',
-                          boxShadow: '0 3px 10px rgba(101,70,199,0.18)',
+                          background: '#4DC3C8',
+                          boxShadow: '0 3px 10px rgba(77,195,200,0.18)',
                         }}
                       >
                         <span style={{ fontSize: `${fontSize}px` }}>{chat.unread}</span>
@@ -487,7 +487,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                 className="w-20 h-20 rounded-full flex items-center justify-center mb-5"
                 style={{ background: '#F2F2F7' }}
               >
-                <MessageCircle size={32} className="text-sevchik-purple" />
+                <MessageCircle size={32} className="text-sevchik-accent" />
               </div>
               <h2 className="font-heading font-extrabold text-lg text-sevchik-text mb-2">Пока нет чатов</h2>
               <p className="text-sevchik-textSecondary font-body text-sm max-w-xs">

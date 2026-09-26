@@ -63,7 +63,7 @@ export function Sidebar({ current, onNavigate, grayMode = false }: SidebarProps)
               }`}
               style={
                 active
-                  ? { background: '#6546C7', boxShadow: '0 6px 16px rgba(101,70,199,0.2)' }
+                  ? { background: '#4DC3C8', boxShadow: '0 6px 16px rgba(77,195,200,0.2)' }
                   : {
                       background: 'rgba(255,255,255,0.65)',
                       backdropFilter: 'blur(16px)',
@@ -281,7 +281,7 @@ function TabBarButton({ label, Icon, active, badge, hoverCapable, onTap }: TabBa
           {badge > 0 && (
             <span
               className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-pill flex items-center justify-center text-white text-[10px] font-heading font-bold z-10"
-              style={{ background: '#6546C7', boxShadow: '0 3px 10px rgba(101,70,199,0.18)' }}
+              style={{ background: '#4DC3C8', boxShadow: '0 3px 10px rgba(77,195,200,0.18)' }}
             >
               {badge > 99 ? '99+' : badge}
             </span>

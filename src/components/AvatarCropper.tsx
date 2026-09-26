@@ -179,7 +179,7 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
           aria-label="Отразить"
           aria-pressed={flipped}
           className="w-11 h-11 rounded-full flex items-center justify-center text-white transition-colors"
-          style={{ background: flipped ? '#6546C7' : 'rgba(255,255,255,0.15)' }}
+          style={{ background: flipped ? '#4DC3C8' : 'rgba(255,255,255,0.15)' }}
         >
           <FlipHorizontal size={20} />
         </button>
@@ -261,7 +261,7 @@ export function AvatarCropper({ imageSrc, onCancel, onSave }: AvatarCropperProps
             aria-label="Сохранить"
             className="flex flex-col items-center gap-1.5 w-16 disabled:opacity-50"
           >
-            <span className="w-14 h-14 rounded-full bg-sevchik-purple flex items-center justify-center text-white">
+            <span className="w-14 h-14 rounded-full bg-sevchik-accent flex items-center justify-center text-white">
               <Check size={24} />
             </span>
             <span className="text-white/80 text-xs font-body">Сохранить</span>

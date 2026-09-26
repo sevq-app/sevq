@@ -17,7 +17,7 @@ export function Calls({ onNavigate }: CallsProps) {
             whileHover={{ scale: 1.05 }}
             onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
             className="w-12 h-12 rounded-full flex items-center justify-center text-white"
-            style={{ background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
+            style={{ background: '#4DC3C8', boxShadow: '0 4px 12px rgba(77,195,200,0.2)' }}
           >
             <Phone size={22} />
           </motion.button>
@@ -32,7 +32,7 @@ export function Calls({ onNavigate }: CallsProps) {
           className="w-24 h-24 rounded-full bg-sevchik-cream flex items-center justify-center mb-6"
           style={{ boxShadow: '0 8px 24px rgba(15,23,42,0.07)' }}
         >
-          <Video size={40} className="text-sevchik-purple" />
+          <Video size={40} className="text-sevchik-accent" />
         </motion.div>
         <h2 className="font-heading font-extrabold text-xl text-[#1A1A1A] mb-2">Звонки в Севчик</h2>
         <p className="text-sevchik-textSecondary font-body max-w-xs">

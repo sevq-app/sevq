@@ -67,7 +67,7 @@ export function ContactProfile({ chatId, onBack, onEdit, onOpenMedia }: ContactP
 
       <div className="px-4 sm:px-6 space-y-4 max-w-2xl mx-auto">
         {override.note && (
-          <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(101,70,199,0.08)]">
+          <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(77,195,200,0.08)]">
             <h3 className="font-heading font-bold text-[var(--text-main)] mb-2">Заметка</h3>
             <p className="text-sm text-sevchik-textSecondary font-body">{override.note}</p>
           </section>
@@ -75,7 +75,7 @@ export function ContactProfile({ chatId, onBack, onEdit, onOpenMedia }: ContactP
 
         <button
           onClick={onOpenMedia}
-          className="w-full text-left bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(101,70,199,0.08)]"
+          className="w-full text-left bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_8px_24px_rgba(77,195,200,0.08)]"
         >
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-heading font-bold text-[var(--text-main)]">Медиафайлы</h3>
@@ -87,7 +87,7 @@ export function ContactProfile({ chatId, onBack, onEdit, onOpenMedia }: ContactP
           </div>
         </button>
 
-        <section className="bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-[0_8px_24px_rgba(101,70,199,0.08)]">
+        <section className="bg-[var(--bg-card)] rounded-2xl overflow-hidden shadow-[0_8px_24px_rgba(77,195,200,0.08)]">
           <button
             onClick={() => alert('🔕 Уведомления от этого контакта отключены')}
             className="w-full flex items-center gap-3 px-5 py-4 text-left border-b border-[#F3F4F6]"

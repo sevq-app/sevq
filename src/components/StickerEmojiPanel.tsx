@@ -262,7 +262,7 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
             className="px-4 py-1.5 rounded-full font-heading font-bold text-sm transition-colors"
             style={
               tab === 'stickers'
-                ? { background: '#6546C7', color: '#fff' }
+                ? { background: '#4DC3C8', color: '#fff' }
                 : { background: 'rgba(255,255,255,0.5)', color: 'var(--text-secondary)' }
             }
           >
@@ -273,7 +273,7 @@ export function StickerEmojiPanel({ onSelectEmoji, onSelectSticker }: StickerEmo
             className="px-4 py-1.5 rounded-full font-heading font-bold text-sm transition-colors"
             style={
               tab === 'emoji'
-                ? { background: '#6546C7', color: '#fff' }
+                ? { background: '#4DC3C8', color: '#fff' }
                 : { background: 'rgba(255,255,255,0.5)', color: 'var(--text-secondary)' }
             }
           >
