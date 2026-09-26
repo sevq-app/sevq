@@ -55,7 +55,6 @@
        Единственная переменная для фона облачка позволяет позднее подставить
        пользовательский цвет/картинку, не меняя разметку. */
     --bubble-outgoing-bg: var(--bubble-outgoing-gradient);
-    --bubble-intensity-shade: 0;
     --action-menu-bg: rgba(255, 255, 255, 0.88);
     --action-menu-text: #17191f;
     --action-menu-border: rgba(15, 23, 42, 0.12);
@@ -261,11 +260,6 @@
   background: var(--bubble-outgoing-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  background-image:
-    linear-gradient(rgba(17, 24, 39, var(--bubble-intensity-shade)), rgba(17, 24, 39, var(--bubble-intensity-shade))),
-    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 20%),
-    radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 25%),
-    var(--bubble-outgoing-gradient);
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
 }
@@ -295,6 +289,12 @@
   border-radius: 999px;
   background: var(--picker-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+/* Не даём общему правилу тёмной темы, которое нейтрализует декоративные
+   radial-gradient-фоны, обесцвечивать интерактивный HSV-круг. */
+.gray-theme .color-wheel {
+  background: radial-gradient(circle, white 0%, rgba(255,255,255,0) 72%), conic-gradient(from 90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00) !important;
 }
 
 /* Фон экрана переписки — тот же нейтральный --bg-main, что и везде в
@@ -482,7 +482,7 @@ html.theme-switching * {
 .gray-theme [style*="FFF0DB"],
 .gray-theme [style*="FFF0DC"],
 .gray-theme [style*="FFE9CC"],
-.gray-theme [style*="radial-gradient"] {
+.gray-theme [style*="radial-gradient"]:not(.color-wheel) {
   background: var(--bg-main) !important;
 }
 

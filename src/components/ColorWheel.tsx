@@ -22,7 +22,7 @@ export function ColorWheel({ color, onChange }: ColorWheelProps) {
   };
 
   const radians = (color.h - 90) * Math.PI / 180;
-  const markerRadius = color.s / 100 * 50;
+  const markerRadius = color.s / 100 * 72;
 
   return (
     <div
@@ -36,7 +36,7 @@ export function ColorWheel({ color, onChange }: ColorWheelProps) {
         updateColor(event);
       }}
       onPointerMove={(event) => event.currentTarget.hasPointerCapture(event.pointerId) && updateColor(event)}
-      className="relative size-[212px] touch-none rounded-full shadow-[0_12px_30px_rgba(0,0,0,0.35)] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-white/80"
+      className="color-wheel relative size-[164px] touch-none rounded-full shadow-[0_10px_24px_rgba(0,0,0,0.32)] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-white/80"
       style={{
         background: 'radial-gradient(circle, white 0%, rgba(255,255,255,0) 72%), conic-gradient(from 90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00)',
       }}
