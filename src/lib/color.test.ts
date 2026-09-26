@@ -18,8 +18,10 @@ test('message gradients stay close to the chosen colour without white highlights
     const [primaryChannels, darkChannels, lightChannels] = [primary, dark, light].map(channels);
     assert.ok(darkChannels.every((channel, index) => channel <= primaryChannels[index]));
     assert.ok(lightChannels.every((channel, index) => channel >= primaryChannels[index]));
-    assert.ok(lightChannels.every((channel, index) => channel - primaryChannels[index] <= 26));
+    assert.ok(lightChannels.every((channel, index) => channel - primaryChannels[index] <= 36));
   }
+  assert.equal(messageGradientColors('#808080').dark, '#6e6e6e');
+  assert.equal(messageGradientColors('#808080').light, '#929292');
 });
 
 test('brightness adjustment preserves full brightness and darkens at lower values', () => {

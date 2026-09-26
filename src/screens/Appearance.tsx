@@ -1,9 +1,9 @@
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Palette, Sun, Flower, Leaf, Snowflake, Sparkles, Waves, Monitor, Moon, Volume2, Vibrate, X } from 'lucide-react';
 import { playSound, triggerHaptic } from '@/lib/feedback';
 import { ColorWheel } from '@/components/ColorWheel';
-import { hexToHsv, hsvToHex, messageThemeColors, setHexBrightness, type HsvColor } from '@/lib/color';
+import { hexToHsv, hsvToHex, messageGradientColors, messageThemeColors, setHexBrightness, type HsvColor } from '@/lib/color';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -63,23 +63,50 @@ export function Appearance({
   setHapticsEnabled,
 }: AppearanceProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  // customColor is the single source of truth. The wheel, preview and palette
-  // icon all derive from it instead of maintaining a second, drifting colour.
-  const pickerColor: HsvColor = { ...hexToHsv(customColor), v: 100 };
+  const [draftColor, setDraftColor] = useState(customColor);
+  const [draftGradient, setDraftGradient] = useState(customGradient);
+  const [draftBrightness, setDraftBrightness] = useState(colorBrightness);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const pickerButtonRef = useRef<HTMLButtonElement>(null);
+  const swipeStartY = useRef<number | null>(null);
+  const pickerColor: HsvColor = { ...hexToHsv(draftColor), v: 100 };
   const appliedCustomColor = setHexBrightness(customColor, colorBrightness);
+  const draftAppliedColor = setHexBrightness(draftColor, draftBrightness);
+  const draftPalette = messageGradientColors(draftAppliedColor);
+  const draftBubbleBackground = draftGradient
+    ? `linear-gradient(90deg, ${draftPalette.dark} 0%, ${draftAppliedColor} 46%, ${draftPalette.light} 100%)`
+    : draftAppliedColor;
 
   const updateCustomColor = (next: HsvColor) => {
-    setCustomColor(hsvToHex({ ...next, v: 100 }));
-    setSelectedTheme('custom');
+    setDraftColor(hsvToHex({ ...next, v: 100 }));
   };
   const resetCustomColor = () => {
-    const defaultColor = '#7C5CFC';
-    setCustomColor(defaultColor);
-    setCustomGradient(true);
-    setColorBrightness(100);
-    applyTheme('spring');
+    setDraftColor('#7C5CFC');
+    setDraftGradient(true);
+    setDraftBrightness(100);
+  };
+  const openPicker = () => {
+    setDraftColor(customColor);
+    setDraftGradient(customGradient);
+    setDraftBrightness(colorBrightness);
+    setPickerOpen(true);
+  };
+  const saveCustomColor = () => {
+    setCustomColor(draftColor);
+    setCustomGradient(draftGradient);
+    setColorBrightness(draftBrightness);
+    setSelectedTheme('custom');
     setPickerOpen(false);
   };
+  useEffect(() => {
+    if (!pickerOpen) return;
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!pickerRef.current?.contains(target) && !pickerButtonRef.current?.contains(target)) setPickerOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOnOutsidePress);
+    return () => document.removeEventListener('pointerdown', closeOnOutsidePress);
+  }, [pickerOpen]);
   const applyTheme = (themeId: string) => {
     // Убираем все классы тем
     themes.forEach(t => {
@@ -155,8 +182,9 @@ export function Appearance({
         >
           <div className="flex items-center gap-[12px] mb-[16px]">
             <motion.button
+              ref={pickerButtonRef}
               whileTap={{ scale: 0.92 }}
-              onClick={() => setPickerOpen((open) => !open)}
+              onClick={() => pickerOpen ? setPickerOpen(false) : openPicker()}
               aria-label="Выбрать свой цвет"
               aria-expanded={pickerOpen}
               className="relative w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
@@ -172,11 +200,21 @@ export function Appearance({
           </div>
           {pickerOpen && (
             <motion.div
+              ref={pickerRef}
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
               className="mx-auto mb-4 w-[min(260px,100%)] rounded-[18px] border border-white/20 p-4 text-white shadow-[0_18px_45px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
               style={{ background: 'rgba(24, 26, 32, 0.9)' }}
             >
+              <div
+                className="mx-auto mb-2 h-1 w-10 cursor-grab rounded-full bg-white/30"
+                onPointerDown={(event) => { swipeStartY.current = event.clientY; }}
+                onPointerUp={(event) => {
+                  if (swipeStartY.current !== null && event.clientY - swipeStartY.current > 45) setPickerOpen(false);
+                  swipeStartY.current = null;
+                }}
+                aria-hidden="true"
+              />
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h4 className="font-heading text-sm font-bold">Выбери свой цвет</h4>
                 <button type="button" onClick={resetCustomColor} className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-white/70 transition hover:bg-white/10 hover:text-white" aria-label="Сбросить свой цвет">
@@ -186,12 +224,12 @@ export function Appearance({
               <div className="flex justify-center"><ColorWheel color={pickerColor} onChange={updateCustomColor} /></div>
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between text-xs text-white/70">
-                  <span>Яркость цвета</span><span className="font-semibold text-white">{Math.round(colorBrightness)}%</span>
+                  <span>Яркость цвета</span><span className="font-semibold text-white">{Math.round(draftBrightness)}%</span>
                 </div>
                 <input
                   aria-label="Яркость выбранного цвета"
-                  type="range" min="20" max="100" value={colorBrightness}
-                  onChange={(event) => setColorBrightness(Number(event.target.value))}
+                  type="range" min="20" max="100" value={draftBrightness}
+                  onChange={(event) => setDraftBrightness(Number(event.target.value))}
                   className="color-brightness-slider w-full"
                   style={{ '--picker-color': hsvToHex({ ...pickerColor, v: 100 }) } as CSSProperties}
                 />
@@ -200,11 +238,19 @@ export function Appearance({
                 <span>Градиент</span>
                 <input
                   type="checkbox"
-                  checked={customGradient}
-                  onChange={(event) => setCustomGradient(event.target.checked)}
+                  checked={draftGradient}
+                  onChange={(event) => setDraftGradient(event.target.checked)}
                   className="size-5 cursor-pointer accent-[#4DC3C8]"
                 />
               </label>
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.98 }}
+                onClick={saveCustomColor}
+                className="mt-4 w-full rounded-xl bg-[#4DC3C8] px-4 py-3 font-heading text-sm font-bold text-white transition-colors hover:bg-[#43b4b9]"
+              >
+                Сохранить
+              </motion.button>
             </motion.div>
           )}
           <div className="grid grid-cols-3 gap-[8px]">
@@ -254,7 +300,7 @@ export function Appearance({
             <div className="flex justify-end">
               <div
                 className="message-outgoing-pattern p-[12px] rounded-2xl rounded-br-sm max-w-[80%]"
-                style={{ boxShadow: 'none' }}
+                style={{ background: pickerOpen ? draftBubbleBackground : undefined, boxShadow: 'none', filter: 'none' }}
               >
                 <p className="font-body" style={{ fontSize: `${fontSize}px` }}>
                   Выбери, что тебе ближе 💜
