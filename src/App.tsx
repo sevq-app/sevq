@@ -22,7 +22,7 @@ import { supabase } from '@/lib/supabase';
 import { displayNameOf, initialsOf, listMyChats } from '@/lib/messagingService';
 import { useChatStore } from '@/store/chatStore';
 import { useAutoReloadOnNewVersion } from '@/hooks/useAutoReloadOnNewVersion';
-import { shadeHex } from '@/lib/color';
+import { messageThemeColors, setHexBrightness, shadeHex } from '@/lib/color';
 
 function App() {
   useAutoReloadOnNewVersion();
@@ -50,6 +50,7 @@ function App() {
   });
   const [customColor, setCustomColor] = useState(() => localStorage.getItem('sevchik_customColor') || '#7C5CFC');
   const [customGradient, setCustomGradient] = useState(() => localStorage.getItem('sevchik_customGradient') !== 'false');
+  const [colorBrightness, setColorBrightness] = useState(() => Number(localStorage.getItem('sevchik_colorBrightness')) || 100);
   const [soundsEnabled, setSoundsEnabled] = useState<boolean>(() => {
     return localStorage.getItem('sevchik_sounds') !== 'false';
   });
@@ -125,27 +126,22 @@ function App() {
     document.documentElement.classList.add(selectedTheme);
   }, [selectedTheme]);
 
-  // Пользовательский цвет заменяет только фон исходящих сообщений, не
-  // окрашивая нейтральный фон. Градиент идёт от тёмного оттенка сверху к
-  // светлому снизу; его можно полностью отключить.
+  // Градиент и яркость едины для шести готовых тем и пользовательского цвета.
+  // Направление всегда горизонтальное: тёмный оттенок слева, светлый справа.
   useEffect(() => {
     const root = document.documentElement;
-    if (selectedTheme === 'custom') {
-      root.style.setProperty('--theme-primary', customColor);
-      const rgb = [1, 3, 5].map((index) => parseInt(customColor.slice(index, index + 2), 16)).join(', ');
-      root.style.setProperty('--theme-primary-rgb', rgb);
-      root.style.setProperty('--theme-message-gradient', customColor);
-      root.style.setProperty('--bubble-outgoing-gradient', customGradient
-        ? `linear-gradient(180deg, ${shadeHex(customColor, -0.22)} 0%, ${customColor} 48%, ${shadeHex(customColor, 0.2)} 100%)`
-        : customColor);
-    } else {
-      root.style.removeProperty('--theme-primary');
-      root.style.removeProperty('--theme-primary-rgb');
-      root.style.removeProperty('--theme-message-gradient');
-      if (customGradient) root.style.removeProperty('--bubble-outgoing-gradient');
-      else root.style.setProperty('--bubble-outgoing-gradient', 'var(--theme-primary)');
-    }
-  }, [selectedTheme, customColor, customGradient]);
+    const palette = messageThemeColors[selectedTheme];
+    const primary = setHexBrightness(palette?.primary ?? customColor, colorBrightness);
+    const dark = setHexBrightness(palette?.dark ?? shadeHex(customColor, -0.28), colorBrightness);
+    const light = setHexBrightness(palette?.light ?? shadeHex(customColor, 0.72), colorBrightness);
+    const rgb = [1, 3, 5].map((index) => parseInt(primary.slice(index, index + 2), 16)).join(', ');
+    root.style.setProperty('--theme-primary', primary);
+    root.style.setProperty('--theme-primary-rgb', rgb);
+    root.style.setProperty('--theme-message-gradient', primary);
+    root.style.setProperty('--bubble-outgoing-gradient', customGradient
+      ? `linear-gradient(90deg, ${dark} 0%, ${primary} 46%, ${light} 100%)`
+      : primary);
+  }, [selectedTheme, customColor, customGradient, colorBrightness]);
 
   // Применение тёмного/серого режима при изменении вычисленного значения
   useEffect(() => {
@@ -179,7 +175,8 @@ function App() {
   useEffect(() => {
     localStorage.setItem('sevchik_customColor', customColor);
     localStorage.setItem('sevchik_customGradient', String(customGradient));
-  }, [customColor, customGradient]);
+    localStorage.setItem('sevchik_colorBrightness', String(colorBrightness));
+  }, [customColor, customGradient, colorBrightness]);
 
   // Для авторизованного пользователя эти настройки также являются частью
   // профиля и восстанавливаются на другом устройстве.
@@ -190,6 +187,7 @@ function App() {
       setCustomColor(appearance.customColor);
     }
     if (typeof appearance.customGradient === 'boolean') setCustomGradient(appearance.customGradient);
+    if (typeof appearance.colorBrightness === 'number') setColorBrightness(appearance.colorBrightness);
     if (typeof appearance.selectedTheme === 'string') setSelectedTheme(appearance.selectedTheme);
   }, [currentUser?.id]);
 
@@ -197,11 +195,11 @@ function App() {
     if (!currentUser?.id) return;
     const timeout = window.setTimeout(() => {
       void supabase.auth.updateUser({
-        data: { appearance: { selectedTheme, customColor, customGradient } },
+        data: { appearance: { selectedTheme, customColor, customGradient, colorBrightness } },
       });
     }, 800);
     return () => window.clearTimeout(timeout);
-  }, [currentUser?.id, selectedTheme, customColor, customGradient]);
+  }, [currentUser?.id, selectedTheme, customColor, customGradient, colorBrightness]);
 
   // Сохранение режима оформления (системная/светлая/тёмная) при изменении
   useEffect(() => {
@@ -345,6 +343,8 @@ function App() {
                 setCustomColor={setCustomColor}
                 customGradient={customGradient}
                 setCustomGradient={setCustomGradient}
+                colorBrightness={colorBrightness}
+                setColorBrightness={setColorBrightness}
                 themeMode={themeMode}
                 setThemeMode={setThemeMode}
                 soundsEnabled={soundsEnabled}

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Palette, Sun, Flower, Leaf, Snowflake, Sparkles, Waves, Monitor, Moon, Volume2, Vibrate, X } from 'lucide-react';
 import { playSound, triggerHaptic } from '@/lib/feedback';
 import { ColorWheel } from '@/components/ColorWheel';
-import { hexToHsv, hsvToHex, type HsvColor } from '@/lib/color';
+import { hexToHsv, hsvToHex, messageThemeColors, type HsvColor } from '@/lib/color';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -17,6 +17,8 @@ interface AppearanceProps {
   setCustomColor: (color: string) => void;
   customGradient: boolean;
   setCustomGradient: (enabled: boolean) => void;
+  colorBrightness: number;
+  setColorBrightness: (value: number) => void;
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
   soundsEnabled: boolean;
@@ -26,13 +28,14 @@ interface AppearanceProps {
 }
 
 const themes = [
-  { id: 'spring', name: 'Весна', gradient: '#FF9848', primary: '#FF9848', icon: Flower },
-  { id: 'summer', name: 'Лето', gradient: 'linear-gradient(135deg, #FFD93D, #FFB848)', primary: '#FFB848', icon: Sun },
-  { id: 'autumn', name: 'Осень', gradient: 'linear-gradient(135deg, #FF6B6B, #FF9848)', primary: '#FF6B6B', icon: Leaf },
-  { id: 'winter', name: 'Зима', gradient: 'linear-gradient(135deg, #A78BFA, #6546C7)', primary: '#6546C7', icon: Snowflake },
-  { id: 'aurora', name: 'Северное сияние', gradient: 'linear-gradient(135deg, #4FD3C8, #6546C7)', primary: '#4FD3C8', icon: Sparkles },
-  { id: 'sea', name: 'Море', gradient: 'linear-gradient(135deg, #38b2ac, #2c7a7b)', primary: '#38b2ac', icon: Waves },
-];
+  ...Object.entries(messageThemeColors).map(([id, colors]) => ({ id, ...colors })),
+].map((theme) => ({
+  ...theme,
+  name: ({ spring: 'Весна', summer: 'Лето', autumn: 'Осень', winter: 'Зима', aurora: 'Северное сияние', sea: 'Море' } as Record<string, string>)[theme.id],
+  icon: ({ spring: Flower, summer: Sun, autumn: Leaf, winter: Snowflake, aurora: Sparkles, sea: Waves } as Record<string, typeof Flower>)[theme.id],
+  gradient: `linear-gradient(90deg, ${theme.dark}, ${theme.light})`,
+  primary: theme.primary,
+}));
 
 const themeModes: { id: ThemeMode; name: string; icon: typeof Monitor }[] = [
   { id: 'system', name: 'Системная', icon: Monitor },
@@ -50,6 +53,8 @@ export function Appearance({
   setCustomColor,
   customGradient,
   setCustomGradient,
+  colorBrightness,
+  setColorBrightness,
   themeMode,
   setThemeMode,
   soundsEnabled,
@@ -70,6 +75,7 @@ export function Appearance({
     setPickerColor(hexToHsv(defaultColor));
     setCustomColor(defaultColor);
     setCustomGradient(true);
+    setColorBrightness(100);
     applyTheme('spring');
     setPickerOpen(false);
   };
@@ -179,12 +185,12 @@ export function Appearance({
               <div className="flex justify-center"><ColorWheel color={pickerColor} onChange={updateCustomColor} /></div>
               <div className="mt-4">
                 <div className="mb-2 flex items-center justify-between text-xs text-white/70">
-                  <span>Яркость цвета</span><span className="font-semibold text-white">{Math.round(pickerColor.v)}%</span>
+                  <span>Яркость цвета</span><span className="font-semibold text-white">{Math.round(colorBrightness)}%</span>
                 </div>
                 <input
                   aria-label="Яркость выбранного цвета"
-                  type="range" min="20" max="100" value={pickerColor.v}
-                  onChange={(event) => updateCustomColor({ ...pickerColor, v: Number(event.target.value) })}
+                  type="range" min="20" max="100" value={colorBrightness}
+                  onChange={(event) => setColorBrightness(Number(event.target.value))}
                   className="color-brightness-slider w-full"
                   style={{ '--picker-color': hsvToHex({ ...pickerColor, v: 100 }) } as CSSProperties}
                 />
