@@ -63,9 +63,9 @@ export default {
         },
         // 🎨 Переименовано на sevchik
         sevchik: {
-          purple: '#6546C7',
-          purpleDark: '#4E35A5',
-          purpleLight: '#8366D9',
+          accent: '#4DC3C8',
+          accentDark: '#3D999D',
+          accentLight: '#8BD8DB',
           orange: '#FF9848',
           orangeDark: '#E8802F',
           orangeLight: '#FFB87A',

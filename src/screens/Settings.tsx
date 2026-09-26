@@ -38,14 +38,14 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
     {
       title: 'Основное',
       items: [
-        { icon: Smartphone, label: 'Устройства', color: '#6546C7', hasChevron: true, value: '1 активно' },
+        { icon: Smartphone, label: 'Устройства', color: '#4DC3C8', hasChevron: true, value: '1 активно' },
       ],
     },
     {
       title: 'Уведомления и вид',
       items: [
         { icon: Bell, label: 'Уведомления и звуки', color: '#FF9848', isToggle: true, value: notifications, action: () => setNotifications(!notifications) },
-        { icon: Palette, label: 'Оформление', color: '#6546C7', hasChevron: true, action: () => onNavigate?.('appearance') },
+        { icon: Palette, label: 'Оформление', color: '#4DC3C8', hasChevron: true, action: () => onNavigate?.('appearance') },
         { icon: Battery, label: 'Энергосбережение', color: '#4FD3C8', isToggle: true, value: powerSaving, action: () => setPowerSaving(!powerSaving) },
       ],
     },
@@ -59,7 +59,7 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
     {
       title: 'Поддержка',
       items: [
-        { icon: UserPlus, label: 'Пригласить друзей', color: '#6546C7', hasChevron: true },
+        { icon: UserPlus, label: 'Пригласить друзей', color: '#4DC3C8', hasChevron: true },
         { icon: Languages, label: 'Язык приложения', color: '#6B7280', hasChevron: true, value: 'Русский' },
         { icon: HelpCircle, label: 'Помощь', color: '#6B7280', hasChevron: true },
         { icon: Info, label: 'О приложении', color: '#6B7280', hasChevron: true, value: `v${__APP_RELEASE_VERSION__}` },
@@ -73,8 +73,8 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={onBack}
-          className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7] transition-colors"
-          style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.15)' }}
+          className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#4DC3C8] transition-colors"
+          style={{ boxShadow: '0 4px 12px rgba(77,195,200,0.15)' }}
         >
           <ChevronRight size={22} className="rotate-180" />
         </motion.button>

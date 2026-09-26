@@ -154,7 +154,7 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
           background: isMe ? 'rgba(var(--theme-primary-rgb), 0.55)' : 'var(--bubble-incoming-bg)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
+          boxShadow: isMe ? '0 4px 16px rgba(77,195,200,0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
         }}
       >
         {replyTo && <ReplyQuotePreview replyTo={replyTo} isMe={isMe} onClick={onReplyClick} />}
@@ -892,7 +892,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             whileTap={{ scale: 0.9 }}
             onClick={exitMessageSelectMode}
             className="px-4 py-2 rounded-2xl font-heading font-bold text-sm text-white"
-            style={{ background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
+            style={{ background: '#4DC3C8', boxShadow: '0 4px 12px rgba(77,195,200,0.2)' }}
           >
             Готово
           </motion.button>
@@ -1067,8 +1067,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                     transition={{ duration: 0.15 }}
                     className={`absolute top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center border-2 ${isMe ? 'left-0' : 'right-0'}`}
                     style={{
-                      borderColor: selectedMessageIds.includes(msg.id) ? '#6546C7' : 'rgba(107,114,128,0.4)',
-                      background: selectedMessageIds.includes(msg.id) ? '#6546C7' : 'transparent',
+                      borderColor: selectedMessageIds.includes(msg.id) ? '#4DC3C8' : 'rgba(107,114,128,0.4)',
+                      background: selectedMessageIds.includes(msg.id) ? '#4DC3C8' : 'transparent',
                     }}
                   >
                     {selectedMessageIds.includes(msg.id) && <Check size={14} className="text-white" />}
@@ -1128,7 +1128,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                         ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
                         : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
                     }`}
-                    style={{ boxShadow: isMe ? '0 4px 16px rgba(101,70,199,0.14)' : '0 4px 16px rgba(15,23,42,0.05)' }}
+                    style={{ boxShadow: isMe ? '0 4px 16px rgba(77,195,200,0.14)' : '0 4px 16px rgba(15,23,42,0.05)' }}
                   >
                     {msg.replyTo && (
                       <div className="relative z-10">
@@ -1270,7 +1270,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                   className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                   style={{
                     background: 'var(--theme-primary)',
-                    boxShadow: '0 4px 14px rgba(101,70,199,0.22)',
+                    boxShadow: '0 4px 14px rgba(77,195,200,0.22)',
                   }}
                 >
                   <Send size={20} />
@@ -1291,7 +1291,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 whileTap={{ scale: 0.9, y: 2 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowAttachMenu(true)}
-                className="shrink-0 w-12 h-12 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-purple btn-3d"
+                className="shrink-0 w-12 h-12 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-accent btn-3d"
                 style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
               >
                 <Paperclip size={22} />
@@ -1303,7 +1303,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Написать сообщение..."
-                className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-purple/30 font-body text-sm"
+                className="flex-1 bg-sevchik-cream/60 rounded-btn py-3 px-4 text-sevchik-text placeholder:text-sevchik-textSecondary/60 focus:outline-none focus:ring-2 focus:ring-sevchik-accent/30 font-body text-sm"
               />
 
               <motion.button
@@ -1311,7 +1311,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 onClick={() => setShowStickerPanel((prev) => !prev)}
                 className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center btn-3d"
                 style={{
-                  background: showStickerPanel ? '#6546C7' : 'var(--bg-input)',
+                  background: showStickerPanel ? '#4DC3C8' : 'var(--bg-input)',
                   color: showStickerPanel ? '#fff' : 'var(--theme-primary)',
                 }}
               >
@@ -1328,7 +1328,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={handleSend}
                     className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(101,70,199,0.22)' }}
+                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(77,195,200,0.22)' }}
                   >
                     <Send size={20} className="relative z-10" />
                   </motion.button>
@@ -1419,9 +1419,9 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
 
               <div className="space-y-2">
                 {[
-                  { label: 'На 1 час', color: '#6546C7' },
-                  { label: 'На 4 часа', color: '#6546C7' },
-                  { label: 'На 24 часа', color: '#6546C7' },
+                  { label: 'На 1 час', color: '#4DC3C8' },
+                  { label: 'На 4 часа', color: '#4DC3C8' },
+                  { label: 'На 24 часа', color: '#4DC3C8' },
                   { label: 'Навсегда', color: '#EF4444' },
                 ].map((item) => (
                   <motion.button

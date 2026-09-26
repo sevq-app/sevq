@@ -15,11 +15,11 @@ interface QLogoProps {
 }
 
 const ACCENT = {
-  light: '#6546C7',
+  light: '#4DC3C8',
   dark: '#FFFFFF',
 };
 // Зрачок всегда фирменный фиолетовый — не зависит от темы (в отличие от --qlogo-accent).
-const PUPIL_COLOR = '#6546C7';
+const PUPIL_COLOR = '#4DC3C8';
 
 /**
  * Севчик — талисман приложения: кольцо-голова, две ножки, глаза со зрачками и звёздочка.

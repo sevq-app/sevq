@@ -86,8 +86,8 @@ export function Appearance({
             <div
               className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
-                background: '#6546C7',
-                boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
+                background: '#4DC3C8',
+                boxShadow: '0 4px 12px rgba(77,195,200,0.2)',
               }}
             >
               <span className="text-white font-bold text-lg">A</span>
@@ -102,7 +102,7 @@ export function Appearance({
               max="20"
               value={fontSize}
               onChange={(e) => setFontSize(Number(e.target.value))}
-              className="flex-1 accent-[#6546C7]"
+              className="flex-1 accent-[#4DC3C8]"
             />
             <span className="text-lg font-bold" style={{ color: textMain }}>A</span>
           </div>
@@ -199,7 +199,7 @@ export function Appearance({
           <div className="flex items-center gap-[12px] mb-[16px]">
             <div
               className="w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
-              style={{ background: '#6546C7', boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
+              style={{ background: '#4DC3C8', boxShadow: '0 4px 12px rgba(77,195,200,0.2)' }}
             >
               <Moon size={20} className="text-white" />
             </div>
@@ -221,7 +221,7 @@ export function Appearance({
                   onClick={() => setThemeMode(mode.id)}
                   className="flex flex-col items-center gap-1.5 rounded-2xl py-3 transition-colors"
                   style={{
-                    background: active ? '#6546C7' : 'var(--bg-input)',
+                    background: active ? '#4DC3C8' : 'var(--bg-input)',
                     color: active ? '#fff' : 'var(--text-secondary)',
                   }}
                 >
@@ -267,7 +267,7 @@ export function Appearance({
                 if (next) playSound('tap');
               }}
               className={`shrink-0 w-14 h-8 rounded-full transition-colors ${
-                soundsEnabled ? 'bg-[#6546C7]' : 'bg-[var(--bg-input)]'
+                soundsEnabled ? 'bg-[#4DC3C8]' : 'bg-[var(--bg-input)]'
               }`}
             >
               <motion.div
@@ -296,7 +296,7 @@ export function Appearance({
                 if (next) triggerHaptic(15);
               }}
               className={`shrink-0 w-14 h-8 rounded-full transition-colors ${
-                hapticsEnabled ? 'bg-[#6546C7]' : 'bg-[var(--bg-input)]'
+                hapticsEnabled ? 'bg-[#4DC3C8]' : 'bg-[var(--bg-input)]'
               }`}
             >
               <motion.div

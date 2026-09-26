@@ -50,7 +50,7 @@ export function ContactEdit({ chatId, onBack }: ContactEditProps) {
       </div>
 
       <div className="space-y-3">
-        <Field label="Отображаемое имя" icon={UserIcon} iconColor="#6546C7">
+        <Field label="Отображаемое имя" icon={UserIcon} iconColor="#4DC3C8">
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Введите имя" />
         </Field>
         <Field label="Номер телефона" icon={Phone} iconColor="#FF9848">
@@ -64,7 +64,7 @@ export function ContactEdit({ chatId, onBack }: ContactEditProps) {
       <button
         onClick={handleSave}
         disabled={saving || !name.trim()}
-        className="w-full mt-6 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(101,70,199,0.18)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(101,70,199,0.22)] active:scale-95 disabled:opacity-60"
+        className="w-full mt-6 rounded-2xl bg-gradient-to-r from-[#3D999D] to-[#4DC3C8] px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(77,195,200,0.18)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(77,195,200,0.22)] active:scale-95 disabled:opacity-60"
       >
         {saving ? 'Сохранение...' : 'Сохранить'}
       </button>
@@ -74,7 +74,7 @@ export function ContactEdit({ chatId, onBack }: ContactEditProps) {
 
 function Field({ label, icon: Icon, iconColor, help, children }: { label: string; icon: typeof UserIcon; iconColor: string; help?: string; children: ReactNode }) {
   return (
-    <label className="group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-purple-500/50">
+    <label className="group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-[#4DC3C8]/50">
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}>
           <Icon size={19} />

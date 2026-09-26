@@ -75,7 +75,7 @@ export const chats: Chat[] = [
   {
     id: FAVORITES_CHAT_ID,
     name: 'Избранное',
-    avatarColor: '#6546C7',
+    avatarColor: '#4DC3C8',
     initials: '',
     isFavorites: true,
     lastMessage: 'Сохраняйте сюда важные сообщения',

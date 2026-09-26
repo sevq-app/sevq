@@ -242,7 +242,7 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
       </div>
 
       <div className="space-y-3">
-        <Field label="Имя" icon={UserIcon} iconColor="#6546C7"><input type="text" value={data.firstName} onChange={(event) => update('firstName', event.target.value)} placeholder="Введите имя" /></Field>
+        <Field label="Имя" icon={UserIcon} iconColor="#4DC3C8"><input type="text" value={data.firstName} onChange={(event) => update('firstName', event.target.value)} placeholder="Введите имя" /></Field>
         <Field label="Фамилия" icon={UserIcon} iconColor="#FF9848"><input type="text" value={data.lastName} onChange={(event) => update('lastName', event.target.value)} placeholder="Введите фамилию" /></Field>
         <Field
           label="Никнейм"
@@ -258,11 +258,11 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
         <VisibilityField label="Дата рождения" icon={Calendar} iconColor="#A78BFA" value={data.birthDate} placeholder="ДД.ММ.ГГГГ" isDate visibility={data.birthDateVisibility} isOpen={openVisibility === 'birthDateVisibility'} onChange={(value) => update('birthDate', value)} onToggle={() => setOpenVisibility(openVisibility === 'birthDateVisibility' ? null : 'birthDateVisibility')} onVisibilityChange={(value) => { update('birthDateVisibility', value); setOpenVisibility(null); }} />
         <Field label="О себе" icon={MessageSquare} iconColor="#4FD3C8"><textarea rows={3} value={data.about} onChange={(event) => update('about', event.target.value)} placeholder="Расскажите о себе" /></Field>
         <Field label="Email" icon={Mail} iconColor="#FF9848" help="Никто не видит ваш email. Нужен для восстановления доступа"><input type="email" value={data.email} readOnly placeholder="Добавьте свой адрес электронной почты" /></Field>
-        <VisibilityField label="Другие соцсети" icon={Share2} iconColor="#6546C7" value={data.social} placeholder="Добавьте ссылки на другие соцсети" visibility={data.socialVisibility} isOpen={openVisibility === 'socialVisibility'} onChange={(value) => update('social', value)} onToggle={() => setOpenVisibility(openVisibility === 'socialVisibility' ? null : 'socialVisibility')} onVisibilityChange={(value) => { update('socialVisibility', value); setOpenVisibility(null); }} />
+        <VisibilityField label="Другие соцсети" icon={Share2} iconColor="#4DC3C8" value={data.social} placeholder="Добавьте ссылки на другие соцсети" visibility={data.socialVisibility} isOpen={openVisibility === 'socialVisibility'} onChange={(value) => update('social', value)} onToggle={() => setOpenVisibility(openVisibility === 'socialVisibility' ? null : 'socialVisibility')} onVisibilityChange={(value) => { update('socialVisibility', value); setOpenVisibility(null); }} />
         <VisibilityField label="Сайт" icon={Globe} iconColor="#4FD3C8" value={data.website} placeholder="Добавьте ссылку на сайт" visibility={data.websiteVisibility} isOpen={openVisibility === 'websiteVisibility'} onChange={(value) => update('website', value)} onToggle={() => setOpenVisibility(openVisibility === 'websiteVisibility' ? null : 'websiteVisibility')} onVisibilityChange={(value) => { update('websiteVisibility', value); setOpenVisibility(null); }} />
       </div>
 
-      <button onClick={handleSave} disabled={saving || usernameFormatInvalid} className="w-full mt-6 rounded-2xl bg-gradient-to-r from-purple-600 to-purple-500 px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(101,70,199,0.18)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(101,70,199,0.22)] active:scale-95 disabled:opacity-60">
+      <button onClick={handleSave} disabled={saving || usernameFormatInvalid} className="w-full mt-6 rounded-2xl bg-gradient-to-r from-[#3D999D] to-[#4DC3C8] px-4 py-3.5 text-white font-heading font-medium shadow-[0_4px_14px_rgba(77,195,200,0.18)] transition-all duration-200 ease-out hover:scale-[1.02] hover:shadow-[0_8px_20px_rgba(77,195,200,0.22)] active:scale-95 disabled:opacity-60">
         {saving ? 'Сохранение...' : 'Сохранить'}
       </button>
     </div>
@@ -271,7 +271,7 @@ export function AboutMe({ user, onBack, setProfileData }: AboutMeProps) {
 
 function Field({ label, icon: Icon, iconColor, help, error, success, children }: { label: string; icon: typeof UserIcon; iconColor: string; help?: string; error?: string; success?: boolean; children: ReactNode }) {
   return (
-    <label className={`group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] ${error ? 'border-red-400 focus-within:border-red-500' : 'border-transparent focus-within:border-purple-500/50'}`}>
+    <label className={`group block bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] ${error ? 'border-red-400 focus-within:border-red-500' : 'border-transparent focus-within:border-[#4DC3C8]/50'}`}>
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}><Icon size={19} /></div>
         <div className="min-w-0 flex-1">
@@ -323,7 +323,7 @@ function VisibilityField({ label, icon: Icon, iconColor, value, placeholder, typ
   const LockIcon = visibility === 'Никто' ? Lock : LockOpen;
 
   return (
-    <div className="group relative bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-purple-500/50">
+    <div className="group relative bg-[var(--bg-card)] rounded-2xl px-5 py-4 border-2 border-transparent transition-all duration-200 ease-out hover:bg-[var(--bg-input)] hover:scale-[1.01] focus-within:border-[#4DC3C8]/50">
       <div className="flex items-start gap-3">
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}20`, color: iconColor }}><Icon size={19} /></div>
         <div className="min-w-0 flex-1">
@@ -340,7 +340,7 @@ function VisibilityField({ label, icon: Icon, iconColor, value, placeholder, typ
                 <ChevronDown size={11} className="text-white" />
               </button>
               {isOpen && <motion.div initial={{ opacity: 0, scale: 0.94, y: 4 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.18, ease: 'easeOut' }} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-36 rounded-2xl bg-[var(--bg-card)]/95 backdrop-blur-md shadow-2xl border border-[var(--border-color)] p-1.5">
-                {(['Все', 'Контакты', 'Никто'] as Visibility[]).map((option) => <button type="button" key={option} onClick={() => { onVisibilityChange(option); onToggle(); }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${visibility === option ? 'bg-purple-100 text-purple-600' : 'text-[var(--text-main)] hover:bg-[var(--bg-input)]'}`}>{option}</button>)}
+                {(['Все', 'Контакты', 'Никто'] as Visibility[]).map((option) => <button type="button" key={option} onClick={() => { onVisibilityChange(option); onToggle(); }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${visibility === option ? 'bg-[#4DC3C8]/15 text-[#3D999D]' : 'text-[var(--text-main)] hover:bg-[var(--bg-input)]'}`}>{option}</button>)}
               </motion.div>}
             </div>
           </div>

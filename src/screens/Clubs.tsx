@@ -6,7 +6,7 @@ interface ClubsProps {
 }
 
 const mockClubs = [
-  { id: 1, name: 'Клуб путешественников', members: '1.2k', color: '#6546C7', initials: 'КП' },
+  { id: 1, name: 'Клуб путешественников', members: '1.2k', color: '#4DC3C8', initials: 'КП' },
   { id: 2, name: 'Дизайн и UI/UX', members: '856', color: '#FF9848', initials: 'ДУ' },
   { id: 3, name: 'Разработчики', members: '2.4k', color: '#4FD3C8', initials: 'РЗ' },
 ];

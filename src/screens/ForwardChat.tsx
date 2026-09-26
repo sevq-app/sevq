@@ -166,7 +166,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
                           {isSelected && (
                             <div
                               className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white"
-                              style={{ background: '#6546C7' }}
+                              style={{ background: '#4DC3C8' }}
                             >
                               <Check size={12} className="text-white" />
                             </div>
@@ -224,7 +224,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
           className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2 relative overflow-hidden disabled:opacity-40"
           style={{
             background: 'var(--theme-message-gradient)',
-            boxShadow: selectedIds.length > 0 ? '0 4px 14px rgba(101,70,199,0.22)' : 'none',
+            boxShadow: selectedIds.length > 0 ? '0 4px 14px rgba(77,195,200,0.22)' : 'none',
             backdropFilter: 'blur(8px)',
           }}
         >
@@ -306,7 +306,7 @@ function ChatRow({
       whileTap={{ scale: 0.98 }}
       onClick={() => onToggle(chat.id)}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-left btn-3d ${
-        isSelected ? 'ring-2 ring-[#6546C7]' : ''
+        isSelected ? 'ring-2 ring-[#4DC3C8]' : ''
       }`}
       style={{
         background: 'rgba(255,255,255,0.65)',
@@ -317,7 +317,7 @@ function ChatRow({
     >
       <div
         className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-          isSelected ? 'bg-[#6546C7]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
+          isSelected ? 'bg-[#4DC3C8]' : 'border-2 border-[var(--text-secondary)]/25 bg-transparent'
         }`}
       >
         {isSelected && (

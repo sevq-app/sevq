@@ -241,7 +241,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
     <div className="h-full overflow-y-auto pb-6 md:pb-0">
       <div className="px-4 sm:px-6 pt-6 pb-2 flex items-center justify-between">
         <h1 className="font-heading font-extrabold text-xl text-sevchik-text">Мой Севчик</h1>
-        <button onClick={() => onNavigate?.('settings')} className="w-12 h-12 rounded-card bg-[var(--bg-card)] flex items-center justify-center text-sevchik-textSecondary hover:text-sevchik-purple transition-colors" aria-label="Настройки"><Settings size={20} /></button>
+        <button onClick={() => onNavigate?.('settings')} className="w-12 h-12 rounded-card bg-[var(--bg-card)] flex items-center justify-center text-sevchik-textSecondary hover:text-sevchik-accent transition-colors" aria-label="Настройки"><Settings size={20} /></button>
       </div>
 
       <div className="flex flex-col items-center px-4 sm:px-6 mb-6 mt-2">
@@ -282,15 +282,15 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
       <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
 
       <div className="px-4 sm:px-6 space-y-4 max-w-2xl mx-auto">
-        <section className="bg-[var(--bg-card)] rounded-2xl p-5 flex items-center justify-between shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><div><h3 className="font-heading font-bold">Статус</h3><p className="text-sm text-sevchik-textSecondary font-body mt-0.5 flex items-center gap-1.5"><span className={`w-2 h-2 rounded-full ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/50'}`} />{online ? 'В сети' : 'Не в сети'}</p></div><button onClick={() => setOnline(!online)} aria-label="Изменить статус" className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/20'}`}><span className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-[left] ${online ? 'left-7' : 'left-1'} shadow-[0_2px_8px_rgba(0,0,0,0.15)]`} /></button></section>
-        <button onClick={() => onNavigate?.('about')} className="w-full bg-[var(--bg-card)] rounded-2xl p-5 flex items-center justify-between text-left shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><span className="font-heading font-bold">Укажите информацию о себе</span><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>
+        <section className="bg-[var(--bg-card)] rounded-2xl p-5 flex items-center justify-between shadow-[0_10px_30px_rgba(77,195,200,0.16)]"><div><h3 className="font-heading font-bold">Статус</h3><p className="text-sm text-sevchik-textSecondary font-body mt-0.5 flex items-center gap-1.5"><span className={`w-2 h-2 rounded-full ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/50'}`} />{online ? 'В сети' : 'Не в сети'}</p></div><button onClick={() => setOnline(!online)} aria-label="Изменить статус" className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${online ? 'bg-sevchik-mint' : 'bg-sevchik-textSecondary/20'}`}><span className={`absolute top-1 w-6 h-6 rounded-full bg-white transition-[left] ${online ? 'left-7' : 'left-1'} shadow-[0_2px_8px_rgba(0,0,0,0.15)]`} /></button></section>
+        <button onClick={() => onNavigate?.('about')} className="w-full bg-[var(--bg-card)] rounded-2xl p-5 flex items-center justify-between text-left shadow-[0_10px_30px_rgba(77,195,200,0.16)]"><span className="font-heading font-bold">Укажите информацию о себе</span><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>
 
-        <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><button onClick={() => onNavigate?.('photos')} className="w-full flex items-center justify-between mb-3 text-left"><h3 className="font-heading font-bold">Фотографии</h3><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>{photos.length === 0 ? <p className="text-sm text-sevchik-textSecondary font-body">Фото ещё не загрузили</p> : <div className="grid grid-cols-3 gap-2">{photos.slice(0, 6).map((photo) => <button key={photo.id} onClick={() => onNavigate?.('photos')} className="aspect-square overflow-hidden rounded-xl"><img src={photo.url} alt="" className="w-full h-full object-cover" /></button>)}</div>}</section>
+        <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_10px_30px_rgba(77,195,200,0.16)]"><button onClick={() => onNavigate?.('photos')} className="w-full flex items-center justify-between mb-3 text-left"><h3 className="font-heading font-bold">Фотографии</h3><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>{photos.length === 0 ? <p className="text-sm text-sevchik-textSecondary font-body">Фото ещё не загрузили</p> : <div className="grid grid-cols-3 gap-2">{photos.slice(0, 6).map((photo) => <button key={photo.id} onClick={() => onNavigate?.('photos')} className="aspect-square overflow-hidden rounded-xl"><img src={photo.url} alt="" className="w-full h-full object-cover" /></button>)}</div>}</section>
 
-        <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><button onClick={() => onNavigate?.('my-groups')} className="w-full flex items-center justify-between text-left"><h3 className="font-heading font-bold">Мои группы</h3><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>{groups.length === 0 ? <p className="text-sm text-sevchik-textSecondary mt-4">Вы ещё не состоите в группах</p> : <><div className="grid grid-cols-3 gap-3 mt-4">{groups.slice(0, 3).map((group) => <button key={group.id} onClick={() => onNavigate?.('my-groups')} className="min-w-0 text-left"><GroupIcon group={group} /><span className="block text-xs font-heading font-bold truncate mt-2">{group.name}</span></button>)}</div><button onClick={() => onNavigate?.('my-groups')} className="mt-4 text-sm font-heading font-bold text-sevchik-purple">Показать все</button></>}</section>
+        <section className="bg-[var(--bg-card)] rounded-2xl p-5 shadow-[0_10px_30px_rgba(77,195,200,0.16)]"><button onClick={() => onNavigate?.('my-groups')} className="w-full flex items-center justify-between text-left"><h3 className="font-heading font-bold">Мои группы</h3><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>{groups.length === 0 ? <p className="text-sm text-sevchik-textSecondary mt-4">Вы ещё не состоите в группах</p> : <><div className="grid grid-cols-3 gap-3 mt-4">{groups.slice(0, 3).map((group) => <button key={group.id} onClick={() => onNavigate?.('my-groups')} className="min-w-0 text-left"><GroupIcon group={group} /><span className="block text-xs font-heading font-bold truncate mt-2">{group.name}</span></button>)}</div><button onClick={() => onNavigate?.('my-groups')} className="mt-4 text-sm font-heading font-bold text-sevchik-accent">Показать все</button></>}</section>
 
-        <button onClick={() => undefined} className="w-full bg-[var(--bg-card)] rounded-2xl p-5 flex items-center gap-3 text-left shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><Sparkles size={22} className="text-sevchik-purple" /><span className="font-heading font-bold">Стикеры</span></button>
-        <button onClick={() => { setInviteMode('menu'); setInviteOpen(true); }} className="w-full bg-[var(--bg-card)] rounded-2xl p-5 flex items-center gap-3 text-left shadow-[0_10px_30px_rgba(101,70,199,0.16)]"><Link size={23} className="text-[#6546C7]" /><span className="flex-1 font-heading font-bold">Пригласить друзей</span><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>
+        <button onClick={() => undefined} className="w-full bg-[var(--bg-card)] rounded-2xl p-5 flex items-center gap-3 text-left shadow-[0_10px_30px_rgba(77,195,200,0.16)]"><Sparkles size={22} className="text-sevchik-accent" /><span className="font-heading font-bold">Стикеры</span></button>
+        <button onClick={() => { setInviteMode('menu'); setInviteOpen(true); }} className="w-full bg-[var(--bg-card)] rounded-2xl p-5 flex items-center gap-3 text-left shadow-[0_10px_30px_rgba(77,195,200,0.16)]"><Link size={23} className="text-[#4DC3C8]" /><span className="flex-1 font-heading font-bold">Пригласить друзей</span><ChevronRight size={20} className="text-sevchik-textSecondary" /></button>
         <div className="pb-6" />
       </div>
 
@@ -319,7 +319,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
         <Modal onClose={() => setUploadError(null)}>
           <h2 className="font-heading font-extrabold text-xl">Не получилось</h2>
           <p className="text-sm text-sevchik-textSecondary mt-2">{uploadError}</p>
-          <button onClick={() => setUploadError(null)} className="w-full rounded-xl bg-sevchik-purple text-white py-3 font-heading font-bold mt-5">Понятно</button>
+          <button onClick={() => setUploadError(null)} className="w-full rounded-xl bg-sevchik-accent text-white py-3 font-heading font-bold mt-5">Понятно</button>
         </Modal>
       )}
       {isInviteOpen && <Modal onClose={() => setInviteOpen(false)}>{inviteMode === 'qr' ? <><h2 className="font-heading font-extrabold text-xl">QR-код</h2><QrCodeVisual value={inviteUrl} /><button onClick={() => setInviteMode('menu')} className="w-full rounded-xl bg-[var(--bg-input)] py-3 font-heading font-bold">Назад</button></> : <><h2 className="font-heading font-extrabold text-xl">Пригласить друзей</h2><div className="space-y-2 mt-5"><ShareAction icon={Copy} text="Скопировать ссылку" onClick={() => navigator.clipboard?.writeText(inviteUrl)} /><ShareAction icon={Link} text="Реферальная ссылка" onClick={() => navigator.clipboard?.writeText(referralUrl)} /><ShareAction icon={QrCode} text="QR-код" onClick={() => setInviteMode('qr')} /><ShareAction icon={Share2} text="Поделиться в других приложениях" onClick={() => { if (navigator.share) navigator.share({ title: 'Профиль', url: inviteUrl }); }} /></div></>}</Modal>}
@@ -328,7 +328,7 @@ export function Profile({ user, profileData, onNavigate }: ProfileProps) {
 }
 
 function GroupIcon({ group }: { group: ProfileGroup }) {
-  return group.avatarUrl ? <img src={group.avatarUrl} alt="" className="w-full aspect-square rounded-2xl object-cover" /> : <div className="w-full aspect-square rounded-2xl bg-sevchik-purple text-white flex items-center justify-center font-heading font-bold">{group.initials || group.name.slice(0, 2).toUpperCase()}</div>;
+  return group.avatarUrl ? <img src={group.avatarUrl} alt="" className="w-full aspect-square rounded-2xl object-cover" /> : <div className="w-full aspect-square rounded-2xl bg-sevchik-accent text-white flex items-center justify-center font-heading font-bold">{group.initials || group.name.slice(0, 2).toUpperCase()}</div>;
 }
 
 function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
@@ -390,15 +390,15 @@ function PhotoViewer({
                 style={{ boxShadow: '0 12px 32px rgba(0,0,0,0.3)' }}
               >
                 <button onClick={() => { setMenuOpen(false); onShare(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
-                  <Share2 size={19} className="text-sevchik-purple" />
+                  <Share2 size={19} className="text-sevchik-accent" />
                   <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Поделиться</span>
                 </button>
                 <button onClick={() => { setMenuOpen(false); onSaveToGallery(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
-                  <Download size={19} className="text-sevchik-purple" />
+                  <Download size={19} className="text-sevchik-accent" />
                   <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Сохранить в галерею</span>
                 </button>
                 <button onClick={() => { setMenuOpen(false); onReplace(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
-                  <Camera size={19} className="text-sevchik-purple" />
+                  <Camera size={19} className="text-sevchik-accent" />
                   <span className="font-heading font-semibold text-sm text-[var(--text-main)]">Заменить фото</span>
                 </button>
                 <button onClick={() => { setMenuOpen(false); onDeleteRequest(); }} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-[var(--bg-input)]">
@@ -422,7 +422,7 @@ function PhotoViewer({
 }
 
 function ShareAction({ icon: Icon, text, onClick }: { icon: typeof Copy; text: string; onClick: () => void }) {
-  return <button onClick={onClick} className="w-full flex items-center gap-3 rounded-xl bg-[var(--bg-input)] p-3 text-left"><Icon size={19} className="text-sevchik-purple" /><span className="font-body text-sm">{text}</span></button>;
+  return <button onClick={onClick} className="w-full flex items-center gap-3 rounded-xl bg-[var(--bg-input)] p-3 text-left"><Icon size={19} className="text-sevchik-accent" /><span className="font-body text-sm">{text}</span></button>;
 }
 
 function QrCodeVisual({ value }: { value: string }) {

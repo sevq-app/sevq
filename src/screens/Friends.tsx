@@ -89,8 +89,8 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="w-12 h-12 rounded-full flex items-center justify-center text-white"
                 style={{
-                  background: '#6546C7',
-                  boxShadow: '0 4px 12px rgba(101,70,199,0.2)',
+                  background: '#4DC3C8',
+                  boxShadow: '0 4px 12px rgba(77,195,200,0.2)',
                 }}
               >
                 <Plus size={24} />
@@ -169,7 +169,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Поиск"
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl border-2 border-transparent focus:border-[#4DC3C8]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ background: '#F2F2F7', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
           </div>
@@ -328,7 +328,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentView('main')}
-              className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
+              className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#4DC3C8]"
               style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.08)' }}
             >
               <ChevronLeft size={22} />
@@ -343,7 +343,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               value={groupSearch}
               onChange={(e) => setGroupSearch(e.target.value)}
               placeholder="Найти по имени или номеру"
-              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
+              className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#4DC3C8]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
           </div>
@@ -352,8 +352,8 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-3 px-4 py-2 bg-[#6546C7] rounded-xl text-white text-sm font-heading font-bold inline-block"
-              style={{ boxShadow: '0 4px 12px rgba(101,70,199,0.2)' }}
+              className="mt-3 px-4 py-2 bg-[#4DC3C8] rounded-xl text-white text-sm font-heading font-bold inline-block"
+              style={{ boxShadow: '0 4px 12px rgba(77,195,200,0.2)' }}
             >
               Выбрано: {selectedMembers.length}
             </motion.div>
@@ -375,7 +375,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => toggleMember(friend.id)}
                   className={`w-full bg-white rounded-2xl p-4 flex items-center gap-4 transition-all ${
-                    isSelected ? 'ring-2 ring-[#6546C7]' : ''
+                    isSelected ? 'ring-2 ring-[#4DC3C8]' : ''
                   }`}
                   style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
                 >
@@ -395,7 +395,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   {/* Галочка выбора */}
                   <div
                     className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                      isSelected ? 'bg-[#6546C7]' : 'bg-[#E5E7EB]'
+                      isSelected ? 'bg-[#4DC3C8]' : 'bg-[#E5E7EB]'
                     }`}
                   >
                     {isSelected && (
@@ -418,13 +418,13 @@ export function Friends({ onWriteMessage }: FriendsProps) {
         {/* Кнопка "Создать пустую группу" внизу */}
         <div className="fixed bottom-20 md:bottom-6 left-0 right-0 px-4 sm:px-6 max-w-2xl mx-auto">
           <motion.button
-            whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(101,70,199,0.2)' }}
+            whileHover={{ scale: 1.02, boxShadow: '0 8px 20px rgba(77,195,200,0.2)' }}
             whileTap={{ scale: 0.98, y: 2 }}
             onClick={() => setCurrentView('createGroup')}
             className="w-full py-4 rounded-2xl text-white font-heading font-bold text-base relative overflow-hidden flex items-center justify-center gap-3"
             style={{
-              background: '#6546C7',
-              boxShadow: '0 4px 14px rgba(101,70,199,0.25)',
+              background: '#4DC3C8',
+              boxShadow: '0 4px 14px rgba(77,195,200,0.25)',
             }}
           >
             <Plus size={20} className="relative z-10" />
@@ -447,7 +447,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => setCurrentView('selectMembers')}
-              className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#6546C7]"
+              className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[#4DC3C8]"
               style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.08)' }}
             >
               <ChevronLeft size={22} />
@@ -497,7 +497,7 @@ export function Friends({ onWriteMessage }: FriendsProps) {
               onChange={(e) => setGroupName(e.target.value)}
               placeholder="Например: Друзья из школы"
               maxLength={50}
-              className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#6546C7]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
+              className="w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-input)] border-2 border-transparent focus:border-[#4DC3C8]/30 outline-none transition-all font-body text-[var(--text-main)] placeholder:text-[var(--text-secondary)]"
               style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
             />
             <p className="text-xs text-[#9CA3AF] font-body text-right">

@@ -237,7 +237,7 @@ export function Photos({ onBack }: { onBack: () => void }) {
                 {selectMode && (
                   <div
                     className={`absolute top-1.5 right-1.5 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white transition-colors ${
-                      isSelected ? 'bg-sevchik-purple' : 'bg-black/30'
+                      isSelected ? 'bg-sevchik-accent' : 'bg-black/30'
                     }`}
                   >
                     {isSelected && <Check size={14} className="text-white" strokeWidth={3} />}
@@ -260,7 +260,7 @@ export function Photos({ onBack }: { onBack: () => void }) {
               event.stopPropagation();
               setCropSource(selected.url);
             }}
-            className="mt-6 px-6 py-3 rounded-xl bg-sevchik-purple text-white font-heading font-bold"
+            className="mt-6 px-6 py-3 rounded-xl bg-sevchik-accent text-white font-heading font-bold"
           >
             Сделать аватаркой
           </button>
@@ -297,7 +297,7 @@ export function Photos({ onBack }: { onBack: () => void }) {
                 whileTap={{ scale: 0.98 }}
                 onClick={shareSelected}
                 className="flex-1 py-4 rounded-2xl text-white font-heading font-bold text-base flex items-center justify-center gap-2"
-                style={{ background: '#6546C7', boxShadow: '0 4px 14px rgba(101,70,199,0.2)' }}
+                style={{ background: '#4DC3C8', boxShadow: '0 4px 14px rgba(77,195,200,0.2)' }}
               >
                 <Share2 size={20} />
                 <span>Переслать</span>
@@ -338,7 +338,7 @@ export function Photos({ onBack }: { onBack: () => void }) {
         <Modal onClose={() => setError(null)}>
           <h2 className="font-heading font-extrabold text-xl">Не получилось</h2>
           <p className="text-sm text-sevchik-textSecondary mt-2">{error}</p>
-          <button onClick={() => setError(null)} className="w-full rounded-xl bg-sevchik-purple text-white py-3 font-heading font-bold mt-5">
+          <button onClick={() => setError(null)} className="w-full rounded-xl bg-sevchik-accent text-white py-3 font-heading font-bold mt-5">
             Понятно
           </button>
         </Modal>
