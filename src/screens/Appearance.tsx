@@ -203,11 +203,11 @@ export function Appearance({
               ref={pickerRef}
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mx-auto mb-4 w-[min(260px,100%)] rounded-[18px] border border-white/20 p-4 text-white shadow-[0_18px_45px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
+              className="mx-auto mb-4 w-[90%] rounded-[18px] border border-white/20 px-4 pb-4 pt-3 text-white shadow-[0_18px_45px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
               style={{ background: 'rgba(24, 26, 32, 0.9)' }}
             >
               <div
-                className="mx-auto mb-2 h-1 w-10 cursor-grab rounded-full bg-white/30"
+                className="mx-auto mb-1.5 h-1 w-10 cursor-grab rounded-full bg-white/30"
                 onPointerDown={(event) => { swipeStartY.current = event.clientY; }}
                 onPointerUp={(event) => {
                   if (swipeStartY.current !== null && event.clientY - swipeStartY.current > 45) setPickerOpen(false);
@@ -215,45 +215,57 @@ export function Appearance({
                 }}
                 aria-hidden="true"
               />
-              <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="mb-2 flex items-center justify-between gap-2">
                 <h4 className="font-heading text-sm font-bold">Выбери свой цвет</h4>
                 <button type="button" onClick={resetCustomColor} className="flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] text-white/70 transition hover:bg-white/10 hover:text-white" aria-label="Сбросить свой цвет">
                   <X size={13} /> Сбросить
                 </button>
               </div>
-              <div className="flex justify-center"><ColorWheel color={pickerColor} onChange={updateCustomColor} /></div>
-              <div className="mt-4">
-                <div className="mb-2 flex items-center justify-between text-xs text-white/70">
-                  <span>Яркость цвета</span><span className="font-semibold text-white">{Math.round(draftBrightness)}%</span>
+              <div className="flex items-center gap-4">
+                <div className="flex w-1/2 min-w-0 justify-center">
+                  <ColorWheel color={pickerColor} onChange={updateCustomColor} />
                 </div>
-                <input
-                  aria-label="Яркость выбранного цвета"
-                  type="range" min="20" max="100" value={draftBrightness}
-                  onChange={(event) => setDraftBrightness(Number(event.target.value))}
-                  className="color-brightness-slider w-full"
-                  style={{ '--picker-color': hsvToHex({ ...pickerColor, v: 100 }) } as CSSProperties}
-                />
+                <div className="flex w-1/2 min-w-0 flex-col justify-center">
+                  <div>
+                    <div className="mb-2 flex items-center justify-between gap-2 text-[11px] text-white/70 sm:text-xs">
+                      <span>Яркость цвета</span><span className="shrink-0 font-semibold text-white">{Math.round(draftBrightness)}%</span>
+                    </div>
+                    <input
+                      aria-label="Яркость выбранного цвета"
+                      type="range" min="20" max="100" value={draftBrightness}
+                      onChange={(event) => setDraftBrightness(Number(event.target.value))}
+                      className="color-brightness-slider w-full"
+                      style={{ '--picker-color': hsvToHex({ ...pickerColor, v: 100 }) } as CSSProperties}
+                    />
+                  </div>
+                  <label className="mt-3 flex cursor-pointer items-center justify-between gap-2 text-sm font-medium">
+                    <span>Градиент</span>
+                    <span className="relative size-5 shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={draftGradient}
+                        onChange={(event) => setDraftGradient(event.target.checked)}
+                        className="peer absolute inset-0 z-10 cursor-pointer appearance-none rounded-[6px]"
+                      />
+                      <span className="pointer-events-none absolute inset-0 rounded-[6px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,255,255,0.13)_0%,rgba(255,255,255,0.04)_42%,rgba(5,8,13,0.5)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_10px_rgba(0,0,0,0.28)] transition peer-focus-visible:ring-2 peer-focus-visible:ring-white/70 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#181a20]" />
+                      <svg viewBox="0 0 20 20" aria-hidden="true" className="pointer-events-none absolute inset-0 scale-75 text-white opacity-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)] transition peer-checked:scale-100 peer-checked:opacity-100">
+                        <path d="m5 10 3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </span>
+                  </label>
+                  <motion.button
+                    type="button"
+                    whileTap={{ scale: 0.98 }}
+                    onClick={saveCustomColor}
+                    className="mt-3 w-full rounded-xl border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.13)_0%,rgba(255,255,255,0.045)_38%,rgba(5,8,13,0.48)_100%)] px-3 py-2.5 font-heading text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_18px_rgba(0,0,0,0.3)] transition hover:border-white/50 hover:bg-white/10"
+                  >
+                    Сохранить
+                  </motion.button>
+                </div>
               </div>
-              <label className="mt-4 flex cursor-pointer items-center justify-between gap-3 text-sm font-medium">
-                <span>Градиент</span>
-                <input
-                  type="checkbox"
-                  checked={draftGradient}
-                  onChange={(event) => setDraftGradient(event.target.checked)}
-                  className="size-5 cursor-pointer accent-[#4DC3C8]"
-                />
-              </label>
-              <motion.button
-                type="button"
-                whileTap={{ scale: 0.98 }}
-                onClick={saveCustomColor}
-                className="mt-4 w-full rounded-xl bg-[#4DC3C8] px-4 py-3 font-heading text-sm font-bold text-white transition-colors hover:bg-[#43b4b9]"
-              >
-                Сохранить
-              </motion.button>
             </motion.div>
           )}
-          <div className="grid grid-cols-3 gap-[8px]">
+          {!pickerOpen && <div className="grid grid-cols-3 gap-[8px]">
             {themes.map((theme) => {
               const ThemeIcon = theme.icon;
               return (
@@ -277,7 +289,7 @@ export function Appearance({
                 </motion.button>
               );
             })}
-          </div>
+          </div>}
         </motion.div>
 
         {/* Предпросмотр сообщений */}
