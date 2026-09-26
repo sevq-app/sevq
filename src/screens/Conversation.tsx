@@ -895,13 +895,23 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
   };
 
   // Общий стиль стеклянной капсулы для отдельных элементов шапки (имя,
-  // звонок, меню) — стрелка "Назад" сознательно НЕ стеклянная, см. ниже.
+  // звонок, меню).
   const headerGlassStyle: CSSProperties = {
     background: 'var(--header-glass-bg)',
     backdropFilter: 'blur(16px)',
     WebkitBackdropFilter: 'blur(16px)',
     border: '1px solid rgba(255,255,255,0.15)',
     boxShadow: `inset 0 1px 0 rgba(255,255,255,0.2), var(--header-glass-shadow)`,
+  };
+
+  // Адаптивные круглые стеклянные кнопки (назад, звонок, меню, скрепка,
+  // смайлик, микрофон, отправка) — тот же стеклянный материал, что и у
+  // капсулы шапки (--header-glass-bg уже светлый на светлой теме и тёмный
+  // на тёмной), плюс цвет иконки завязан на --text-main — она тоже
+  // автоматически чёрная на светлом и белая на тёмном.
+  const iconButtonGlassStyle: CSSProperties = {
+    ...headerGlassStyle,
+    color: 'var(--text-main)',
   };
 
   return (
@@ -923,14 +933,14 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         </div>
       ) : (
       <div className="shrink-0 sticky top-0 z-10 px-3 pt-2 sm:px-4 sm:pt-3 flex items-center gap-3">
-        {/* Стрелка "Назад" — отдельный сплошной чёрный кружок, не стекло */}
+        {/* Стрелка "Назад" — адаптивная стеклянная кнопка */}
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
           onClick={onBack}
-          className="w-12 h-12 rounded-full bg-[#1A1A1A] text-white btn-3d flex items-center justify-center shrink-0"
-          style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.25)' }}
+          className="w-10 h-10 rounded-full btn-3d flex items-center justify-center shrink-0"
+          style={iconButtonGlassStyle}
         >
-          <ArrowLeft size={22} />
+          <ArrowLeft size={20} />
         </motion.button>
 
         {/* Имя/аватарка/статус — отдельная стеклянная капсула, компактная */}
@@ -972,8 +982,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={() => alert('📞 Функция звонков скоро будет доступна!')}
-            className="w-10 h-10 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center shrink-0"
-            style={headerGlassStyle}
+            className="w-10 h-10 rounded-full btn-3d flex items-center justify-center shrink-0"
+            style={iconButtonGlassStyle}
           >
             <Phone size={19} />
           </motion.button>
@@ -985,8 +995,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             whileTap={{ scale: 0.9 }}
             whileHover={{ scale: 1.05 }}
             onClick={() => setShowMenu(!showMenu)}
-            className="w-10 h-10 rounded-full text-sevchik-textSecondary btn-3d flex items-center justify-center"
-            style={headerGlassStyle}
+            className="w-10 h-10 rounded-full btn-3d flex items-center justify-center"
+            style={iconButtonGlassStyle}
           >
             <MoreVertical size={19} />
           </motion.button>
@@ -1286,16 +1296,18 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               </div>
 
               <div className="relative shrink-0">
+                {/* Идёт запись — единственное исключение из адаптивного
+                    стеклянного стиля: кнопка мятная, чтобы запись было видно. */}
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={handleMicHoldEnd}
-                  className="w-12 h-12 rounded-full flex items-center justify-center text-white"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white"
                   style={{
-                    background: 'var(--theme-primary)',
-                    boxShadow: '0 4px 14px rgba(77,195,200,0.22)',
+                    background: '#4DC3C8',
+                    boxShadow: '0 4px 14px rgba(77,195,200,0.35)',
                   }}
                 >
-                  <Send size={20} />
+                  <Send size={18} />
                 </motion.button>
               </div>
             </div>
@@ -1313,10 +1325,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 whileTap={{ scale: 0.9, y: 2 }}
                 whileHover={{ scale: 1.05 }}
                 onClick={() => setShowAttachMenu(true)}
-                className="shrink-0 w-12 h-12 rounded-full bg-sevchik-cream flex items-center justify-center text-sevchik-accent btn-3d"
-                style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+                className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center btn-3d"
+                style={iconButtonGlassStyle}
               >
-                <Paperclip size={22} />
+                <Paperclip size={19} />
               </motion.button>
 
               <input
@@ -1331,13 +1343,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setShowStickerPanel((prev) => !prev)}
-                className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center btn-3d"
-                style={{
-                  background: showStickerPanel ? '#4DC3C8' : 'var(--bg-input)',
-                  color: showStickerPanel ? '#fff' : 'var(--theme-primary)',
-                }}
+                className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center btn-3d"
+                style={iconButtonGlassStyle}
               >
-                <Smile size={20} />
+                <Smile size={19} />
               </motion.button>
 
               <AnimatePresence mode="wait">
@@ -1349,10 +1358,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                     exit={{ scale: 0.5, opacity: 0 }}
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={handleSend}
-                    className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                    style={{ background: 'var(--theme-message-gradient)', boxShadow: '0 4px 14px rgba(77,195,200,0.22)' }}
+                    className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center btn-3d relative overflow-hidden"
+                    style={iconButtonGlassStyle}
                   >
-                    <Send size={20} className="relative z-10" />
+                    <Send size={18} className="relative z-10" />
                   </motion.button>
                 ) : showStickerPanel ? (
                   <motion.button
@@ -1362,10 +1371,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                     exit={{ scale: 0.5, opacity: 0 }}
                     whileTap={{ scale: 0.88, y: 2 }}
                     onClick={() => setShowStickerPanel(false)}
-                    className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white btn-3d"
-                    style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
+                    className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center btn-3d"
+                    style={iconButtonGlassStyle}
                   >
-                    <Keyboard size={20} />
+                    <Keyboard size={19} />
                   </motion.button>
                 ) : (
                   <div className="relative">
@@ -1395,10 +1404,10 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                       onMouseLeave={handleMicHoldEnd}
                       onTouchStart={handleMicHoldStart}
                       onTouchEnd={handleMicHoldEnd}
-                      className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white btn-3d relative overflow-hidden"
-                      style={{ background: '#4FD3C8', boxShadow: '0 4px 14px rgba(79,211,200,0.22)' }}
+                      className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center btn-3d relative overflow-hidden"
+                      style={iconButtonGlassStyle}
                     >
-                      <Mic size={20} className="relative z-10" />
+                      <Mic size={18} className="relative z-10" />
                     </motion.button>
                   </div>
                 )}
