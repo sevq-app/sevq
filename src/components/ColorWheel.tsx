@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import type { PointerEvent } from 'react';
-import { hsvToHex, type HsvColor } from '@/lib/color';
+import { hsvToHex, hsvToWheelPoint, wheelPointToHsv, type HsvColor } from '@/lib/color';
 
 interface ColorWheelProps {
   color: HsvColor;
@@ -16,13 +16,10 @@ export function ColorWheel({ color, onChange }: ColorWheelProps) {
     const x = event.clientX - rect.left - rect.width / 2;
     const y = event.clientY - rect.top - rect.height / 2;
     const radius = rect.width / 2;
-    const distance = Math.min(Math.sqrt(x * x + y * y), radius);
-    const h = (Math.atan2(y, x) * 180 / Math.PI + 90 + 360) % 360;
-    onChange({ h, s: distance / radius * 100, v: color.v });
+    onChange(wheelPointToHsv(x, y, radius, color.v));
   };
 
-  const radians = (color.h - 90) * Math.PI / 180;
-  const markerRadius = color.s / 100 * 72;
+  const marker = hsvToWheelPoint(color, 72);
 
   return (
     <div
@@ -45,7 +42,7 @@ export function ColorWheel({ color, onChange }: ColorWheelProps) {
         className="pointer-events-none absolute left-1/2 top-1/2 size-6 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.55)]"
         style={{
           background: hsvToHex(color),
-          transform: `translate(calc(-50% + ${Math.cos(radians) * markerRadius}px), calc(-50% + ${Math.sin(radians) * markerRadius}px))`,
+          transform: `translate(calc(-50% + ${marker.x}px), calc(-50% + ${marker.y}px))`,
         }}
       />
     </div>
