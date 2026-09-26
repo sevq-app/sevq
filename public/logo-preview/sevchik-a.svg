@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="240" viewBox="0 0 720 240" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc" style="color:#4DC3C8">
+<title id="title">Логотип «Севчик», вариант A</title>
+<desc id="desc">Живой рукописный леттеринг с прыгающей высотой, разным наклоном и плотным наложением букв.</desc>
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+  <g transform="rotate(-7 95 120)"><path d="M146 57C112 28 60 44 46 97C27 168 83 213 145 173" stroke-width="48"/><path d="M145 57L132 64" stroke-width="32"/></g>
+  <g transform="rotate(6 193 139)"><path d="M154 142C158 99 213 87 229 124C235 139 221 148 196 149L158 149C168 183 208 190 235 162" stroke-width="34"/><path d="M166 145L224 138" stroke-width="23"/></g>
+  <g transform="rotate(-4 280 130)"><path d="M257 83C252 116 251 153 253 188" stroke-width="34"/><path d="M259 93C307 72 330 112 294 133C340 125 346 180 294 187L256 188" stroke-width="38"/></g>
+  <g transform="rotate(8 393 126)"><path d="M355 72L357 126C359 155 407 153 426 122" stroke-width="39"/><path d="M431 66C425 105 425 151 430 190" stroke-width="31"/></g>
+  <g transform="rotate(-5 500 143)"><path d="M469 91C465 128 466 163 470 193" stroke-width="32"/><path d="M474 187C500 151 525 119 550 89" stroke-width="42"/><path d="M549 91C546 126 547 159 551 191" stroke-width="27"/></g>
+  <g transform="rotate(7 618 120)"><path d="M590 55C585 97 585 148 590 194" stroke-width="38"/><path d="M593 143C615 121 637 97 659 74" stroke-width="30"/><path d="M613 124C634 144 650 164 667 187" stroke-width="43"/></g>
+</g>
+</svg>

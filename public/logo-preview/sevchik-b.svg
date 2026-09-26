@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="240" viewBox="0 0 720 240" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="title desc" style="color:#4DC3C8">
+<title id="title">Логотип «Севчик», вариант B</title>
+<desc id="desc">Мягкий рукописный леттеринг с лёгким колебанием высоты и свободными пластичными соединениями.</desc>
+<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+  <g transform="rotate(-3 91 121)"><path d="M139 59C108 37 60 49 46 99C29 158 72 199 132 174" stroke-width="40"/><path d="M139 59L128 64" stroke-width="27"/></g>
+  <g transform="rotate(3 191 138)"><path d="M157 141C161 105 208 94 224 125C232 141 214 147 190 148L159 149C169 177 204 183 229 161" stroke-width="29"/><path d="M168 145L218 140" stroke-width="19"/></g>
+  <g transform="rotate(-2 283 133)"><path d="M258 88C255 119 255 154 258 185" stroke-width="29"/><path d="M261 96C301 80 322 112 291 132C329 128 334 174 294 183L260 185" stroke-width="32"/></g>
+  <g transform="rotate(4 392 132)"><path d="M357 84L358 126C359 150 400 153 421 126" stroke-width="32"/><path d="M426 79C423 113 423 150 427 185" stroke-width="27"/></g>
+  <g transform="rotate(-3 499 140)"><path d="M468 91C466 123 466 155 470 186" stroke-width="27"/><path d="M473 181C496 150 520 121 544 92" stroke-width="34"/><path d="M545 94C543 124 544 155 548 185" stroke-width="24"/></g>
+  <g transform="rotate(4 614 127)"><path d="M585 69C582 104 583 146 588 187" stroke-width="32"/><path d="M590 140C611 121 632 101 652 82" stroke-width="25"/><path d="M608 125C627 144 643 162 659 182" stroke-width="35"/></g>
+</g>
+</svg>
