@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, type MouseEvent, type ChangeEvent, type CSSProperties } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft, Star, Pencil, Download } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Send, Phone, Bell, Check, CheckCheck, Search, X, Mic, Paperclip, Play, Pause, Image, File, BarChart3, Contact, Reply, Forward, EyeOff, Copy, Flag, Trash2, CheckSquare, Smile, Keyboard, ChevronLeft, Pencil, Download } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
+import { BookmarkTag } from '@/components/icons/BookmarkTag';
 import { ForwardChat } from '@/screens/ForwardChat';
 import { StickerEmojiPanel } from '@/components/StickerEmojiPanel';
 import type { Message, DeliveryStatus } from '@/data/mock';
@@ -912,7 +913,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
         </motion.button>
         {isFavoritesChat ? (
           <div className="flex items-center gap-3 flex-1 min-w-0 text-left">
-            <Avatar initials="" color={chat.avatarColor} size="sm" icon={<Star size={16} fill="white" strokeWidth={0} />} />
+            <Avatar initials="" size="sm" icon={<BookmarkTag size={16} />} />
             <div className="flex-1 min-w-0">
               <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
               <p className="text-sm font-body text-sevchik-textSecondary">Сохранённые сообщения</p>
@@ -920,7 +921,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           </div>
         ) : (
           <button onClick={onOpenProfile} className="flex items-center gap-3 flex-1 min-w-0 text-left">
-            <Avatar initials={displayInitials} color={chat.avatarColor} size="sm" online={chat.online} />
+            <Avatar initials={displayInitials} size="sm" online={chat.online} />
             <div className="flex-1 min-w-0">
               <h2 className="font-heading font-bold text-lg text-sevchik-text truncate">{displayName}</h2>
               <p className={`text-sm font-body flex items-center gap-1 ${isTyping || chat.online ? 'text-sevchik-mint' : 'text-sevchik-textSecondary'}`}>

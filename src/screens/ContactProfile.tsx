@@ -44,7 +44,7 @@ export function ContactProfile({ chatId, onBack, onEdit, onOpenMedia }: ContactP
       </div>
 
       <div className="flex flex-col items-center px-4 mt-2 mb-6">
-        <Avatar initials={displayInitials} color={chat.avatarColor} size="xxl" online={chat.online} />
+        <Avatar initials={displayInitials} size="xxl" online={chat.online} />
         <h1 className="font-heading font-extrabold text-2xl text-sevchik-text mt-4">{displayName}</h1>
         {override.phone && <p className="text-sm text-[var(--text-secondary)] font-body mt-1">{override.phone}</p>}
         <p className={`text-sm font-body mt-1 flex items-center gap-1.5 ${chat.online ? 'text-sevchik-mint' : 'text-[var(--text-secondary)]'}`}>

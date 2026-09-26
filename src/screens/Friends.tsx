@@ -12,7 +12,6 @@ interface Contact {
   id: string;
   name: string;
   phone: string;
-  avatarColor: string;
   initials: string;
   online: boolean;
 }
@@ -222,13 +221,28 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   style={{ boxShadow: '0 6px 18px rgba(15,23,42,0.10)' }}
                 >
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative shrink-0"
+                    className="w-12 h-12 rounded-full flex items-center justify-center font-heading font-black text-base relative shrink-0 overflow-hidden"
                     style={{
-                      background: `linear-gradient(135deg, ${friend.avatarColor}dd, ${friend.avatarColor})`,
-                      boxShadow: `0 4px 12px ${friend.avatarColor}26`,
+                      background: 'var(--avatar-glass-bg)',
+                      backdropFilter: 'blur(6px)',
+                      WebkitBackdropFilter: 'blur(6px)',
+                      boxShadow: friend.online
+                        ? '0 0 0 1px var(--avatar-glass-border), 0 0 16px 3px rgba(77, 195, 200, 0.5), 0 0 32px 8px rgba(77, 195, 200, 0.28)'
+                        : '0 0 0 1px var(--avatar-glass-border), 0 2px 6px rgba(15,23,42,0.12)',
                     }}
                   >
-                    <span className="relative z-10">{friend.initials}</span>
+                    <span
+                      className="relative z-10"
+                      style={{
+                        color: '#4DC3C8',
+                        opacity: friend.online ? 1 : 0.55,
+                        textShadow: friend.online
+                          ? '0 0 4px rgba(77, 195, 200, 0.85), 0 0 10px rgba(77, 195, 200, 0.55), 0 0 20px rgba(77, 195, 200, 0.3)'
+                          : 'none',
+                      }}
+                    >
+                      {friend.initials}
+                    </span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-heading font-bold text-[#1A1A1A] text-sm truncate">{friend.name}</h3>
@@ -380,13 +394,28 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   style={{ boxShadow: '0 4px 12px rgba(15,23,42,0.05)' }}
                 >
                   <div
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-heading font-bold text-base relative shrink-0"
+                    className="w-12 h-12 rounded-full flex items-center justify-center font-heading font-black text-base relative shrink-0 overflow-hidden"
                     style={{
-                      background: `linear-gradient(135deg, ${friend.avatarColor}dd, ${friend.avatarColor})`,
-                      boxShadow: `0 4px 12px ${friend.avatarColor}26`,
+                      background: 'var(--avatar-glass-bg)',
+                      backdropFilter: 'blur(6px)',
+                      WebkitBackdropFilter: 'blur(6px)',
+                      boxShadow: friend.online
+                        ? '0 0 0 1px var(--avatar-glass-border), 0 0 16px 3px rgba(77, 195, 200, 0.5), 0 0 32px 8px rgba(77, 195, 200, 0.28)'
+                        : '0 0 0 1px var(--avatar-glass-border), 0 2px 6px rgba(15,23,42,0.12)',
                     }}
                   >
-                    <span className="relative z-10">{friend.initials}</span>
+                    <span
+                      className="relative z-10"
+                      style={{
+                        color: '#4DC3C8',
+                        opacity: friend.online ? 1 : 0.55,
+                        textShadow: friend.online
+                          ? '0 0 4px rgba(77, 195, 200, 0.85), 0 0 10px rgba(77, 195, 200, 0.55), 0 0 20px rgba(77, 195, 200, 0.3)'
+                          : 'none',
+                      }}
+                    >
+                      {friend.initials}
+                    </span>
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <h3 className="font-heading font-bold text-[#1A1A1A] text-sm truncate">{friend.name}</h3>
@@ -522,12 +551,13 @@ export function Friends({ onWriteMessage }: FriendsProps) {
                   .map(friend => (
                     <div key={friend.id} className="flex items-center gap-3 py-2">
                       <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-white font-heading font-bold text-xs"
+                        className="w-8 h-8 rounded-full flex items-center justify-center font-heading font-black text-xs"
                         style={{
-                          background: `linear-gradient(135deg, ${friend.avatarColor}dd, ${friend.avatarColor})`,
+                          background: 'var(--avatar-glass-bg)',
+                          boxShadow: '0 0 0 1px var(--avatar-glass-border)',
                         }}
                       >
-                        {friend.initials}
+                        <span style={{ color: '#4DC3C8', opacity: 0.55 }}>{friend.initials}</span>
                       </div>
                       <span className="text-sm font-heading font-semibold text-[#1A1A1A]">{friend.name}</span>
                     </div>

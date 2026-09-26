@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Star, Loader2, MessageCircle } from 'lucide-react';
+import { Search, MoreVertical, Plus, Check, Trash2, CheckCheck, Loader2, MessageCircle } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
+import { BookmarkTag } from '@/components/icons/BookmarkTag';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import { useChatStore } from '@/store/chatStore';
 import { previewText } from '@/lib/messagePreview';
@@ -126,7 +127,6 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
       const chat: Chat = {
         id: `real-${remoteChatId}`,
         name,
-        avatarColor: '#4DC3C8',
         initials: initialsOf(name),
         lastMessage: '',
         time: '',
@@ -302,7 +302,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                       disabled={openingProfileId === profile.id}
                       className={`flex w-full items-center gap-4 px-4 py-3 text-left disabled:opacity-60 ${index !== profileResults.length - 1 ? 'border-b border-[#F3F4F6]' : ''}`}
                     >
-                      <Avatar initials={initialsOf(name)} color="#4DC3C8" size="lg" />
+                      <Avatar initials={initialsOf(name)} size="lg" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-heading font-bold text-sevchik-text">{name}</p>
                         {details && <p className="truncate text-xs font-body text-sevchik-textSecondary">{details}</p>}
@@ -332,7 +332,7 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
                   }}
                   className={`flex w-full items-center gap-4 px-4 py-3 text-left ${index !== groupResults.length - 1 ? 'border-b border-[#F3F4F6]' : ''}`}
                 >
-                  <Avatar initials={chat.initials} color={chat.avatarColor} size="lg" />
+                  <Avatar initials={chat.initials} size="lg" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-heading font-bold text-sevchik-text">{chat.name}</p>
                   </div>
@@ -421,11 +421,9 @@ export function Chats({ onOpenChat, onStartChat, grayMode, fontSize }: ChatsProp
 
                 <Avatar
                   initials={displayInitials}
-                  color={chat.avatarColor}
                   size="lg"
                   online={chat.online}
-                  ringColor={chat.online ? '#4FD3C8' : undefined}
-                  icon={chat.isFavorites ? <Star size={28} fill="white" strokeWidth={0} /> : undefined}
+                  icon={chat.isFavorites ? <BookmarkTag size={28} /> : undefined}
                 />
                 <div className="flex-1 min-w-0 relative z-10">
                   <div className="flex items-center justify-between gap-2">

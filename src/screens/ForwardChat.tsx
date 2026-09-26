@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Send, Check, Star } from 'lucide-react';
+import { Search, X, Send, Check } from 'lucide-react';
 import { Avatar } from '@/components/Avatar';
+import { BookmarkTag } from '@/components/icons/BookmarkTag';
 import { useChatStore } from '@/store/chatStore';
 import { getDisplayContact } from '@/lib/contactOverrides';
 import type { Chat } from '@/data/mock';
@@ -162,7 +163,7 @@ export function ForwardChat({ excludeChatId, onClose, onSend }: ForwardChatProps
                         className="flex flex-col items-center gap-1.5 shrink-0 w-16"
                       >
                         <div className="relative">
-                          <Avatar initials={initials} color={chat.avatarColor} size="lg" online={chat.online} />
+                          <Avatar initials={initials} size="lg" online={chat.online} />
                           {isSelected && (
                             <div
                               className="absolute -top-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center border-2 border-white"
@@ -338,10 +339,9 @@ function ChatRow({
 
       <Avatar
         initials={initials}
-        color={chat.avatarColor}
         size="md"
         online={chat.online}
-        icon={chat.isFavorites ? <Star size={20} fill="white" strokeWidth={0} /> : undefined}
+        icon={chat.isFavorites ? <BookmarkTag size={20} /> : undefined}
       />
       <span className="font-heading font-bold text-sevchik-text truncate">{name}</span>
     </motion.button>
