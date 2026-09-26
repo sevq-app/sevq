@@ -45,7 +45,7 @@
     --theme-primary: #6546C7;
     --theme-primary-rgb: 101, 70, 199;
     --theme-message-gradient: #6546C7;
-    --bubble-outgoing-gradient: linear-gradient(90deg, #C92F6C 0%, #E7548B 46%, #FFE0EA 100%);
+    --bubble-outgoing-gradient: linear-gradient(90deg, #D54D80 0%, #E7548B 46%, #E96597 100%);
     /* Фон входящих (чужих) сообщений — база нейтральная (не зависит от
        выбранной из 6 темы), меняется только со светлым/тёмным режимом; лёгкий
        оттенок текущей темы добавляется поверх отдельным слоем — см.
@@ -258,6 +258,7 @@
 
 .message-outgoing-pattern {
   background: var(--bubble-outgoing-bg);
+  box-shadow: none;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: #fff;
@@ -314,37 +315,37 @@ html.spring {
   --theme-primary: #E7548B;
   --theme-primary-rgb: 231, 84, 139;
   --theme-message-gradient: #E7548B;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #C92F6C 0%, #E7548B 46%, #FFE0EA 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #D54D80 0%, #E7548B 46%, #E96597 100%);
 }
 html.summer {
   --theme-primary: #F5A000;
   --theme-primary-rgb: 245, 160, 0;
   --theme-message-gradient: #F5A000;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #E47B00 0%, #F5A000 46%, #FFF1A8 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #E19300 0%, #F5A000 46%, #F6A91A 100%);
 }
 html.autumn {
   --theme-primary: #E06B24;
   --theme-primary-rgb: 224, 107, 36;
   --theme-message-gradient: #E06B24;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #B94A12 0%, #E06B24 46%, #FFF0D1 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #CE6221 0%, #E06B24 46%, #E47A3A 100%);
 }
 html.winter {
   --theme-primary: #429FD1;
   --theme-primary-rgb: 66, 159, 209;
   --theme-message-gradient: #429FD1;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #247FB8 0%, #429FD1 46%, #DDF4FF 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #3D92C0 0%, #429FD1 46%, #55A9D6 100%);
 }
 html.aurora {
   --theme-primary: #2EC4B6;
   --theme-primary-rgb: 46, 196, 182;
   --theme-message-gradient: #2EC4B6;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #147F78 0%, #2EC4B6 46%, #C8F7F2 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #2AB4A7 0%, #2EC4B6 46%, #43CABF 100%);
 }
 html.sea {
   --theme-primary: #1976C9;
   --theme-primary-rgb: 25, 118, 201;
   --theme-message-gradient: #1976C9;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #084F9B 0%, #1976C9 46%, #C9EDFF 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #176CAD 0%, #1976C9 46%, #3084CE 100%);
 }
 
 /* Глобальная серая (тёмная) тема — сама по себе не задаёт акцент
@@ -400,37 +401,37 @@ html.gray-theme.spring {
   --theme-primary: #E7548B;
   --theme-primary-rgb: 231, 84, 139;
   --theme-message-gradient: #E7548B;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #C92F6C 0%, #E7548B 46%, #FFE0EA 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #D54D80 0%, #E7548B 46%, #E96597 100%);
 }
 html.gray-theme.summer {
   --theme-primary: #F5A000;
   --theme-primary-rgb: 245, 160, 0;
   --theme-message-gradient: #F5A000;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #E47B00 0%, #F5A000 46%, #FFF1A8 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #E19300 0%, #F5A000 46%, #F6A91A 100%);
 }
 html.gray-theme.autumn {
   --theme-primary: #E06B24;
   --theme-primary-rgb: 224, 107, 36;
   --theme-message-gradient: #E06B24;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #B94A12 0%, #E06B24 46%, #FFF0D1 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #CE6221 0%, #E06B24 46%, #E47A3A 100%);
 }
 html.gray-theme.winter {
   --theme-primary: #8366D9;
   --theme-primary-rgb: 131, 102, 217;
   --theme-message-gradient: #8366D9;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #247FB8 0%, #429FD1 46%, #DDF4FF 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #3D92C0 0%, #429FD1 46%, #55A9D6 100%);
 }
 html.gray-theme.aurora {
   --theme-primary: #2EC4B6;
   --theme-primary-rgb: 46, 196, 182;
   --theme-message-gradient: #2EC4B6;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #147F78 0%, #2EC4B6 46%, #C8F7F2 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #2AB4A7 0%, #2EC4B6 46%, #43CABF 100%);
 }
 html.gray-theme.sea {
   --theme-primary: #4DC4BE;
   --theme-primary-rgb: 77, 196, 190;
   --theme-message-gradient: #4DC4BE;
-  --bubble-outgoing-gradient: linear-gradient(90deg, #084F9B 0%, #1976C9 46%, #C9EDFF 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #176CAD 0%, #1976C9 46%, #3084CE 100%);
 }
 
 .message-action-menu {

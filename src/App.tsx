@@ -22,7 +22,7 @@ import { supabase } from '@/lib/supabase';
 import { displayNameOf, initialsOf, listMyChats } from '@/lib/messagingService';
 import { useChatStore } from '@/store/chatStore';
 import { useAutoReloadOnNewVersion } from '@/hooks/useAutoReloadOnNewVersion';
-import { messageThemeColors, setHexBrightness, shadeHex } from '@/lib/color';
+import { messageGradientColors, messageThemeColors, setHexBrightness } from '@/lib/color';
 
 function App() {
   useAutoReloadOnNewVersion();
@@ -131,9 +131,10 @@ function App() {
   useEffect(() => {
     const root = document.documentElement;
     const palette = messageThemeColors[selectedTheme];
-    const primary = setHexBrightness(palette?.primary ?? customColor, colorBrightness);
-    const dark = setHexBrightness(palette?.dark ?? shadeHex(customColor, -0.28), colorBrightness);
-    const light = setHexBrightness(palette?.light ?? shadeHex(customColor, 0.72), colorBrightness);
+    const colors = palette ?? messageGradientColors(customColor);
+    const primary = setHexBrightness(colors.primary, colorBrightness);
+    const dark = setHexBrightness(colors.dark, colorBrightness);
+    const light = setHexBrightness(colors.light, colorBrightness);
     const rgb = [1, 3, 5].map((index) => parseInt(primary.slice(index, index + 2), 16)).join(', ');
     root.style.setProperty('--theme-primary', primary);
     root.style.setProperty('--theme-primary-rgb', rgb);
