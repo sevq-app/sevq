@@ -203,7 +203,7 @@ export function Appearance({
               ref={pickerRef}
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mx-auto mb-4 w-[90%] rounded-[18px] border border-white/20 px-4 pb-4 pt-3 text-white shadow-[0_18px_45px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
+              className="mx-auto mb-4 w-[90%] rounded-[18px] border border-white/20 px-4 pb-4 pt-3 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_18px_45px_rgba(0,0,0,0.42)] backdrop-blur-2xl"
               style={{ background: 'rgba(24, 26, 32, 0.9)' }}
             >
               <div
@@ -247,9 +247,9 @@ export function Appearance({
                         onChange={(event) => setDraftGradient(event.target.checked)}
                         className="peer absolute inset-0 z-10 cursor-pointer appearance-none rounded-[6px]"
                       />
-                      <span className="pointer-events-none absolute inset-0 rounded-[6px] border border-white/45 bg-[linear-gradient(180deg,rgba(255,255,255,0.13)_0%,rgba(255,255,255,0.04)_42%,rgba(5,8,13,0.5)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_4px_10px_rgba(0,0,0,0.28)] transition peer-focus-visible:ring-2 peer-focus-visible:ring-white/70 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#181a20]" />
+                      <span className="pointer-events-none absolute inset-0 rounded-[6px] border border-white/25 bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0.025)_38%,rgba(5,8,13,0.28)_100%)] shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_4px_10px_rgba(0,0,0,0.24)] transition peer-hover:border-white/35 peer-focus-visible:ring-2 peer-focus-visible:ring-white/70 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-[#181a20]" />
                       <svg viewBox="0 0 20 20" aria-hidden="true" className="pointer-events-none absolute inset-0 scale-75 text-white opacity-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.75)] transition peer-checked:scale-100 peer-checked:opacity-100">
-                        <path d="m5 10 3 3 7-7" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                        <path d="m5 10.5 3 3 7-7" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </span>
                   </label>
@@ -257,7 +257,7 @@ export function Appearance({
                     type="button"
                     whileTap={{ scale: 0.98 }}
                     onClick={saveCustomColor}
-                    className="mt-3 w-full rounded-xl border border-white/35 bg-[linear-gradient(180deg,rgba(255,255,255,0.13)_0%,rgba(255,255,255,0.045)_38%,rgba(5,8,13,0.48)_100%)] px-3 py-2.5 font-heading text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),0_8px_18px_rgba(0,0,0,0.3)] transition hover:border-white/50 hover:bg-white/10"
+                    className="mt-3 w-full rounded-xl border border-white/15 bg-[linear-gradient(180deg,rgba(255,255,255,0.1)_0%,rgba(255,255,255,0.025)_38%,rgba(5,8,13,0.28)_100%)] px-3 py-2.5 font-heading text-sm font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.14),0_8px_18px_rgba(0,0,0,0.3)] transition hover:border-white/25 hover:bg-white/[0.07] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                   >
                     Сохранить
                   </motion.button>
