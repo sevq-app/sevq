@@ -49,10 +49,7 @@ function App() {
     return saved || 'spring';
   });
   const [customColor, setCustomColor] = useState(() => localStorage.getItem('sevchik_customColor') || '#7C5CFC');
-  const [colorIntensity, setColorIntensity] = useState(() => {
-    const saved = Number(localStorage.getItem('sevchik_colorIntensity'));
-    return Number.isFinite(saved) && saved >= 0 && saved <= 100 ? saved : 100;
-  });
+  const [customGradient, setCustomGradient] = useState(() => localStorage.getItem('sevchik_customGradient') !== 'false');
   const [soundsEnabled, setSoundsEnabled] = useState<boolean>(() => {
     return localStorage.getItem('sevchik_sounds') !== 'false';
   });
@@ -128,24 +125,27 @@ function App() {
     document.documentElement.classList.add(selectedTheme);
   }, [selectedTheme]);
 
-  // Интенсивность действует на любую тему, а пользовательский цвет заменяет
-  // только градиент исходящих сообщений, не окрашивая нейтральный фон.
+  // Пользовательский цвет заменяет только фон исходящих сообщений, не
+  // окрашивая нейтральный фон. Градиент идёт от тёмного оттенка сверху к
+  // светлому снизу; его можно полностью отключить.
   useEffect(() => {
     const root = document.documentElement;
-    root.style.setProperty('--bubble-intensity-shade', `${(100 - colorIntensity) * 0.0045}`);
     if (selectedTheme === 'custom') {
       root.style.setProperty('--theme-primary', customColor);
       const rgb = [1, 3, 5].map((index) => parseInt(customColor.slice(index, index + 2), 16)).join(', ');
       root.style.setProperty('--theme-primary-rgb', rgb);
       root.style.setProperty('--theme-message-gradient', customColor);
-      root.style.setProperty('--bubble-outgoing-gradient', `linear-gradient(180deg, ${shadeHex(customColor, 0.18)} 0%, ${customColor} 48%, ${shadeHex(customColor, -0.2)} 100%)`);
+      root.style.setProperty('--bubble-outgoing-gradient', customGradient
+        ? `linear-gradient(180deg, ${shadeHex(customColor, -0.22)} 0%, ${customColor} 48%, ${shadeHex(customColor, 0.2)} 100%)`
+        : customColor);
     } else {
       root.style.removeProperty('--theme-primary');
       root.style.removeProperty('--theme-primary-rgb');
       root.style.removeProperty('--theme-message-gradient');
-      root.style.removeProperty('--bubble-outgoing-gradient');
+      if (customGradient) root.style.removeProperty('--bubble-outgoing-gradient');
+      else root.style.setProperty('--bubble-outgoing-gradient', 'var(--theme-primary)');
     }
-  }, [selectedTheme, customColor, colorIntensity]);
+  }, [selectedTheme, customColor, customGradient]);
 
   // Применение тёмного/серого режима при изменении вычисленного значения
   useEffect(() => {
@@ -178,8 +178,8 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem('sevchik_customColor', customColor);
-    localStorage.setItem('sevchik_colorIntensity', String(colorIntensity));
-  }, [customColor, colorIntensity]);
+    localStorage.setItem('sevchik_customGradient', String(customGradient));
+  }, [customColor, customGradient]);
 
   // Для авторизованного пользователя эти настройки также являются частью
   // профиля и восстанавливаются на другом устройстве.
@@ -189,9 +189,7 @@ function App() {
     if (typeof appearance.customColor === 'string' && /^#[0-9a-f]{6}$/i.test(appearance.customColor)) {
       setCustomColor(appearance.customColor);
     }
-    if (typeof appearance.colorIntensity === 'number') {
-      setColorIntensity(Math.max(0, Math.min(100, appearance.colorIntensity)));
-    }
+    if (typeof appearance.customGradient === 'boolean') setCustomGradient(appearance.customGradient);
     if (typeof appearance.selectedTheme === 'string') setSelectedTheme(appearance.selectedTheme);
   }, [currentUser?.id]);
 
@@ -199,11 +197,11 @@ function App() {
     if (!currentUser?.id) return;
     const timeout = window.setTimeout(() => {
       void supabase.auth.updateUser({
-        data: { appearance: { selectedTheme, customColor, colorIntensity } },
+        data: { appearance: { selectedTheme, customColor, customGradient } },
       });
     }, 800);
     return () => window.clearTimeout(timeout);
-  }, [currentUser?.id, selectedTheme, customColor, colorIntensity]);
+  }, [currentUser?.id, selectedTheme, customColor, customGradient]);
 
   // Сохранение режима оформления (системная/светлая/тёмная) при изменении
   useEffect(() => {
@@ -345,8 +343,8 @@ function App() {
                 setSelectedTheme={setSelectedTheme}
                 customColor={customColor}
                 setCustomColor={setCustomColor}
-                colorIntensity={colorIntensity}
-                setColorIntensity={setColorIntensity}
+                customGradient={customGradient}
+                setCustomGradient={setCustomGradient}
                 themeMode={themeMode}
                 setThemeMode={setThemeMode}
                 soundsEnabled={soundsEnabled}
