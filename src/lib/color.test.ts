@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { hsvToHex, hsvToWheelPoint, messageThemeColors, setHexBrightness, wheelPointToHsv } from './color.ts';
+import { hsvToHex, hsvToWheelPoint, messageGradientColors, messageThemeColors, setHexBrightness, wheelPointToHsv } from './color.ts';
 
 test('all six message themes have dark-to-light palettes', () => {
   assert.deepEqual(Object.keys(messageThemeColors), ['spring', 'summer', 'autumn', 'winter', 'aurora', 'sea']);
@@ -9,6 +9,17 @@ test('all six message themes have dark-to-light palettes', () => {
     assert.ok(value(palette.dark) < value(palette.light));
   }
   assert.equal(messageThemeColors.aurora.primary, '#2EC4B6');
+});
+
+test('message gradients stay close to the chosen colour without white highlights', () => {
+  const palettes = [...Object.values(messageThemeColors), messageGradientColors('#2EC4B6')];
+  for (const { primary, dark, light } of palettes) {
+    const channels = (hex: string) => hex.match(/[0-9a-f]{2}/gi)!.map((part) => parseInt(part, 16));
+    const [primaryChannels, darkChannels, lightChannels] = [primary, dark, light].map(channels);
+    assert.ok(darkChannels.every((channel, index) => channel <= primaryChannels[index]));
+    assert.ok(lightChannels.every((channel, index) => channel >= primaryChannels[index]));
+    assert.ok(lightChannels.every((channel, index) => channel - primaryChannels[index] <= 26));
+  }
 });
 
 test('brightness adjustment preserves full brightness and darkens at lower values', () => {

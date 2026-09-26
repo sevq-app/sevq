@@ -165,7 +165,7 @@ function VoiceMessageBubble({ duration, time, isMe, status, replyTo, reaction, o
             : 'linear-gradient(rgba(var(--theme-primary-rgb), 0.08), rgba(var(--theme-primary-rgb), 0.08)), var(--bubble-incoming-bg)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          boxShadow: isMe ? '0 4px 16px rgba(var(--theme-primary-rgb), 0.14)' : '0 4px 16px rgba(15,23,42,0.05)',
+          boxShadow: 'none',
         }}
       >
         {replyTo && <ReplyQuotePreview replyTo={replyTo} isMe={isMe} onClick={onReplyClick} />}
@@ -1178,7 +1178,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                         ? 'message-outgoing-pattern text-white rounded-2xl rounded-br-sm'
                         : 'message-incoming-pattern text-[var(--text-main)] rounded-2xl rounded-bl-sm'
                     }`}
-                    style={{ boxShadow: isMe ? '0 4px 16px rgba(77,195,200,0.14)' : '0 4px 16px rgba(15,23,42,0.05)' }}
+                    style={{ boxShadow: 'none' }}
                   >
                     {msg.replyTo && (
                       <div className="relative z-10">

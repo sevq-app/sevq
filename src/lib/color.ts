@@ -63,13 +63,23 @@ export function shadeHex(hex: string, amount: number): string {
   }).join('')}`;
 }
 
+export function messageGradientColors(primary: string): { primary: string; dark: string; light: string } {
+  return {
+    primary,
+    // Keep the complete gradient range below 20%: the ends stay recognisably
+    // the selected colour instead of fading into a white highlight.
+    dark: shadeHex(primary, -0.08),
+    light: shadeHex(primary, 0.1),
+  };
+}
+
 export const messageThemeColors: Record<string, { primary: string; dark: string; light: string }> = {
-  spring: { primary: '#E7548B', dark: '#C92F6C', light: '#FFE0EA' },
-  summer: { primary: '#F5A000', dark: '#E47B00', light: '#FFF1A8' },
-  autumn: { primary: '#E06B24', dark: '#B94A12', light: '#FFF0D1' },
-  winter: { primary: '#429FD1', dark: '#247FB8', light: '#DDF4FF' },
-  aurora: { primary: '#2EC4B6', dark: '#147F78', light: '#C8F7F2' },
-  sea: { primary: '#1976C9', dark: '#084F9B', light: '#C9EDFF' },
+  spring: messageGradientColors('#E7548B'),
+  summer: messageGradientColors('#F5A000'),
+  autumn: messageGradientColors('#E06B24'),
+  winter: messageGradientColors('#429FD1'),
+  aurora: messageGradientColors('#2EC4B6'),
+  sea: messageGradientColors('#1976C9'),
 };
 
 /** Scales HSV value while preserving a palette color's hue and saturation. */

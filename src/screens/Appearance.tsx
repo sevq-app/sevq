@@ -254,7 +254,7 @@ export function Appearance({
             <div className="flex justify-end">
               <div
                 className="message-outgoing-pattern p-[12px] rounded-2xl rounded-br-sm max-w-[80%]"
-                style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}
+                style={{ boxShadow: 'none' }}
               >
                 <p className="font-body" style={{ fontSize: `${fontSize}px` }}>
                   Выбери, что тебе ближе 💜
