@@ -55,6 +55,7 @@
        Единственная переменная для фона облачка позволяет позднее подставить
        пользовательский цвет/картинку, не меняя разметку. */
     --bubble-outgoing-bg: var(--bubble-outgoing-gradient);
+    --bubble-intensity-shade: 0;
     --action-menu-bg: rgba(255, 255, 255, 0.88);
     --action-menu-text: #17191f;
     --action-menu-border: rgba(15, 23, 42, 0.12);
@@ -261,11 +262,39 @@
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   background-image:
+    linear-gradient(rgba(17, 24, 39, var(--bubble-intensity-shade)), rgba(17, 24, 39, var(--bubble-intensity-shade))),
     radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.15) 0%, transparent 20%),
     radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 25%),
     var(--bubble-outgoing-gradient);
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42);
+}
+
+.color-brightness-slider {
+  height: 6px;
+  appearance: none;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #111 0%, var(--picker-color) 100%);
+  cursor: pointer;
+}
+
+.color-brightness-slider::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  appearance: none;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: var(--picker-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.color-brightness-slider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: var(--picker-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
 }
 
 /* Фон экрана переписки — тот же нейтральный --bg-main, что и везде в
