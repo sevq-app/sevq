@@ -4,6 +4,25 @@ export interface HsvColor {
   v: number;
 }
 
+/**
+ * Maps a point relative to the centre of the CSS colour wheel to HSV.
+ * The wheel's conic gradient starts with red on the right and progresses
+ * clockwise, which is also the direction used by atan2 in screen coordinates.
+ */
+export function wheelPointToHsv(x: number, y: number, radius: number, value = 100): HsvColor {
+  const safeRadius = Math.max(radius, Number.EPSILON);
+  const distance = Math.min(Math.hypot(x, y), safeRadius);
+  const h = (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  return { h, s: distance / safeRadius * 100, v: value };
+}
+
+/** Returns the marker offset for the wheel orientation used above. */
+export function hsvToWheelPoint({ h, s }: HsvColor, radius: number): { x: number; y: number } {
+  const radians = h * Math.PI / 180;
+  const distance = Math.max(0, Math.min(100, s)) / 100 * radius;
+  return { x: Math.cos(radians) * distance, y: Math.sin(radians) * distance };
+}
+
 export function hsvToHex({ h, s, v }: HsvColor): string {
   const saturation = s / 100;
   const value = v / 100;

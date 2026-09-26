@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Palette, Sun, Flower, Leaf, Snowflake, Sparkles, Waves, Monitor, Moon, Volume2, Vibrate, X } from 'lucide-react';
 import { playSound, triggerHaptic } from '@/lib/feedback';
 import { ColorWheel } from '@/components/ColorWheel';
-import { hexToHsv, hsvToHex, messageThemeColors, type HsvColor } from '@/lib/color';
+import { hexToHsv, hsvToHex, messageThemeColors, setHexBrightness, type HsvColor } from '@/lib/color';
 
 type ThemeMode = 'system' | 'light' | 'dark';
 
@@ -63,16 +63,17 @@ export function Appearance({
   setHapticsEnabled,
 }: AppearanceProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerColor, setPickerColor] = useState<HsvColor>(() => hexToHsv(customColor));
+  // customColor is the single source of truth. The wheel, preview and palette
+  // icon all derive from it instead of maintaining a second, drifting colour.
+  const pickerColor: HsvColor = { ...hexToHsv(customColor), v: 100 };
+  const appliedCustomColor = setHexBrightness(customColor, colorBrightness);
 
   const updateCustomColor = (next: HsvColor) => {
-    setPickerColor(next);
-    setCustomColor(hsvToHex(next));
+    setCustomColor(hsvToHex({ ...next, v: 100 }));
     setSelectedTheme('custom');
   };
   const resetCustomColor = () => {
     const defaultColor = '#7C5CFC';
-    setPickerColor(hexToHsv(defaultColor));
     setCustomColor(defaultColor);
     setCustomGradient(true);
     setColorBrightness(100);
@@ -160,12 +161,12 @@ export function Appearance({
               aria-expanded={pickerOpen}
               className="relative w-[40px] h-[40px] rounded-2xl flex items-center justify-center"
               style={{
-                background: selectedTheme === 'custom' ? customColor : '#4FD3C8',
-                boxShadow: selectedTheme === 'custom' ? `0 4px 18px ${customColor}99` : '0 4px 12px rgba(79,211,200,0.2)',
+                background: selectedTheme === 'custom' ? appliedCustomColor : '#4FD3C8',
+                boxShadow: selectedTheme === 'custom' ? `0 4px 18px ${appliedCustomColor}99` : '0 4px 12px rgba(79,211,200,0.2)',
               }}
             >
               <Palette size={20} className="text-white" />
-              {selectedTheme === 'custom' && <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-white" style={{ background: customColor }} />}
+              {selectedTheme === 'custom' && <span className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-white" style={{ background: appliedCustomColor }} />}
             </motion.button>
             <h3 className="font-heading font-bold" style={{ color: textMain }}>Цветовая тема</h3>
           </div>
