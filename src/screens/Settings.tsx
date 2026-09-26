@@ -45,7 +45,6 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
       title: 'Уведомления и вид',
       items: [
         { icon: Bell, label: 'Уведомления и звуки', color: '#FF9848', isToggle: true, value: notifications, action: () => setNotifications(!notifications) },
-        // ИСПРАВЛЕНО: теперь эта кнопка открывает экран оформления
         { icon: Palette, label: 'Оформление', color: '#6546C7', hasChevron: true, action: () => onNavigate?.('appearance') },
         { icon: Battery, label: 'Энергосбережение', color: '#4FD3C8', isToggle: true, value: powerSaving, action: () => setPowerSaving(!powerSaving) },
       ],
@@ -63,7 +62,7 @@ export function Settings({ onBack, onLogout, onNavigate, grayMode }: SettingsPro
         { icon: UserPlus, label: 'Пригласить друзей', color: '#6546C7', hasChevron: true },
         { icon: Languages, label: 'Язык приложения', color: '#6B7280', hasChevron: true, value: 'Русский' },
         { icon: HelpCircle, label: 'Помощь', color: '#6B7280', hasChevron: true },
-        { icon: Info, label: 'О приложении', color: '#6B7280', hasChevron: true, value: 'v1.0.0' },
+        { icon: Info, label: 'О приложении', color: '#6B7280', hasChevron: true, value: `v${__APP_RELEASE_VERSION__}` },
       ],
     },
   ];
