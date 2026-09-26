@@ -32,7 +32,10 @@
     --chart-5: 27 87% 67%;
     
     /* Кастомные переменные для Севчик */
-    --bg-main: radial-gradient(ellipse at top left, #FAFAFF 0%, #F4F1FF 55%, #EEEBFF 100%);
+    /* Нейтральный светло-серый, без цветных оттенков и без градиента —
+       одинаковый для всех 6 тем оформления, меняется только со сменой
+       светлого/тёмного режима (см. .gray-theme ниже). */
+    --bg-main: #FAFAFA;
     --bg-card: #FFFFFF;
     --bg-input: #F9FAFB;
     --text-main: #1A1A1A;
@@ -42,11 +45,17 @@
     --theme-primary: #6546C7;
     --theme-primary-rgb: 101, 70, 199;
     --theme-message-gradient: #6546C7;
-    /* Фон входящих (чужих) сообщений — намеренно НЕ завязан на цветовую тему
-       (Весна/Лето/.../Море): в MAX и большинстве мессенджеров входящие
-       остаются нейтральными и меняются только вместе со светлым/тёмным
-       режимом, а не с выбором акцентного цвета. См. .gray-theme ниже. */
+    /* Фон входящих (чужих) сообщений — база нейтральная (не зависит от
+       выбранной из 6 темы), меняется только со светлым/тёмным режимом; лёгкий
+       оттенок текущей темы добавляется поверх отдельным слоем — см.
+       .message-incoming-pattern и VoiceMessageBubble в Conversation.tsx. */
     --bubble-incoming-bg: rgba(240, 240, 245, 0.55);
+    /* Фон СВОИХ сообщений — наоборот, завязан на акцентный цвет текущей из
+       6 тем (через уже тема-зависимый --theme-primary-rgb): у каждой темы
+       свой цвет облачка. Единственная переменная для фона облачка — со
+       временем сюда можно будет подставлять настраиваемый пользователем
+       цвет/картинку, ничего в разметке менять не придётся. */
+    --bubble-outgoing-bg: rgba(var(--theme-primary-rgb), 0.55);
     --avatar-placeholder-bg: #EDEAF7;
     --avatar-placeholder-icon: #4DC3C8;
     /* Аватарки-инициалы ("неоновые буквы на тёмном стекле"): фон всегда
@@ -233,13 +242,16 @@
 
 .message-incoming-pattern {
   background-color: var(--bubble-incoming-bg);
+  /* Лёгкий оттенок текущей темы поверх нейтральной базы — плоская заливка
+     тем же акцентным цветом, что и у своих сообщений, но почти прозрачная. */
+  background-image: linear-gradient(rgba(var(--theme-primary-rgb), 0.08), rgba(var(--theme-primary-rgb), 0.08));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--text-main);
 }
 
 .message-outgoing-pattern {
-  background-color: rgba(var(--theme-primary-rgb), 0.55);
+  background-color: var(--bubble-outgoing-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   background-image:
@@ -247,21 +259,20 @@
     radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 25%);
 }
 
-/* Цветная «сетка»-подложка для экрана переписки — фон, который красиво
-   просвечивает сквозь стеклянные пузыри сообщений и панели */
+/* Фон экрана переписки — тот же нейтральный --bg-main, что и везде в
+   приложении, без цветных пятен: не должен зависеть от выбранной из 6 тем
+   (в отличие от облачка своих сообщений, см. --bubble-outgoing-bg). */
 .chat-wallpaper {
-  background:
-    radial-gradient(circle at 12% 12%, rgba(77, 195, 200, 0.35) 0%, transparent 42%),
-    radial-gradient(circle at 88% 8%, rgba(255, 152, 72, 0.32) 0%, transparent 42%),
-    radial-gradient(circle at 15% 88%, rgba(79, 211, 200, 0.3) 0%, transparent 42%),
-    radial-gradient(circle at 92% 80%, rgba(77, 195, 200, 0.22) 0%, transparent 42%),
-    var(--bg-main);
+  background: var(--bg-main);
 }
 
-/* Цветовые темы: задают только --theme-primary (облачко СВОИХ сообщений).
+/* Цветовые темы: задают только --theme-primary(-rgb) — через него же берёт
+   свой цвет --bubble-outgoing-bg (облачко СВОИХ сообщений, см. выше в :root).
    --theme-message-gradient использует другой код (кнопка отправки и т.п.).
-   Облачко чужих сообщений (--bubble-incoming-bg) сюда намеренно не входит —
-   оно нейтральное и зависит только от светлого/тёмного режима, см. ниже. */
+   База облачка чужих сообщений (--bubble-incoming-bg) сюда намеренно не
+   входит — она нейтральная и зависит только от светлого/тёмного режима, см.
+   ниже; лёгкий оттенок темы поверх неё берётся из того же --theme-primary-rgb
+   отдельным слоем (.message-incoming-pattern), а не из этой переменной. */
 html.spring {
   --theme-primary: #FF9848;
   --theme-primary-rgb: 255, 152, 72;
@@ -304,7 +315,9 @@ html.sea {
    как отфолбэк на случай, если html.gray-theme окажется без класса
    темы (в норме такого не бывает — см. App.tsx). */
 html.gray-theme {
-  --bg-main: radial-gradient(ellipse at top left, #34383f 0%, #24272b 60%, #1b1e22 100%);
+  /* Нейтральный тёмно-серый, без цветных оттенков и без градиента —
+     одинаковый для всех 6 тем. */
+  --bg-main: #1A1A1A;
   --bg-card: #35383d;
   --bg-input: #2b2e33;
   --text-main: #ffffff;
@@ -315,6 +328,7 @@ html.gray-theme {
   --theme-primary-rgb: 255, 152, 72;
   --theme-message-gradient: #FF9848;
   --bubble-incoming-bg: rgba(42, 45, 51, 0.55);
+  --bubble-outgoing-bg: rgba(var(--theme-primary-rgb), 0.6);
   --avatar-placeholder-bg: #3A3E46;
   --avatar-placeholder-icon: #8BD8DB;
   --avatar-glass-bg: rgba(255, 255, 255, 0.05);
