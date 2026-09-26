@@ -45,7 +45,7 @@
     --theme-primary: #6546C7;
     --theme-primary-rgb: 101, 70, 199;
     --theme-message-gradient: #6546C7;
-    --bubble-outgoing-gradient: linear-gradient(135deg, #ff4f9a 0%, #39dda0 100%);
+    --bubble-outgoing-gradient: linear-gradient(90deg, #C92F6C 0%, #E7548B 46%, #FFE0EA 100%);
     /* Фон входящих (чужих) сообщений — база нейтральная (не зависит от
        выбранной из 6 темы), меняется только со светлым/тёмным режимом; лёгкий
        оттенок текущей темы добавляется поверх отдельным слоем — см.
@@ -311,40 +311,40 @@
    ниже; лёгкий оттенок темы поверх неё берётся из того же --theme-primary-rgb
    отдельным слоем (.message-incoming-pattern), а не из этой переменной. */
 html.spring {
-  --theme-primary: #FF9848;
-  --theme-primary-rgb: 255, 152, 72;
-  --theme-message-gradient: #FF9848;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #ff4f9a 0%, #ff73af 42%, #25d99a 100%);
+  --theme-primary: #E7548B;
+  --theme-primary-rgb: 231, 84, 139;
+  --theme-message-gradient: #E7548B;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #C92F6C 0%, #E7548B 46%, #FFE0EA 100%);
 }
 html.summer {
-  --theme-primary: #FFB848;
-  --theme-primary-rgb: 255, 184, 72;
-  --theme-message-gradient: #FFB848;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #ffd900 0%, #ffad00 45%, #ff6818 100%);
+  --theme-primary: #F5A000;
+  --theme-primary-rgb: 245, 160, 0;
+  --theme-message-gradient: #F5A000;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #E47B00 0%, #F5A000 46%, #FFF1A8 100%);
 }
 html.autumn {
-  --theme-primary: #FF6B6B;
-  --theme-primary-rgb: 255, 107, 107;
-  --theme-message-gradient: #FF6B6B;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #ff9d16 0%, #f05a24 48%, #b91c2e 100%);
+  --theme-primary: #E06B24;
+  --theme-primary-rgb: 224, 107, 36;
+  --theme-message-gradient: #E06B24;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #B94A12 0%, #E06B24 46%, #FFF0D1 100%);
 }
 html.winter {
-  --theme-primary: #6546C7;
-  --theme-primary-rgb: 101, 70, 199;
-  --theme-message-gradient: #6546C7;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #38a9f5 0%, #9edcff 55%, #e8f4f7 100%);
+  --theme-primary: #429FD1;
+  --theme-primary-rgb: 66, 159, 209;
+  --theme-message-gradient: #429FD1;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #247FB8 0%, #429FD1 46%, #DDF4FF 100%);
 }
 html.aurora {
-  --theme-primary: #4FD3C8;
-  --theme-primary-rgb: 79, 211, 200;
-  --theme-message-gradient: #4FD3C8;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #00a978 0%, #c9db19 52%, #a75de0 100%);
+  --theme-primary: #2EC4B6;
+  --theme-primary-rgb: 46, 196, 182;
+  --theme-message-gradient: #2EC4B6;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #147F78 0%, #2EC4B6 46%, #C8F7F2 100%);
 }
 html.sea {
-  --theme-primary: #38b2ac;
-  --theme-primary-rgb: 56, 178, 172;
-  --theme-message-gradient: #38b2ac;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #29bff5 0%, #00aeb6 45%, #0752a4 100%);
+  --theme-primary: #1976C9;
+  --theme-primary-rgb: 25, 118, 201;
+  --theme-message-gradient: #1976C9;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #084F9B 0%, #1976C9 46%, #C9EDFF 100%);
 }
 
 /* Глобальная серая (тёмная) тема — сама по себе не задаёт акцент
@@ -367,9 +367,9 @@ html.gray-theme {
   --text-secondary: #d6d9de;
   --text-placeholder: #aeb4bc;
   --border-color: rgba(255, 255, 255, 0.14);
-  --theme-primary: #FF9848;
-  --theme-primary-rgb: 255, 152, 72;
-  --theme-message-gradient: #FF9848;
+  --theme-primary: #E7548B;
+  --theme-primary-rgb: 231, 84, 139;
+  --theme-message-gradient: #E7548B;
   --bubble-incoming-bg: rgba(42, 45, 51, 0.55);
   --bubble-outgoing-bg: var(--bubble-outgoing-gradient);
   --action-menu-bg: rgba(22, 24, 30, 0.88);
@@ -397,40 +397,40 @@ html.gray-theme {
    значения (#6546C7 и #38b2ac) на почти чёрном фоне сливаются и плохо
    выделяются, поэтому для тёмного режима они чуть светлее/ярче. */
 html.gray-theme.spring {
-  --theme-primary: #FF9848;
-  --theme-primary-rgb: 255, 152, 72;
-  --theme-message-gradient: #FF9848;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #df2778 0%, #ee4f99 42%, #079b69 100%);
+  --theme-primary: #E7548B;
+  --theme-primary-rgb: 231, 84, 139;
+  --theme-message-gradient: #E7548B;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #C92F6C 0%, #E7548B 46%, #FFE0EA 100%);
 }
 html.gray-theme.summer {
-  --theme-primary: #FFB848;
-  --theme-primary-rgb: 255, 184, 72;
-  --theme-message-gradient: #FFB848;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #dcae00 0%, #f08400 48%, #d9470d 100%);
+  --theme-primary: #F5A000;
+  --theme-primary-rgb: 245, 160, 0;
+  --theme-message-gradient: #F5A000;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #E47B00 0%, #F5A000 46%, #FFF1A8 100%);
 }
 html.gray-theme.autumn {
-  --theme-primary: #FF6B6B;
-  --theme-primary-rgb: 255, 107, 107;
-  --theme-message-gradient: #FF6B6B;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #dd7800 0%, #c83f18 48%, #861326 100%);
+  --theme-primary: #E06B24;
+  --theme-primary-rgb: 224, 107, 36;
+  --theme-message-gradient: #E06B24;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #B94A12 0%, #E06B24 46%, #FFF0D1 100%);
 }
 html.gray-theme.winter {
   --theme-primary: #8366D9;
   --theme-primary-rgb: 131, 102, 217;
   --theme-message-gradient: #8366D9;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #137cc5 0%, #5ba5ce 55%, #a7bbc4 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #247FB8 0%, #429FD1 46%, #DDF4FF 100%);
 }
 html.gray-theme.aurora {
-  --theme-primary: #4FD3C8;
-  --theme-primary-rgb: 79, 211, 200;
-  --theme-message-gradient: #4FD3C8;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #007d58 0%, #8fae08 52%, #7740ad 100%);
+  --theme-primary: #2EC4B6;
+  --theme-primary-rgb: 46, 196, 182;
+  --theme-message-gradient: #2EC4B6;
+  --bubble-outgoing-gradient: linear-gradient(90deg, #147F78 0%, #2EC4B6 46%, #C8F7F2 100%);
 }
 html.gray-theme.sea {
   --theme-primary: #4DC4BE;
   --theme-primary-rgb: 77, 196, 190;
   --theme-message-gradient: #4DC4BE;
-  --bubble-outgoing-gradient: linear-gradient(135deg, #0b87bd 0%, #007d88 45%, #073879 100%);
+  --bubble-outgoing-gradient: linear-gradient(90deg, #084F9B 0%, #1976C9 46%, #C9EDFF 100%);
 }
 
 .message-action-menu {
