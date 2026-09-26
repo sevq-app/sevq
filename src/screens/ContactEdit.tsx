@@ -46,7 +46,7 @@ export function ContactEdit({ chatId, onBack }: ContactEditProps) {
       </div>
 
       <div className="flex flex-col items-center mb-6">
-        <Avatar initials={previewInitials} color={chat.avatarColor} size="xl" online={chat.online} />
+        <Avatar initials={previewInitials} size="xl" online={chat.online} />
       </div>
 
       <div className="space-y-3">

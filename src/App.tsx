@@ -85,7 +85,6 @@ function App() {
           upsertRealChat({
             id: `real-${summary.chatId}`,
             name,
-            avatarColor: '#6546C7',
             initials: initialsOf(name),
             lastMessage: summary.lastMessageText ?? '',
             time: summary.lastMessageAt

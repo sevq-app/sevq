@@ -37,7 +37,6 @@ export interface Message {
 export interface Chat {
   id: string;
   name: string;
-  avatarColor: string;
   initials: string;
   lastMessage: string;
   time: string;
@@ -75,7 +74,6 @@ export const chats: Chat[] = [
   {
     id: FAVORITES_CHAT_ID,
     name: 'Избранное',
-    avatarColor: '#4DC3C8',
     initials: '',
     isFavorites: true,
     lastMessage: 'Сохраняйте сюда важные сообщения',
