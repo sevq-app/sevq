@@ -902,7 +902,17 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           </span>
         </div>
       ) : (
-      <div className="shrink-0 sticky top-0 z-10 px-4 py-3 flex items-center gap-3 bg-transparent">
+      <div className="shrink-0 sticky top-0 z-10 px-3 pt-2 sm:px-4 sm:pt-3">
+      <div
+        className="flex items-center gap-3 px-3 py-2.5 rounded-[22px]"
+        style={{
+          background: 'var(--header-glass-bg)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.2), var(--header-glass-shadow)`,
+        }}
+      >
         <motion.button
           whileTap={{ scale: 0.9, y: 2 }}
           onClick={onBack}
@@ -1026,6 +1036,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             )}
           </AnimatePresence>
         </div>
+      </div>
       </div>
       )}
 
@@ -1530,11 +1541,20 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
             userSelect: 'none',
             WebkitTouchCallout: 'none',
           };
+          // Тёмное глянцевое стекло — как у системных долгих нажатий
+          // (iOS/Android): один и тот же тёмный материал в обеих темах
+          // приложения, не завязан на --header-glass-bg. Блик сверху и
+          // тень снизу — inset-строки, внешняя тень даёт эффект парения.
           const glass: CSSProperties = {
-            background: 'rgba(255,255,255,0.68)',
-            backdropFilter: 'blur(26px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(26px) saturate(180%)',
-            boxShadow: '0 10px 30px rgba(15,23,42,0.2)',
+            background: 'rgba(22, 24, 30, 0.78)',
+            backdropFilter: 'blur(16px) saturate(160%)',
+            WebkitBackdropFilter: 'blur(16px) saturate(160%)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            boxShadow: [
+              'inset 0 1px 0 rgba(255,255,255,0.2)',
+              'inset 0 -1px 0 rgba(0,0,0,0.1)',
+              '0 16px 40px rgba(0,0,0,0.35)',
+            ].join(', '),
           };
 
           const isText = !isVoiceMessage(menuMessage.text) && !isStickerMessage(menuMessage.text) && !isImageMessage(menuMessage.text);
@@ -1543,7 +1563,8 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
 
           // Каждый пункт — обычная кнопка с onClick, выбирается одним тапом
           // (как в Telegram/WhatsApp/MAX). Никакой отдельной системы жестов.
-          const actionRowClass = 'w-full flex items-center gap-2.5 px-3.5 py-2.5 text-left';
+          // Текст слева, иконка справа (justify-between) — по макету.
+          const actionRowClass = 'w-full flex items-center justify-between gap-3 px-4 py-3 text-left';
 
           const reactionsBar = (
             <div
@@ -1576,60 +1597,60 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
           );
 
           const actionsCard = (
-            <div key="actions" className="rounded-2xl overflow-hidden divide-y divide-black/5" style={glass}>
+            <div key="actions" className="rounded-[22px] overflow-hidden divide-y divide-white/[0.08]" style={glass}>
               {isMine && isText && (
                 <motion.button whileTap={{ scale: 0.97 }} onClick={handleEditMessage} className={actionRowClass}>
+                  <span className="font-heading font-semibold text-[13px] text-white">Редактировать</span>
                   <Pencil size={17} style={{ color: 'var(--theme-primary)' }} />
-                  <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Редактировать</span>
                 </motion.button>
               )}
 
               <motion.button whileTap={{ scale: 0.97 }} onClick={handleReply} className={actionRowClass}>
+                <span className="font-heading font-semibold text-[13px] text-white">Ответить</span>
                 <Reply size={17} style={{ color: 'var(--theme-primary)' }} />
-                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Ответить</span>
               </motion.button>
 
               <motion.button whileTap={{ scale: 0.97 }} onClick={handleForward} className={actionRowClass}>
+                <span className="font-heading font-semibold text-[13px] text-white">Переслать</span>
                 <Forward size={17} style={{ color: 'var(--theme-primary)' }} />
-                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Переслать</span>
               </motion.button>
 
               {isImg && (
                 <motion.button whileTap={{ scale: 0.97 }} onClick={handleSaveToGallery} className={actionRowClass}>
+                  <span className="font-heading font-semibold text-[13px] text-white">Сохранить в галерею</span>
                   <Download size={17} style={{ color: 'var(--theme-primary)' }} />
-                  <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Сохранить в галерею</span>
                 </motion.button>
               )}
 
               <motion.button whileTap={{ scale: 0.97 }} onClick={handleMarkUnread} className={actionRowClass}>
+                <span className="font-heading font-semibold text-[13px] text-white">Отметить непрочитанным</span>
                 <EyeOff size={17} style={{ color: 'var(--theme-primary)' }} />
-                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Отметить непрочитанным</span>
               </motion.button>
 
               {isText && (
                 <motion.button whileTap={{ scale: 0.97 }} onClick={handleCopyText} className={actionRowClass}>
+                  <span className="font-heading font-semibold text-[13px] text-white">Скопировать текст</span>
                   <Copy size={17} style={{ color: 'var(--theme-primary)' }} />
-                  <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Скопировать текст</span>
                 </motion.button>
               )}
 
               {!isMine && (
                 <motion.button whileTap={{ scale: 0.97 }} onClick={handleReport} className={actionRowClass}>
-                  <Flag size={17} className="text-[#EF4444]" />
                   <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Пожаловаться</span>
+                  <Flag size={17} className="text-[#EF4444]" />
                 </motion.button>
               )}
 
               {isMine && (
                 <motion.button whileTap={{ scale: 0.97 }} onClick={handleDeleteMessage} className={actionRowClass}>
-                  <Trash2 size={17} className="text-[#EF4444]" />
                   <span className="font-heading font-semibold text-[13px] text-[#EF4444]">Удалить</span>
+                  <Trash2 size={17} className="text-[#EF4444]" />
                 </motion.button>
               )}
 
               <motion.button whileTap={{ scale: 0.97 }} onClick={handleSelectMessage} className={actionRowClass}>
+                <span className="font-heading font-semibold text-[13px] text-white">Выбрать</span>
                 <CheckSquare size={17} style={{ color: 'var(--theme-primary)' }} />
-                <span className="font-heading font-semibold text-[13px] text-[#1A1A1A]">Выбрать</span>
               </motion.button>
             </div>
           );
@@ -1640,7 +1661,7 @@ export function Conversation({ chatId, onBack, onOpenProfile, fontSize, soundsEn
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 bg-black/20 backdrop-blur-[2px]"
+                className="fixed inset-0 z-50 bg-black/30"
                 onClick={closeMenu}
               />
               <motion.div
