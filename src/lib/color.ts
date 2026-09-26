@@ -66,10 +66,10 @@ export function shadeHex(hex: string, amount: number): string {
 export function messageGradientColors(primary: string): { primary: string; dark: string; light: string } {
   return {
     primary,
-    // Keep the complete gradient range below 20%: the ends stay recognisably
-    // the selected colour instead of fading into a white highlight.
-    dark: shadeHex(primary, -0.08),
-    light: shadeHex(primary, 0.1),
+    // A 28% end-to-end range is clearly visible, while mixing only 14% toward
+    // black/white keeps both edges recognisably the selected colour.
+    dark: shadeHex(primary, -0.14),
+    light: shadeHex(primary, 0.14),
   };
 }
 
